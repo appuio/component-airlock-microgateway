@@ -1,0 +1,5 @@
+= airlock-microgateway
+
+airlock-microgateway is a Commodore component to manage airlock-microgateway.
+
+See the xref:references/parameters.adoc[parameters] reference for further details.
