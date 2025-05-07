@@ -1,11 +1,73 @@
 parameters:
+  =_helm_chart_name: "microgateway"
+  =_kapitan:
+    olm:
+      dependencies:
+        - type: https
+          source: ${airlock_microgateway:olm:source}
+          output_path: ${_base_directory}/olm/airlock-microgateway/airlock-microgateway-olm/
+          unpack: true
+
+      compile:
+        - input_paths:
+            - ${_base_directory}/component/app.jsonnet
+          input_type: jsonnet
+          output_path: .
+
+        - input_paths:
+            - ${_base_directory}/component/olm.jsonnet
+          input_type: jsonnet
+          output_path: olm/
+          # If multi-tenant:
+          # output_path: ${_instance}/olm/
+
+        # - input_paths: ${_kapitan:jsonnet_input_paths}
+        #   input_type: jsonnet
+        #   output_path: ${_instance}/
+
+    helm:
+      dependencies:
+        - type: helm
+          chart_name: ${_helm_chart_name}
+          version: ${airlock_microgateway:charts:${_helm_chart_name}:version}
+          source: ${airlock_microgateway:charts:${_helm_chart_name}:source}
+          output_path: ${_base_directory}/helmcharts/airlock-microgateway/${airlock_microgateway:charts:${_helm_chart_name}:version}/
+
+      compile:
+        - input_paths:
+            - ${_base_directory}/component/app.jsonnet
+          input_type: jsonnet
+          output_path: .
+
+        # - input_paths: ${_kapitan:jsonnet_input_paths}
+        #   input_type: jsonnet
+        #   output_path: ${_instance}/
+
+        - input_paths:
+            - ${_base_directory}/component/helm-namespace.jsonnet
+          input_type: jsonnet
+          output_path: 01_airlock-microgateway_helmchart
+        # - input_paths:
+        #     - ${_base_directory}/component/render-helm-values.jsonnet
+        #   input_type: jsonnet
+        #   output_path: ${_base_directory}/helm_values/
+        # - output_path: 01_airlock-microgateway_helmchart
+        #   input_type: helm
+        #   output_type: yaml
+        #   input_paths:
+        #     - ${_base_directory}/helmcharts/airlock-microgateway/${airlock_microgateway:release}/${airlock_microgateway:charts:${_helm_chart_name:${airlock_microgateway:release}}:version}/
+        #   helm_params:
+        #     name: ${airlock_microgateway:release_name}
+        #     namespace: ${airlock_microgateway:_namespace}
+        #     api_versions: monitoring.coreos.com/v1
+        #     kube_version: ${airlock_microgateway:kubernetes_version}
+        #   helm_values_files:
+        #     - ${_base_directory}/helm_values/values.yaml
+        # - input_paths:
+        #     - ${_base_directory}/helm_values/
+        #   input_type: remove
+        #   output_path: .
+
+
   kapitan:
-    compile:
-      - input_paths:
-          - ${_base_directory}/component/app.jsonnet
-        input_type: jsonnet
-        output_path: .
-      - input_paths:
-          - ${_base_directory}/component/main.jsonnet
-        input_type: jsonnet
-        output_path: airlock-microgateway/
+    ${_kapitan:${airlock_microgateway:install_method}}

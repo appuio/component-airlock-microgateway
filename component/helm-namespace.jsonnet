@@ -1,18 +1,12 @@
-// main template for airlock-microgateway
 local kap = import 'lib/kapitan.libjsonnet';
 local kube = import 'lib/kube.libjsonnet';
+local util = import 'util.libsonnet';
+
 local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.airlock_microgateway;
 
-local license_secret = kube.Secret('airlock-license') {
-  metadata: {
-    namespace: params.namespace,
-  },
-  data_: params.license,
-};
-
 // Define outputs below
 {
-
+  '00_namespace': kube.Namespace(params.namespace),
 }

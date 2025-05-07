@@ -3,3 +3,22 @@ parameters:
     =_metadata:
       multi_tenant: true
     namespace: syn-airlock-microgateway
+
+    # Possible values: "helm", "olm"
+    install_method: helm
+
+    license: ""
+
+    # Installs upstream Kubernetes Gateway API
+    install_gateway_api: true
+
+    # See Airlock docs: https://docs.airlock.com/microgateway/4.5/index/1726159368039.html
+    helm_values: {}
+
+    olm:
+      source: ""
+
+    charts:
+      microgateway:
+        version: "4.5.2"
+        source: "oci://quay.io/airlockcharts/microgateway"
