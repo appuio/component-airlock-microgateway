@@ -1,7 +1,7 @@
 parameters:
   airlock_microgateway:
     =_metadata:
-      multi_tenant: true
+      multi_tenant: false
     namespace: syn-airlock-microgateway
 
     # Possible values: "helm", "olm"
@@ -13,7 +13,20 @@ parameters:
     install_gateway_api: true
 
     # See Airlock docs: https://docs.airlock.com/microgateway/4.5/index/1726159368039.html
-    helm_values: {}
+    helm_values: 
+      operator:
+        gatewayAPI:
+          enabled: true
+          podMonitor:
+            create: true
+            labels:
+              release: "kube-prometheus-stack"
+        serviceMonitor:
+          create: true
+          labels:
+            release: "kube-prometheus-stack"
+      dashboards:
+        create: true
 
     olm:
       source: ""

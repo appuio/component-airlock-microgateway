@@ -1,0 +1,18 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  annotations: null
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: airlock-microgateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: microgateway-operator
+    app.kubernetes.io/part-of: microgateway
+    app.kubernetes.io/version: 4.5.2
+    helm.sh/chart: microgateway-4.5.2
+  name: airlock-microgateway-operator-immutable-labels-syn-airlock-microgateway
+spec:
+  matchResources: null
+  policyName: airlock-microgateway-operator-immutable-labels-syn-airlock-microgateway
+  validationActions:
+    - Deny

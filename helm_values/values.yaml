@@ -1,0 +1,13 @@
+dashboards:
+  create: true
+operator:
+  gatewayAPI:
+    enabled: true
+    podMonitor:
+      create: true
+      labels:
+        release: kube-prometheus-stack
+  serviceMonitor:
+    create: true
+    labels:
+      release: kube-prometheus-stack

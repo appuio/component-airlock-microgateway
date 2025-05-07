@@ -1,5 +1,6 @@
 parameters:
   =_helm_chart_name: "microgateway"
+  =_release_name: "airlock-microgateway"
   =_kapitan:
     olm:
       dependencies:
@@ -47,22 +48,20 @@ parameters:
             - ${_base_directory}/component/helm-namespace.jsonnet
           input_type: jsonnet
           output_path: 01_airlock-microgateway_helmchart
-        # - input_paths:
-        #     - ${_base_directory}/component/render-helm-values.jsonnet
-        #   input_type: jsonnet
-        #   output_path: ${_base_directory}/helm_values/
-        # - output_path: 01_airlock-microgateway_helmchart
-        #   input_type: helm
-        #   output_type: yaml
-        #   input_paths:
-        #     - ${_base_directory}/helmcharts/airlock-microgateway/${airlock_microgateway:release}/${airlock_microgateway:charts:${_helm_chart_name:${airlock_microgateway:release}}:version}/
-        #   helm_params:
-        #     name: ${airlock_microgateway:release_name}
-        #     namespace: ${airlock_microgateway:_namespace}
-        #     api_versions: monitoring.coreos.com/v1
-        #     kube_version: ${airlock_microgateway:kubernetes_version}
-        #   helm_values_files:
-        #     - ${_base_directory}/helm_values/values.yaml
+        - input_paths:
+            - ${_base_directory}/component/render-helm-values.jsonnet
+          input_type: jsonnet
+          output_path: ${_base_directory}/helm_values/
+        - output_path: 01_airlock-microgateway_helmchart
+          input_type: helm
+          output_type: yaml
+          input_paths:
+            - ${_base_directory}/helmcharts/airlock-microgateway/${airlock_microgateway:charts:${_helm_chart_name}:version}/
+          helm_params:
+            name: ${_release_name}
+            namespace: ${airlock_microgateway:namespace}
+          helm_values_files:
+            - ${_base_directory}/helm_values/values.yaml
         # - input_paths:
         #     - ${_base_directory}/helm_values/
         #   input_type: remove
