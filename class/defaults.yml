@@ -9,8 +9,11 @@ parameters:
 
     license: ""
 
-    # Installs upstream Kubernetes Gateway API
-    install_gateway_api: true
+    gateway_api:
+      # Installs upstream Kubernetes Gateway API if true
+      install: true
+      # Upstream Kubernetes Gateway API source
+      source: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml
 
     # See Airlock docs: https://docs.airlock.com/microgateway/4.5/index/1726159368039.html
     helm_values: 

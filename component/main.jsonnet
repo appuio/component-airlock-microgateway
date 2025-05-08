@@ -5,14 +5,16 @@ local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.airlock_microgateway;
 
-local license_secret = kube.Secret('airlock-license') {
+local license_secret = kube.Secret('airlock-microgateway-license') {
   metadata: {
     namespace: params.namespace,
   },
-  data_: params.license,
+  data_: {
+    'microgateway-license.txt': params.license,
+  },
 };
 
 // Define outputs below
 {
-
+  '01_license_secret': license_secret,
 }

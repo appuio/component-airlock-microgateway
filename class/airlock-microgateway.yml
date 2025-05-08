@@ -28,6 +28,9 @@ parameters:
 
     helm:
       dependencies:
+        - type: https
+          source: ${airlock_microgateway:gateway_api:source}
+          output_path: ${_base_directory}/dependencies/gateway-api/standard-install.yaml
         - type: helm
           chart_name: ${_helm_chart_name}
           version: ${airlock_microgateway:charts:${_helm_chart_name}:version}
@@ -47,7 +50,7 @@ parameters:
         - input_paths:
             - ${_base_directory}/component/helm-namespace.jsonnet
           input_type: jsonnet
-          output_path: 01_airlock-microgateway_helmchart
+          output_path: 00_prerequisites/
         - input_paths:
             - ${_base_directory}/component/render-helm-values.jsonnet
           input_type: jsonnet
@@ -62,10 +65,14 @@ parameters:
             namespace: ${airlock_microgateway:namespace}
           helm_values_files:
             - ${_base_directory}/helm_values/values.yaml
-        # - input_paths:
-        #     - ${_base_directory}/helm_values/
-        #   input_type: remove
-        #   output_path: .
+        - input_paths:
+            - ${_base_directory}/component/main.jsonnet
+          input_type: jsonnet
+          output_path: 00_prerequisites/
+        - input_paths:
+            - ${_base_directory}/helm_values/
+          input_type: remove
+          output_path: .
 
 
   kapitan:
