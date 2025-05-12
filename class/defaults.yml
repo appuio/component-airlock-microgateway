@@ -1,7 +1,7 @@
 parameters:
   airlock_microgateway:
     =_metadata:
-      multi_tenant: false
+      multi_tenant: true
     namespace: syn-airlock-microgateway
 
     # Possible values: "helm", "olm"

@@ -52,6 +52,10 @@ parameters:
           input_type: jsonnet
           output_path: 00_prerequisites/
         - input_paths:
+            - ${_base_directory}/dependencies/gateway-api/standard-install.yaml
+          input_type: copy
+          output_path: 00_prerequisites/00_gateway_api/
+        - input_paths:
             - ${_base_directory}/component/render-helm-values.jsonnet
           input_type: jsonnet
           output_path: ${_base_directory}/helm_values/
