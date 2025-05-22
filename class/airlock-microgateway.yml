@@ -24,15 +24,21 @@ parameters:
           output_path: .
 
         - input_paths:
+            - ${_base_directory}/component/namespace.jsonnet
+          input_type: jsonnet
+          output_path: 00_prerequisites/
+
+        - input_paths:
             - ${_base_directory}/component/olm.jsonnet
           input_type: jsonnet
           output_path: olm/
           # If multi-tenant:
           # output_path: ${_instance}/olm/
 
-        # - input_paths: ${_kapitan:jsonnet_input_paths}
-        #   input_type: jsonnet
-        #   output_path: ${_instance}/
+        - input_paths:
+            - ${_base_directory}/component/main.jsonnet
+          input_type: jsonnet
+          output_path: 00_prerequisites/
 
     helm:
       dependencies:
@@ -56,7 +62,7 @@ parameters:
         #   output_path: ${_instance}/
 
         - input_paths:
-            - ${_base_directory}/component/helm-namespace.jsonnet
+            - ${_base_directory}/component/namespace.jsonnet
           input_type: jsonnet
           output_path: 00_prerequisites/
         - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}

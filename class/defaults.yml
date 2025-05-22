@@ -9,6 +9,11 @@ parameters:
 
     license: ""
 
+    network_policy:
+      namespace_selector:
+        matchLabels:
+          'appuio.ch/waf': 'airlock'
+
     gateway_api:
       # Installs upstream Kubernetes Gateway API if true
       enabled: true

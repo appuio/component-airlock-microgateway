@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  annotations: {}
+  labels:
+    name: allow-from-waf-namespaces
+  name: allow-from-waf-namespaces
+  namespace: syn-airlock-microgateway
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              appuio.ch/waf: airlock
+  policyTypes:
+    - Ingress

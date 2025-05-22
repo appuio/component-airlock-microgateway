@@ -1,8 +1,3 @@
 # Overwrite parameters here
 
-parameters:
-  kapitan:
-    dependencies:
-      - type: https
-        source: https://raw.githubusercontent.com/appuio/component-openshift4-operators/master/lib/openshift4-operators.libsonnet
-        output_path: vendor/lib/openshift4-operators.libsonnet
+# parameters: {...}
