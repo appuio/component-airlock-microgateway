@@ -18,8 +18,8 @@ local operator_group = operatorlib.OperatorGroup('airlock-microgateway') {
 local operator_subscription = operatorlib.namespacedSubscription(
   params.namespace,
   'airlock-microgateway',
-  params.channel,
-  'redhat-operators'
+  params.olm.channel,
+  'certified-operators'
 ) {
   metadata+: {
     annotations+: {
@@ -28,7 +28,12 @@ local operator_subscription = operatorlib.namespacedSubscription(
   },
   spec+: {
     config+: {
-      resources: params.olm.resources,
+      env: [
+        {
+          name: 'GATEWAY_API_POD_MONITOR_CREATE',
+          value: '%s' % params.olm.config.create_pod_monitor,
+        },
+      ],
     },
   },
 };

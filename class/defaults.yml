@@ -12,12 +12,13 @@ parameters:
     gateway_api:
       # Installs upstream Kubernetes Gateway API if true
       enabled: true
+      # Kubernetes Gateway API version
       version: "v1.2.1"
       # Upstream Kubernetes Gateway API source
       source: https://github.com/kubernetes-sigs/gateway-api/releases/download/${airlock_microgateway:gateway_api:version}/standard-install.yaml
 
     # See Airlock docs: https://docs.airlock.com/microgateway/4.5/index/1726159368039.html
-    helm_values: 
+    helm_values:
       operator:
         gatewayAPI:
           enabled: true
@@ -35,7 +36,8 @@ parameters:
     olm:
       version: "4.5.2"
       channel: "release-${airlock_microgateway:olm:version}"
-      resources: {}
+      config:
+        create_pod_monitor: true
 
     charts:
       microgateway:

@@ -6,3 +6,11 @@ parameters:
       - type: https
         source: https://raw.githubusercontent.com/appuio/component-openshift4-operators/master/lib/openshift4-operators.libsonnet
         output_path: vendor/lib/openshift4-operators.libsonnet
+
+  airlock_microgateway:
+    install_method: olm
+
+  openshift4_operators:
+    defaultInstallPlanApproval: Automatic
+    defaultSource: openshift-operators-redhat
+    defaultSourceNamespace: openshift-operators-redhat

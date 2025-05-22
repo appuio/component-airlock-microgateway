@@ -9,4 +9,3 @@ parameters:
   airlock_microgateway:
     gateway_api:
       enabled: false
-  
