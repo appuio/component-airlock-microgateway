@@ -1,0 +1,20 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: airlock-microgateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: microgateway-operator
+    app.kubernetes.io/part-of: microgateway
+    app.kubernetes.io/version: 4.5.2
+    helm.sh/chart: microgateway-4.5.2
+  name: airlock-microgateway-operator-manager-syn-airlock-microgateway
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: airlock-microgateway-operator-manager-syn-airlock-microgateway
+subjects:
+  - kind: ServiceAccount
+    name: airlock-microgateway-operator
+    namespace: syn-airlock-microgateway

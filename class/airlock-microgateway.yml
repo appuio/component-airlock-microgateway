@@ -2,13 +2,21 @@ parameters:
   =_helm_chart_name: "microgateway"
   =_release_name: "airlock-microgateway"
   =_kapitan:
+    k8s_gw_api:
+      'True':
+        input_paths:
+          - ${_base_directory}/dependencies/gateway-api/standard-install.yaml
+        input_type: copy
+        output_path: 00_prerequisites/00_gateway_api/
+      'False':
+        input_paths: []
+        input_type: jsonnet
+        output_path: ''
     olm:
       dependencies:
         - type: https
-          source: ${airlock_microgateway:olm:source}
-          output_path: ${_base_directory}/olm/airlock-microgateway/airlock-microgateway-olm/
-          unpack: true
-
+          source: ${airlock_microgateway:gateway_api:source}
+          output_path: ${_base_directory}/dependencies/gateway-api/standard-install.yaml
       compile:
         - input_paths:
             - ${_base_directory}/component/app.jsonnet
@@ -51,10 +59,7 @@ parameters:
             - ${_base_directory}/component/helm-namespace.jsonnet
           input_type: jsonnet
           output_path: 00_prerequisites/
-        - input_paths:
-            - ${_base_directory}/dependencies/gateway-api/standard-install.yaml
-          input_type: copy
-          output_path: 00_prerequisites/00_gateway_api/
+        - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}
         - input_paths:
             - ${_base_directory}/component/render-helm-values.jsonnet
           input_type: jsonnet
