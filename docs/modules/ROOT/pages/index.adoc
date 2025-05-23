@@ -1,4 +1,4 @@
-= airlock-microgateway
+= Airlock Microgateway
 
 airlock-microgateway is a Commodore component to manage airlock-microgateway.
 
