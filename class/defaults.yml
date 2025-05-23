@@ -39,8 +39,8 @@ parameters:
         create: true
 
     olm:
-      version: "4.5.2"
-      channel: "release-${airlock_microgateway:olm:version}"
+      version: "stable"
+      channel: "${airlock_microgateway:olm:version}"
       config:
         create_pod_monitor: true
 

@@ -6,7 +6,7 @@ local inv = kap.inventory();
 local params = inv.parameters.airlock_microgateway;
 
 local license_secret = kube.Secret('airlock-microgateway-license') {
-  metadata: {
+  metadata+: {
     namespace: params.namespace,
   },
   data_: {
@@ -19,12 +19,12 @@ local net_pol = kube.NetworkPolicy('allow-from-waf-namespaces') {
     namespace: params.namespace,
   },
   spec: {
-    ingress: [ {
-      from: [ {
+    ingress: [{
+      from: [{
         namespaceSelector: params.network_policy.namespace_selector,
-      } ],
-    } ],
-    policyTypes: [ 'Ingress' ],
+      }],
+    }],
+    policyTypes: ['Ingress'],
   },
 };
 
