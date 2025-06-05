@@ -19,12 +19,12 @@ local net_pol = kube.NetworkPolicy('allow-from-waf-namespaces') {
     namespace: params.namespace,
   },
   spec: {
-    ingress: [{
-      from: [{
+    ingress: [ {
+      from: [ {
         namespaceSelector: params.network_policy.namespace_selector,
-      }],
-    }],
-    policyTypes: ['Ingress'],
+      } ],
+    } ],
+    policyTypes: [ 'Ingress' ],
   },
 };
 
