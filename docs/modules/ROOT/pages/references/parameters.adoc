@@ -11,9 +11,236 @@ default:: `syn-airlock-microgateway`
 The namespace in which to deploy this component.
 
 
+== `install_method`
+
+[horizontal]
+type:: string
+default:: `helm`
+possible values:: `helm`, `olm`
+
+The installation method for Airlock Microgateway.
+`olm` will create a subscription for the Airlock Microgateway from https://catalog.redhat.com/software/container-stacks/detail/67177f927cfedb209761e48f?gs=&q=airlock&rh-tabs-5gjs77yz5=rh-tab-3tk92bl2m#overview.
+If you use this method, you may want to configure `olm`.
+Openshift is required for this to work.
+
+`helm` will install airlock-microgateway from the official helm chart.
+If you use this method, you may want to configure `helm_values`.
+
+
+== `license`
+
+[horizontal]
+type:: string
+default:: `""`
+
+The license key for Airlock Microgateway.
+
+
+== `network_policy`
+
+[horizontal]
+type:: object
+
+Configuration for network policies related to Airlock Microgateway.
+
+=== `namespace_selector`
+
+[horizontal]
+type:: object
+
+Selector for namespaces where the network policy should be applied.
+
+==== `matchLabels`
+
+[horizontal]
+type:: object
+default:: `appuio.ch/waf: airlock`
+
+Labels used to match namespaces for the network policy.
+
+
+== `gateway_api`
+
+[horizontal]
+type:: object
+
+Configuration for Kubernetes Gateway API integration.
+
+=== `enabled`
+
+[horizontal]
+type:: boolean
+default:: `true`
+
+Whether to install the upstream Kubernetes Gateway API.
+
+=== `version`
+
+[horizontal]
+type:: string
+default:: `v1.2.1`
+
+The version of Kubernetes Gateway API to install.
+
+=== `source`
+
+[horizontal]
+type:: string
+default:: `https://github.com/kubernetes-sigs/gateway-api/releases/download/${airlock_microgateway:gateway_api:version}/standard-install.yaml`
+
+The source URL for the Kubernetes Gateway API installation.
+
+== `helm_values`
+
+[horizontal]
+type:: object
+default::
+```
+operator:
+  gatewayAPI:
+    enabled: true
+    podMonitor:
+      create: true
+      labels:
+        release: "kube-prometheus-stack"
+  serviceMonitor:
+    create: true
+    labels:
+      release: "kube-prometheus-stack"
+dashboards:
+  create: true
+```
+
+Configuration values for the Helm chart installation. See the official Airlock documentation for more details: https://docs.airlock.com/microgateway/4.5/index/1726159368039.html
+
+
+== `olm`
+
+[horizontal]
+type:: object
+
+Configuration for OLM (Operator Lifecycle Manager) installation.
+
+=== `version`
+
+[horizontal]
+type:: string
+default:: `stable`
+
+The version of the OLM operator to install.
+
+=== `channel`
+
+[horizontal]
+type:: string
+default:: `${airlock_microgateway:olm:version}`
+
+The OLM channel to use.
+
+=== `config`
+
+[horizontal]
+type:: object
+
+Configuration for the OLM operator.
+
+==== `create_pod_monitor`
+
+[horizontal]
+type:: boolean
+default:: `true`
+
+Whether to create a PodMonitor for the OLM operator.
+
+
+== `charts`
+
+[horizontal]
+type:: object
+
+Configuration for Helm charts.
+
+=== `microgateway`
+
+[horizontal]
+type:: object
+
+Configuration for the Microgateway chart.
+
+==== `version`
+
+[horizontal]
+type:: string
+default:: `4.5.2`
+
+The version of the Microgateway chart to install.
+
+==== `source`
+
+[horizontal]
+type:: string
+default:: `oci://quay.io/airlockcharts/microgateway`
+
+The source URL for the Microgateway chart.
+
+
 == Example
 
 [source,yaml]
 ----
-namespace: example-namespace
+parameters:
+  airlock_microgateway:
+    namespace: syn-airlock-microgateway
+
+    install_method: helm
+
+    license: |
+      -----BEGIN LICENSE-----
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAA==
+      -----END LICENSE-----
+      -- Airlock Microgateway --
+      License Type                 Premium
+      ID                           aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+      Owner                        OWNER
+      Trial                        true
+      Email                        foo@foo.bar
+      Environment                  Temporary
+      Valid Until                  2025-06-30
+      Requests per Month           10000000
+      Module Base                  on
+      Module Auth                  on
+      ---------------------
+
+    network_policy:
+      namespace_selector:
+        matchLabels:
+          'appuio.ch/waf': 'airlock'
+
+    gateway_api:
+      enabled: true
+      version: "v1.2.1"
+
+    charts:
+      microgateway:
+        version: "4.5.3"
+
 ----

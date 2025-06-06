@@ -1,11 +1,77 @@
 parameters:
+  =_helm_chart_name: "microgateway"
+  =_release_name: "airlock-microgateway"
+  =_kapitan:
+    k8s_gw_api:
+      'True':
+        input_paths:
+          - ${_base_directory}/manifests/gateway-api/standard-install.yaml
+        input_type: copy
+        output_path: airlock-microgateway/00_prerequisites/00_gateway_api/
+      'False':
+        input_paths: []
+        input_type: jsonnet
+        output_path: ''
+    olm:
+      dependencies:
+        - type: https
+          source: ${airlock_microgateway:gateway_api:source}
+          output_path: ${_base_directory}/manifests/gateway-api/standard-install.yaml
+      compile:
+        - input_paths:
+            - ${_base_directory}/component/app.jsonnet
+          input_type: jsonnet
+          output_path: .
+
+        - input_paths:
+            - ${_base_directory}/component/namespace.jsonnet
+          input_type: jsonnet
+          output_path: airlock-microgateway/00_prerequisites/
+
+        - input_paths:
+            - ${_base_directory}/component/olm.jsonnet
+          input_type: jsonnet
+          output_path: airlock-microgateway/01_olm/
+        - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}
+        - input_paths:
+            - ${_base_directory}/component/main.jsonnet
+          input_type: jsonnet
+          output_path: airlock-microgateway/00_prerequisites/
+
+    helm:
+      dependencies:
+        - type: https
+          source: ${airlock_microgateway:gateway_api:source}
+          output_path: ${_base_directory}/manifests/gateway-api/standard-install.yaml
+        - type: helm
+          chart_name: ${_helm_chart_name}
+          version: ${airlock_microgateway:charts:${_helm_chart_name}:version}
+          source: ${airlock_microgateway:charts:${_helm_chart_name}:source}
+          output_path: ${_base_directory}/helmcharts/airlock-microgateway/${airlock_microgateway:charts:${_helm_chart_name}:version}/
+
+      compile:
+        - input_paths:
+            - ${_base_directory}/component/app.jsonnet
+          input_type: jsonnet
+          output_path: .
+        - input_paths:
+            - ${_base_directory}/component/namespace.jsonnet
+          input_type: jsonnet
+          output_path: airlock-microgateway/00_prerequisites/
+        - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}
+        - output_path: airlock-microgateway/01_airlock-microgateway_helmchart/
+          input_type: helm
+          input_paths:
+            - ${_base_directory}/helmcharts/airlock-microgateway/${airlock_microgateway:charts:${_helm_chart_name}:version}/
+          helm_params:
+            name: ${_release_name}
+            namespace: ${airlock_microgateway:namespace}
+          helm_values: ${airlock_microgateway:helm_values}
+        - input_paths:
+            - ${_base_directory}/component/main.jsonnet
+          input_type: jsonnet
+          output_path: airlock-microgateway/00_prerequisites/
+
+
   kapitan:
-    compile:
-      - input_paths:
-          - ${_base_directory}/component/app.jsonnet
-        input_type: jsonnet
-        output_path: .
-      - input_paths:
-          - ${_base_directory}/component/main.jsonnet
-        input_type: jsonnet
-        output_path: airlock-microgateway/
+    ${_kapitan:${airlock_microgateway:install_method}}

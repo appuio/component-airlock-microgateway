@@ -1,0 +1,60 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  annotations: null
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: airlock-microgateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: microgateway-operator
+    app.kubernetes.io/part-of: microgateway
+    app.kubernetes.io/version: 4.5.2
+    helm.sh/chart: microgateway-4.5.2
+  name: airlock-microgateway-operator-immutable-labels-syn-airlock-microgateway
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    objectSelector:
+      matchLabels:
+        microgateway.airlock.com/managedBy: syn-airlock-microgateway
+    resourceRules:
+      - apiGroups:
+          - microgateway.airlock.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - UPDATE
+        resources:
+          - envoyconfigurations
+      - apiGroups:
+          - apps
+        apiVersions:
+          - v1
+        operations:
+          - UPDATE
+        resources:
+          - deployments
+          - replicasets
+      - apiGroups:
+          - ''
+        apiVersions:
+          - v1
+        operations:
+          - UPDATE
+        resources:
+          - services
+      - apiGroups:
+          - monitoring.coreos.com
+        apiVersions:
+          - v1
+        operations:
+          - UPDATE
+        resources:
+          - podmonitors
+  validations:
+    - expression: object.metadata.?labels[?'microgateway.airlock.com/managedBy'] ==
+        oldObject.metadata.?labels[?'microgateway.airlock.com/managedBy']
+      message: label 'microgateway.airlock.com/managedBy' is immutable
+    - expression: object.metadata.?labels[?'gateway.networking.k8s.io/gateway-name']
+        == oldObject.metadata.?labels[?'gateway.networking.k8s.io/gateway-name']
+      message: label 'gateway.networking.k8s.io/gateway-name' is immutable

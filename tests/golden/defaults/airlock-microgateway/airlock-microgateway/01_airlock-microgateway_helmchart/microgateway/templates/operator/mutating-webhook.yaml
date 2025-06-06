@@ -1,0 +1,39 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: syn-airlock-microgateway/airlock-microgateway-operator-serving-cert
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: airlock-microgateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: microgateway-operator
+    app.kubernetes.io/part-of: microgateway
+    app.kubernetes.io/version: 4.5.2
+    helm.sh/chart: microgateway-4.5.2
+  name: airlock-microgateway-operator-webhook-syn-airlock-microgateway
+  namespace: syn-airlock-microgateway
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: airlock-microgateway-operator-webhook
+        namespace: syn-airlock-microgateway
+        path: /mutate-v1-pod
+    failurePolicy: Fail
+    name: mutate-pod.microgateway.airlock.com
+    objectSelector:
+      matchLabels:
+        sidecar.microgateway.airlock.com/inject: 'true'
+    reinvocationPolicy: IfNeeded
+    rules:
+      - apiGroups:
+          - ''
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+        resources:
+          - pods
+    sideEffects: None

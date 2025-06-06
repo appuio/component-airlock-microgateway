@@ -13,3 +13,5 @@
 /_public
 
 # Additional entries
+/jsonnetfile.json
+/olm

@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: airlock-microgateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: microgateway-operator
+    app.kubernetes.io/part-of: microgateway
+    app.kubernetes.io/version: 4.5.2
+    helm.sh/chart: microgateway-4.5.2
+  name: airlock-microgateway-operator-serving-cert
+  namespace: syn-airlock-microgateway
+spec:
+  dnsNames:
+    - airlock-microgateway-operator-webhook.syn-airlock-microgateway.svc
+    - airlock-microgateway-operator-webhook.syn-airlock-microgateway.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: airlock-microgateway-operator-selfsigned-issuer
+  secretName: airlock-microgateway-operator-webhook-server-cert
