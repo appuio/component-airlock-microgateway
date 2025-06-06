@@ -31,7 +31,8 @@ The installation method for Airlock Microgateway.
 If you use this method, you may want to configure `olm`.
 Openshift is required for this to work.
 
-`helm` will install airlock-microgateway from the official helm chart. If you use this method, you may want to configure `helm_values`.
+`helm` will install airlock-microgateway from the official helm chart.
+If you use this method, you may want to configure `helm_values`.
 
 
 == Example
