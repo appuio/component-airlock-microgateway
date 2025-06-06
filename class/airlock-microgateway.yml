@@ -72,8 +72,7 @@ parameters:
           helm_params:
             name: ${_release_name}
             namespace: ${airlock_microgateway:namespace}
-          helm_values_files:
-            - ${_base_directory}/helm_values/values.yaml
+          helm_values: ${airlock_microgateway:helm_values}
         - input_paths:
             - ${_base_directory}/component/main.jsonnet
           input_type: jsonnet
