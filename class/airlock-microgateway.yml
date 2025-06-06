@@ -61,10 +61,6 @@ parameters:
           input_type: jsonnet
           output_path: airlock-microgateway/00_prerequisites/
         - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}
-        - input_paths:
-            - ${_base_directory}/component/render-helm-values.jsonnet
-          input_type: jsonnet
-          output_path: ${_base_directory}/helm_values/
         - output_path: airlock-microgateway/01_airlock-microgateway_helmchart/
           input_type: helm
           input_paths:
