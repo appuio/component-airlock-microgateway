@@ -28,7 +28,8 @@ possible values:: `helm`, `olm`
 
 The installation method for Airlock Microgateway.
 `olm` will create a subscription for the Airlock Microgateway from https://catalog.redhat.com/software/container-stacks/detail/67177f927cfedb209761e48f?gs=&q=airlock&rh-tabs-5gjs77yz5=rh-tab-3tk92bl2m#overview.
-If you use this method, you may want to configure `olm`. Openshift is required for this to work.
+If you use this method, you may want to configure `olm`.
+Openshift is required for this to work.
 
 `helm` will install airlock-microgateway from the official helm chart. If you use this method, you may want to configure `helm_values`.
 
