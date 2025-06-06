@@ -67,7 +67,6 @@ parameters:
           output_path: ${_base_directory}/helm_values/
         - output_path: airlock-microgateway/01_airlock-microgateway_helmchart/
           input_type: helm
-          output_type: yaml
           input_paths:
             - ${_base_directory}/helmcharts/airlock-microgateway/${airlock_microgateway:charts:${_helm_chart_name}:version}/
           helm_params:
