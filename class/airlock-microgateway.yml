@@ -56,11 +56,6 @@ parameters:
             - ${_base_directory}/component/app.jsonnet
           input_type: jsonnet
           output_path: .
-
-        # - input_paths: ${_kapitan:jsonnet_input_paths}
-        #   input_type: jsonnet
-        #   output_path: ${_instance}/
-
         - input_paths:
             - ${_base_directory}/component/namespace.jsonnet
           input_type: jsonnet
