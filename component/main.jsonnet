@@ -9,7 +9,7 @@ local license_secret = kube.Secret('airlock-microgateway-license') {
   metadata+: {
     namespace: params.namespace,
   },
-  data_: {
+  stringData: {
     'microgateway-license.txt': params.license,
   },
 };
