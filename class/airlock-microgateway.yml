@@ -5,7 +5,7 @@ parameters:
     k8s_gw_api:
       'True':
         input_paths:
-          - ${_base_directory}/dependencies/gateway-api/standard-install.yaml
+          - ${_base_directory}/manifests/gateway-api/standard-install.yaml
         input_type: copy
         output_path: airlock-microgateway/00_prerequisites/00_gateway_api/
       'False':
