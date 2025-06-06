@@ -4,4 +4,5 @@ metadata:
   annotations: {}
   labels:
     name: syn-airlock-microgateway
+    openshift.io/cluster-monitoring: 'true'
   name: syn-airlock-microgateway

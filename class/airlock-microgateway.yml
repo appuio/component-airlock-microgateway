@@ -32,8 +32,6 @@ parameters:
             - ${_base_directory}/component/olm.jsonnet
           input_type: jsonnet
           output_path: airlock-microgateway/01_olm/
-          # If multi-tenant:
-          # output_path: ${_instance}/olm/
         - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}
         - input_paths:
             - ${_base_directory}/component/main.jsonnet
@@ -73,10 +71,6 @@ parameters:
             - ${_base_directory}/component/main.jsonnet
           input_type: jsonnet
           output_path: airlock-microgateway/00_prerequisites/
-        - input_paths:
-            - ${_base_directory}/helm_values/
-          input_type: remove
-          output_path: .
 
 
   kapitan:

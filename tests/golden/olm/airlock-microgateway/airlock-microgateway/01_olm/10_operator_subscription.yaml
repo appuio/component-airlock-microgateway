@@ -8,7 +8,7 @@ metadata:
   name: airlock-microgateway
   namespace: syn-airlock-microgateway
 spec:
-  channel: release-4.5.2
+  channel: stable
   config:
     env:
       - name: GATEWAY_API_POD_MONITOR_CREATE

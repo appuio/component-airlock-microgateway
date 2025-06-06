@@ -11,14 +11,6 @@ default:: `syn-airlock-microgateway`
 The namespace in which to deploy this component.
 
 
-== Example
-
-[source,yaml]
-----
-namespace: syn-airlock-microgateway
-----
-
-
 == `install_method`
 
 [horizontal]
@@ -35,14 +27,6 @@ Openshift is required for this to work.
 If you use this method, you may want to configure `helm_values`.
 
 
-== Example
-
-[source,yaml]
-----
-install_method: helm
-----
-
-
 == `license`
 
 [horizontal]
@@ -50,14 +34,6 @@ type:: string
 default:: `""`
 
 The license key for Airlock Microgateway.
-
-
-== Example
-
-[source,yaml]
-----
-license: "your-license-key"
-----
 
 
 == `network_policy`
@@ -81,17 +57,6 @@ type:: object
 default:: `appuio.ch/waf: airlock`
 
 Labels used to match namespaces for the network policy.
-
-
-== Example
-
-[source,yaml]
-----
-network_policy:
-  namespace_selector:
-    matchLabels:
-      'appuio.ch/waf': 'airlock'
-----
 
 
 == `gateway_api`
@@ -125,39 +90,28 @@ default:: `https://github.com/kubernetes-sigs/gateway-api/releases/download/${ai
 
 The source URL for the Kubernetes Gateway API installation.
 
-
-== Example
-
-[source,yaml]
-----
-gateway_api:
-  enabled: true
-  version: "v1.2.1"
-  source: "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml"
-----
-
-
 == `helm_values`
 
 [horizontal]
 type:: object
+default::
+```
+operator:
+  gatewayAPI:
+    enabled: true
+    podMonitor:
+      create: true
+      labels:
+        release: "kube-prometheus-stack"
+  serviceMonitor:
+    create: true
+    labels:
+      release: "kube-prometheus-stack"
+dashboards:
+  create: true
+```
 
 Configuration values for the Helm chart installation. See the official Airlock documentation for more details: https://docs.airlock.com/microgateway/4.5/index/1726159368039.html
-
-
-== Example
-
-[source,yaml]
-----
-helm_values:
-  operator:
-    gatewayAPI:
-      enabled: true
-    serviceMonitor:
-      create: true
-  dashboards:
-    create: true
-----
 
 
 == `olm`
@@ -199,18 +153,6 @@ default:: `true`
 Whether to create a PodMonitor for the OLM operator.
 
 
-== Example
-
-[source,yaml]
-----
-olm:
-  version: "stable"
-  channel: "stable"
-  config:
-    create_pod_monitor: true
-----
-
-
 == `charts`
 
 [horizontal]
@@ -246,8 +188,59 @@ The source URL for the Microgateway chart.
 
 [source,yaml]
 ----
-charts:
-  microgateway:
-    version: "4.5.2"
-    source: "oci://quay.io/airlockcharts/microgateway"
+parameters:
+  airlock_microgateway:
+    namespace: syn-airlock-microgateway
+
+    install_method: helm
+
+    license: |
+      -----BEGIN LICENSE-----
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      AAAAAA==
+      -----END LICENSE-----
+      -- Airlock Microgateway --
+      License Type                 Premium
+      ID                           aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+      Owner                        OWNER
+      Trial                        true
+      Email                        foo@foo.bar
+      Environment                  Temporary
+      Valid Until                  2025-06-30
+      Requests per Month           10000000
+      Module Base                  on
+      Module Auth                  on
+      ---------------------
+
+    network_policy:
+      namespace_selector:
+        matchLabels:
+          'appuio.ch/waf': 'airlock'
+
+    gateway_api:
+      enabled: true
+      version: "v1.2.1"
+
+    charts:
+      microgateway:
+        version: "4.5.3"
+
 ----
