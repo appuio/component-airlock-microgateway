@@ -16,7 +16,7 @@ parameters:
       dependencies:
         - type: https
           source: ${airlock_microgateway:gateway_api:source}
-          output_path: ${_base_directory}/dependencies/gateway-api/standard-install.yaml
+          output_path: ${_base_directory}/manifests/gateway-api/standard-install.yaml
       compile:
         - input_paths:
             - ${_base_directory}/component/app.jsonnet
