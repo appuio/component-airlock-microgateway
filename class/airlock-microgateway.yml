@@ -37,6 +37,10 @@ parameters:
             - ${_base_directory}/component/main.jsonnet
           input_type: jsonnet
           output_path: airlock-microgateway/00_prerequisites/
+        - input_paths:
+            - ${_base_directory}/component/resources.jsonnet
+          input_type: jsonnet
+          output_path: airlock-microgateway/02_resources/
 
     helm:
       dependencies:
@@ -71,6 +75,10 @@ parameters:
             - ${_base_directory}/component/main.jsonnet
           input_type: jsonnet
           output_path: airlock-microgateway/00_prerequisites/
+        - input_paths:
+            - ${_base_directory}/component/resources.jsonnet
+          input_type: jsonnet
+          output_path: airlock-microgateway/02_resources/
 
 
   kapitan:
