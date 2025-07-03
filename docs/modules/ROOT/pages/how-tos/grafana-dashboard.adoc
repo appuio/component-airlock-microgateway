@@ -1,0 +1,63 @@
+= Enable Grafana Dashboards
+
+To make use of the integrated Grafana dashboards, you need to configure Grafana to integrate dashboard ConfigMaps.
+
+For Grafana to find the dashboards, the following things are required:
+
+* Grafana must be able to load the dashboards from the ConfigMaps.
+This is usually done by a sidecar that is enabled by the `grafana.ini` file.
+
+* Grafana must have access to the ConfigMaps and Secrets in the Airlock Operator namespace.
+
+== Grafana Helm Values
+
+* Enable the sidecar to search for dashboards in the `syn-airlock-microgateway` namespace.
++
+[source,yaml]
+----
+sidecar:
+  dashboards:
+    enabled: true <1>
+    searchNamespace:
+      - syn-airlock-microgateway <2>
+----
+<1> Enable the sidecar to search for dashboards.
+<2> The namespace where the Airlock Microgateway operator is installed.
+
+* Allow Grafana to access the ConfigMaps and Secrets in the `syn-airlock-microgateway` namespace.
++
+[source,yaml]
+----
+extraObjects:
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: grafana-dashboard-reader
+      namespace: syn-airlock-microgateway
+    rules:
+    - apiGroups:
+      - ''
+      resources:
+      - configmaps
+      - secrets
+      verbs:
+      - get
+      - list
+      - watch
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: grafana-dashboard-reader
+      namespace: syn
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: grafana-dashboard-reader
+    subjects:
+      - kind: ServiceAccount
+        name: <GRAFANA_SERVICE_ACCOUNT> <1>
+        namespace: <GRAFANA_NAMESPACE> <2>
+
+----
+<1> The name of Grafana's ServiceAccount.
+<2> The namespace where Grafana is installed.
