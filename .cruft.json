@@ -1,13 +1,13 @@
 {
   "template": "https://github.com/projectsyn/commodore-component-template.git",
-  "commit": "98d16f99766e6c6d97322dbe42e058f0e2bf73d0",
+  "commit": "56dd2ee980f197ec2c8b3977c16458e43d0c6ef2",
   "checkout": "main",
   "context": {
     "cookiecutter": {
       "name": "airlock-microgateway",
       "slug": "airlock-microgateway",
       "parameter_key": "airlock_microgateway",
-      "test_cases": "defaults",
+      "test_cases": "defaults disable-gateway-api olm",
       "add_lib": "n",
       "add_pp": "n",
       "add_golden": "y",
@@ -21,11 +21,11 @@
       "auto_release": "y",
       "copyright_holder": "VSHN AG <info@vshn.ch>",
       "copyright_year": "2025",
-      "github_owner": "projectsyn",
+      "github_owner": "appuio",
       "github_name": "component-airlock-microgateway",
-      "github_url": "https://github.com/projectsyn/component-airlock-microgateway",
+      "github_url": "https://github.com/appuio/component-airlock-microgateway",
       "_template": "https://github.com/projectsyn/commodore-component-template.git",
-      "_commit": "98d16f99766e6c6d97322dbe42e058f0e2bf73d0"
+      "_commit": "56dd2ee980f197ec2c8b3977c16458e43d0c6ef2"
     }
   },
   "directory": null
