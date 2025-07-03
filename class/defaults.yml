@@ -23,6 +23,7 @@ parameters:
       source: https://github.com/kubernetes-sigs/gateway-api/releases/download/${airlock_microgateway:gateway_api:version}/standard-install.yaml
 
     gateway_classes: {}
+    gateway_parameters: {}
 
     # See Airlock docs: https://docs.airlock.com/microgateway/4.5/index/1726159368039.html
     helm_values:

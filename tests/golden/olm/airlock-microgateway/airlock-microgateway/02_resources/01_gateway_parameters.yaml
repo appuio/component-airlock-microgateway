@@ -1,0 +1,33 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameter
+metadata:
+  name: airlock
+  namespace: airlock-gateway
+spec:
+  defaults:
+    downstream:
+      remoteIP:
+        xff:
+          numTrustedHops: 1
+  kubernetes:
+    deployment:
+      automountServiceAccountToken: false
+      engineContainer: {}
+      placement: {}
+      replicas: 1
+    service:
+      type: ClusterIP
+  logging:
+    level: info
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameter
+metadata:
+  name: airlock
+  namespace: syn-airlock-microgateway
+spec:
+  defaults:
+    downstream:
+      remoteIP:
+        xff:
+          numTrustedHops: 1

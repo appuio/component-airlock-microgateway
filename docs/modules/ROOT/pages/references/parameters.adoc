@@ -90,12 +90,20 @@ default:: `https://github.com/kubernetes-sigs/gateway-api/releases/download/${ai
 
 The source URL for the Kubernetes Gateway API installation.
 
+
 == `gateway_classes`
 
 [horizontal]
 type:: object
 
 Configuration for Gateway Classes.
+
+=== `gateway_classes.<name>.parametersRef`
+
+[horizontal]
+type:: string
+
+A reference to a Gateway Parameters object, defined in `gateway_parameters`.
 
 === Example
 
@@ -111,7 +119,47 @@ airlock_microgateway:
           kind: GatewayParameters
           name: gatewayparameter-mgw-poc
           namespace: airlock-gateway
+
+    my-other-gateway-class:
+      parametersRef: airlock
+
+  gateway_parameters:
+    airlock: ...
 ----
+
+
+== `gateway_parameters`
+
+[horizontal]
+type:: object
+
+Configuration for Gateway Parameters.
+
+=== Example
+
+[source,yaml]
+----
+airlock_microgateway:
+  gateway_parameters:
+    airlock:
+      spec:
+        defaults:
+          downstream:
+            remoteIP:
+              xff:
+                numTrustedHops: 1
+        kubernetes:
+          deployment:
+            automountServiceAccountToken: false
+            engineContainer: {}
+            placement: {}
+            replicas: 1
+          service:
+            type: ClusterIP
+        logging:
+          level: info
+----
+
 
 == `helm_values`
 
