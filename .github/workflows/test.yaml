@@ -33,6 +33,8 @@ jobs:
       matrix:
         instance:
           - defaults
+          - disable-gateway-api
+          - olm
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -48,6 +50,8 @@ jobs:
       matrix:
         instance:
           - defaults
+          - disable-gateway-api
+          - olm
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
