@@ -9,3 +9,27 @@ spec:
     kind: GatewayParameters
     name: gatewayparameter-mgw-poc
     namespace: airlock-gateway
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: with-ref
+spec:
+  controllerName: microgateway.airlock.com/gatewayclass-controller
+  parametersRef:
+    group: microgateway.airlock.com
+    kind: GatewayParameters
+    name: airlock
+    namespace: airlock-gateway
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: with-ref-no-namespace
+spec:
+  controllerName: microgateway.airlock.com/gatewayclass-controller
+  parametersRef:
+    group: microgateway.airlock.com
+    kind: GatewayParameters
+    name: airlock
+    namespace: syn-airlock-microgateway
