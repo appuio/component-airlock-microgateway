@@ -7,6 +7,8 @@ local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.airlock_microgateway;
 
+local has_cilium = std.member(inv.applications, 'cilium');
+
 local GatewayParameter = function(name='') {
   apiVersion: 'microgateway.airlock.com/v1alpha1',
   kind: 'GatewayParameter',
@@ -26,6 +28,14 @@ local GatewayClass = function(name='') {
 local Gateway = function(name='') {
   apiVersion: 'gateway.networking.k8s.io/v1',
   kind: 'Gateway',
+  metadata: {
+    name: name,
+  },
+};
+
+local CiliumNetworkPolicy(name) = {
+  apiVersion: 'cilium.io/v2',
+  kind: 'CiliumNetworkPolicy',
   metadata: {
     name: name,
   },
@@ -68,6 +78,35 @@ local referencedParam(ref) = {
   for class in std.objectFields(ref)
 };
 
+local GatewayCNP(name) =
+  local nsName = namespacedName(name);
+  CiliumNetworkPolicy(name) {
+    metadata: {
+      name: nsName.name,
+      namespace: nsName.namespace,
+    },
+    spec: {
+      endpointSelector: {
+        matchLabels: {
+          'gateway.networking.k8s.io/gateway-name': nsName.name,
+          'microgateway.airlock.com/managedBy': params.namespace,
+        },
+      },
+      ingress: [
+        {
+          fromEntities: [ 'world' ],
+        },
+      ],
+    },
+  };
+
+local gateway_cnps = [
+  GatewayCNP(k)
+  for k in std.objectFields(params.gateways)
+  if params.gateways[k] != null
+];
+
+
 {
   [if std.length(params.gateway_classes) > 0 then '01_gateway_classes']:
     com.generateResources(referencedParam(params.gateway_classes), GatewayClass),
@@ -75,4 +114,6 @@ local referencedParam(ref) = {
     com.generateResources(namespaced(params.gateway_parameters), GatewayParameter),
   [if std.length(params.gateways) > 0 then '01_gateways']:
     com.generateResources(namespaced(params.gateways), Gateway),
+  [if std.length(params.gateways) > 0 && has_cilium then '01_gateway_networkpolicies']:
+    gateway_cnps,
 }

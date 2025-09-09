@@ -1,3 +1,6 @@
+applications:
+  - cilium
+
 parameters:
   airlock_microgateway:
     gateway_parameters:
