@@ -24,6 +24,7 @@ parameters:
 
     gateway_classes: {}
     gateway_parameters: {}
+    gateways: {}
 
     # See Airlock docs: https://docs.airlock.com/microgateway/4.5/index/1726159368039.html
     helm_values:

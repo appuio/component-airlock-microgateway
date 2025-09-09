@@ -23,6 +23,14 @@ local GatewayClass = function(name='') {
   },
 };
 
+local Gateway = function(name='') {
+  apiVersion: 'gateway.networking.k8s.io/v1',
+  kind: 'Gateway',
+  metadata: {
+    name: name,
+  },
+};
+
 local namespacedName(name, namespace='') = {
   local namespaced = std.splitLimit(name, '/', 1),
   local ns = if namespace != '' then namespace else params.namespace,
@@ -61,6 +69,10 @@ local referencedParam(ref) = {
 };
 
 {
-  [if std.length(params.gateway_classes) > 0 then '01_gateway_classes']: com.generateResources(referencedParam(params.gateway_classes), GatewayClass),
-  [if std.length(params.gateway_parameters) > 0 then '01_gateway_parameters']: com.generateResources(namespaced(params.gateway_parameters), GatewayParameter),
+  [if std.length(params.gateway_classes) > 0 then '01_gateway_classes']:
+    com.generateResources(referencedParam(params.gateway_classes), GatewayClass),
+  [if std.length(params.gateway_parameters) > 0 then '01_gateway_parameters']:
+    com.generateResources(namespaced(params.gateway_parameters), GatewayParameter),
+  [if std.length(params.gateways) > 0 then '01_gateways']:
+    com.generateResources(namespaced(params.gateways), Gateway),
 }
