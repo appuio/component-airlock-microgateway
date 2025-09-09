@@ -17,6 +17,9 @@ parameters:
         - type: https
           source: ${airlock_microgateway:gateway_api:source}
           output_path: ${_base_directory}/manifests/gateway-api/standard-install.yaml
+        - type: https
+          source: https://github.com/kubernetes-sigs/gateway-api/releases/download/${airlock_microgateway:airlock_xopenshift:version}/${airlock_microgateway:airlock_xopenshift:channel}-install.yaml
+          output_path: ${_base_directory}/manifests/airlock-xopenshift/upstream.yaml
       compile:
         - input_paths:
             - ${_base_directory}/component/app.jsonnet
@@ -33,6 +36,10 @@ parameters:
           input_type: jsonnet
           output_path: airlock-microgateway/01_olm/
         - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}
+        - input_paths:
+            - ${_base_directory}/component/airlock-xopenshift.jsonnet
+          input_type: jsonnet
+          output_path: airlock-microgateway/00_prerequisites/00_airlock_xopenshift
         - input_paths:
             - ${_base_directory}/component/main.jsonnet
           input_type: jsonnet

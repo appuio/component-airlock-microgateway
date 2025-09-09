@@ -6,6 +6,8 @@ local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.airlock_microgateway;
 
+local airlock_xopenshift = import 'airlock-xopenshift.jsonnet';
+
 local operator_group = operatorlib.OperatorGroup('airlock-microgateway') {
   metadata+: {
     annotations+: {
@@ -33,6 +35,13 @@ local operator_subscription = operatorlib.namespacedSubscription(
           name: 'GATEWAY_API_POD_MONITOR_CREATE',
           value: '%s' % params.olm.config.create_pod_monitor,
         },
+      ] + if params.airlock_xopenshift.enabled then [
+        {
+          name: 'GATEWAY_API_%s_API_GROUP' % airlock_xopenshift.enabled_crds[crd],
+          value: airlock_xopenshift.api_group,
+        }
+        for crd in std.objectFields(airlock_xopenshift.enabled_crds)
+      ] else [
       ],
     },
   },

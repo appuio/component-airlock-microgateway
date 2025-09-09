@@ -90,6 +90,57 @@ default:: `https://github.com/kubernetes-sigs/gateway-api/releases/download/${ai
 
 The source URL for the Kubernetes Gateway API installation.
 
+== `airlock_xopenshift`
+
+[horizontal]
+type:: object
+
+Configuration for deploying patched Gateway API CRDs on OpenShift.
+This parameter allows us to deploy copies of upstream Gateway API CRDs in API group `x-openshift.microgateway.airlock.com`.
+This allows us -- by leveraging Airlock Mircogateway's support for CRDs in that API group -- to deploy additional Gateway API CRDs on OpenShift without creating conflicts with the ingress-operator-managed Gateway API CRDs that are deployed on OpenShift >= 4.19.
+
+This parameter only has an effect for `install_method=olm`.
+
+=== `enabled`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+Whether to deploy any patched Gateway API CRDs.
+
+=== `version`
+
+[horizontal]
+type:: string
+default:: `v1.3.0`
+
+The upstream Gateway API version of the CRDs that we want to patch.
+
+=== `channel`
+
+[horizontal]
+type:: string
+default:: `experimental`
+
+The upstream Gateway API channel for the CRDs to patch.
+Supported values are `standard` or `experimental`.
+Component compilation will error when another value is provided.
+
+=== `crds`
+
+[horizontal]
+type:: object
+default:: `{"backendtlspolicies":"BACKEND_TLS_POLICY"}`
+
+The list of CRD names for which the component will deploy a copy of the CRD in API group `x-openshift.microgateway.airlock.com`.
+The keys are expected to be CRD base names, such as `backendtlspolicies`.
+The component will always download the full `<channel>-install.yaml` from the specified Gateway API release but will only create copies of CRDs whose base name matches a key with a non-null value in this parameter.
+
+The values are expected to be the identifying segment for the OLM operator environment variable which switches the CRD from API group `gateway.networking.k8s.io` to `x-openshift.microgateway.airlock.com`.
+For example, value `BACKEND_TLS_POLICY` results in environment variable `GATEWAY_API_BACKEND_TLS_POLICY_API_GROUP=x-openshift.microgateway.airlock.com` to be set for the OLM operator.
+
+Users can remove entries in this parameter by setting an entry to `null`.
 
 == `gateway_classes`
 
