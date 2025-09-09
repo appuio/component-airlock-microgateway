@@ -1,0 +1,41 @@
+parameters:
+  airlock_microgateway:
+    gateway_parameters:
+      airlock/params:
+        spec:
+          defaults:
+            downstream:
+              remoteIP:
+                proxyProtocol: {}
+          kubernetes:
+            deployment:
+              automountServiceAccountToken: false
+              engineContainer: {}
+              placement:
+                nodeSelector:
+                  node-role.kubernetes.io/infra: ""
+              replicas: 2
+            service:
+              annotations:
+                k8s.cloudscale.ch/loadbalancer-force-hostname: ingress.mgw.example.com
+                k8s.cloudscale.ch/loadbalancer-pool-protocol: proxyv2
+              externalTrafficPolicy: Local
+              type: LoadBalancer
+          logging:
+            level: info
+
+    gateway_classes:
+      airlock-microgateway:
+        parametersRef: airlock/params
+
+    gateways:
+      airlock/gateway-1:
+        spec:
+          gatewayClassName: airlock-microgateway
+          listeners:
+            - allowedRoutes:
+                namespaces:
+                  from: All
+              name: http
+              port: 80
+              protocol: HTTP
