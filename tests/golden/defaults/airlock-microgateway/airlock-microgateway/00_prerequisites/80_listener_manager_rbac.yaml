@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations: {}
+  labels:
+    name: listenermanager-manager
+  name: listenermanager-manager
+  namespace: syn-airlock-microgateway
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    name: espejote-listenermanager
+  name: espejote:listenermanager
+rules:
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - gateways
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httpsroutes
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: espejote-listenermanager
+  name: espejote:listenermanager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: espejote:listenermanager
+subjects:
+  - kind: ServiceAccount
+    name: listenermanager-manager
+    namespace: syn-airlock-microgateway
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations: {}
+  labels:
+    name: espejote-listenermanager
+  name: espejote:listenermanager
+  namespace: syn-airlock-microgateway
+rules:
+  - apiGroups:
+      - espejote.io
+    resources:
+      - jsonnetlibraries
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations: {}
+  labels:
+    name: espejote-listenermanager
+  name: espejote:listenermanager
+  namespace: syn-airlock-microgateway
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: espejote:listenermanager
+subjects:
+  - kind: ServiceAccount
+    name: listenermanager-manager
+    namespace: syn-airlock-microgateway
