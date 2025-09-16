@@ -22,8 +22,13 @@ local cr = kube.ClusterRole('espejote:listenermanager') {
     },
     {
       apiGroups: [ 'gateway.networking.k8s.io' ],
-      resources: [ 'httpsroutes' ],
+      resources: [ 'httproutes' ],
       verbs: [ 'get', 'list', 'watch' ],
+    },
+    {
+      apiGroups: [ 'gateway.networking.k8s.io' ],
+      resources: [ 'httproutes', 'httproutes/finalizers' ],
+      verbs: [ 'update', 'patch' ],
     },
   ],
 };
@@ -60,7 +65,7 @@ local jsonnetlib =
     spec: {
       data: {
         'config.json': std.manifestJson({
-          apiVersion: 'TODO',
+          TODO: 'TODO',
         }),
       },
     },
@@ -91,6 +96,7 @@ local managedresource =
           resource: {
             apiVersion: 'gateway.networking.k8s.io/v1',
             kind: 'Gateway',
+            namespace: '',  // all namespaces
           },
         },
       ],
@@ -103,7 +109,7 @@ local managedresource =
         },
         {
           name: 'httproute',
-          watchContextResource: {
+          watchResource: {
             apiVersion: 'gateway.networking.k8s.io/v1',
             kind: 'HTTPRoute',
             namespace: '',  // watch all namespaces
