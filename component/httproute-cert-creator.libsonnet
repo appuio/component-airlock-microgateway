@@ -7,38 +7,33 @@ local params = inv.parameters.airlock_microgateway;
 
 local namespace = params.namespace;
 
-local sa = kube.ServiceAccount('listenermanager-manager') {
+local sa = kube.ServiceAccount('httproute-cert-creator-manager') {
   metadata+: {
     namespace: namespace,
   },
 };
 
-local cr = kube.ClusterRole('espejote:listenermanager') {
+local cr = kube.ClusterRole('espejote:httproute-cert-creator') {
   rules: [
     {
-      apiGroups: [ 'gateway.networking.k8s.io' ],
-      resources: [ 'gateways' ],
-      verbs: [ 'get', 'list', 'watch', 'update', 'patch' ],
+      apiGroups: [ 'cert-manager.io' ],
+      resources: [ 'certificates' ],
+      verbs: [ '*' ],
     },
     {
       apiGroups: [ 'gateway.networking.k8s.io' ],
       resources: [ 'httproutes' ],
       verbs: [ 'get', 'list', 'watch' ],
     },
-    {
-      apiGroups: [ 'gateway.networking.k8s.io' ],
-      resources: [ 'httproutes', 'httproutes/finalizers' ],
-      verbs: [ 'update', 'patch' ],
-    },
   ],
 };
 
-local crb = kube.ClusterRoleBinding('espejote:listenermanager') {
+local crb = kube.ClusterRoleBinding('espejote:httproute-cert-creator') {
   roleRef_: cr,
   subjects_: [ sa ],
 };
 
-local role = kube.Role('espejote:listenermanager') {
+local role = kube.Role('espejote:httproute-cert-creator') {
   metadata+: {
     namespace: namespace,
   },
@@ -51,7 +46,7 @@ local role = kube.Role('espejote:listenermanager') {
   ],
 };
 
-local rb = kube.RoleBinding('espejote:listenermanager') {
+local rb = kube.RoleBinding('espejote:httproute-cert-creator') {
   metadata+: {
     namespace: namespace,
   },
@@ -60,7 +55,7 @@ local rb = kube.RoleBinding('espejote:listenermanager') {
 };
 
 local jsonnetlib =
-  esp.jsonnetLibrary('listenermanager', namespace) {
+  esp.jsonnetLibrary('httproute-cert-creator', namespace) {
     spec: {
       data: {
         'config.json': std.manifestJson({
@@ -78,7 +73,7 @@ local jsonnetlib_ref = {
 };
 
 local managedresource =
-  esp.managedResource('listenermanager', namespace) {
+  esp.managedResource('httproute-cert-creator', namespace) {
     metadata+: {
       annotations: {
         'syn.tools/description': |||
@@ -91,27 +86,19 @@ local managedresource =
       applyOptions: { force: true },
       context: [
         {
-          name: 'gateways',
+          name: 'httproutes',
           resource: {
             apiVersion: 'gateway.networking.k8s.io/v1',
-            kind: 'Gateway',
+            kind: 'HTTPRoute',
             namespace: '',  // all namespaces
           },
         },
       ],
       triggers: [
         {
-          name: 'gateway',  // TODO check if required
-          watchContextResource: {
-            name: 'gateways',
-          },
-        },
-        {
           name: 'httproute',
-          watchResource: {
-            apiVersion: 'gateway.networking.k8s.io/v1',
-            kind: 'HTTPRoute',
-            namespace: '',  // watch all namespaces
+          watchContextResource: {
+            name: 'httproutes',
           },
         },
         {
@@ -119,14 +106,14 @@ local managedresource =
           watchResource: jsonnetlib_ref,
         },
       ],
-      template: importstr 'espejote-templates/listener-manager.jsonnet',
+      template: importstr 'espejote-templates/httproute-cert-creator.jsonnet',
     },
   };
 
 if std.member(inv.applications, 'espejote') then
   {
-    '80_listener_manager_rbac': [ sa, cr, crb, role, rb ],
-    '80_listener_manager_managedresource': [ jsonnetlib, managedresource ],
+    '80_httproute_cert_creator_rbac': [ sa, cr, crb, role, rb ],
+    '80_httproute_cert_creator_managedresource': [ jsonnetlib, managedresource ],
   }
 else
-  error 'Application "espejote" required for the listener manager feature.'
+  error 'Application "espejote" required for the httproute-cert-creator feature.'

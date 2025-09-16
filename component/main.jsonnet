@@ -149,4 +149,4 @@ local rbac_aggregated_airlock_admin = kube.ClusterRole('airlock-microgateway-agg
     rbac_aggregated_airlock_edit,
     rbac_aggregated_airlock_admin,
   ],
-} + (import 'listener-manager.libsonnet')
+}

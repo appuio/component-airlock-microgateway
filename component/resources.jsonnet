@@ -64,3 +64,7 @@ local referencedParam(ref) = {
   [if std.length(params.gateway_classes) > 0 then '01_gateway_classes']: com.generateResources(referencedParam(params.gateway_classes), GatewayClass),
   [if std.length(params.gateway_parameters) > 0 then '01_gateway_parameters']: com.generateResources(namespaced(params.gateway_parameters), GatewayParameter),
 }
++
+(import 'listener-manager.libsonnet')
++
+(import 'httproute-cert-creator.libsonnet')
