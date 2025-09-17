@@ -160,6 +160,44 @@ airlock_microgateway:
           level: info
 ----
 
+== `gateways`
+
+[horizontal]
+type:: object
+default:: `{}`
+
+This parameter allows users to define `Gateway` resources to deploy.
+The component currently doesn't validate that the value of `spec.gatewayClassName` is a gateway class that's managed through parameter `gateway_classes`.
+
+Airlock Microgateway also supports referencing a `GatewayParameters` resource directly in `spec.infrastructure.parametersRef`.
+If both `spec.gatewayClassName` and `spec.infrastructure.parametersRef` are provided, the instance is configured with the parameters referenced in `spec.infrastructure.parametersRef`.
+
+See the https://gateway-api.sigs.k8s.io/reference/spec/#gateway[Gateway API] and https://docs.airlock.com/microgateway/latest/index/1726159368159.html#Configuration_examples_of_K8s_Gateway_API_CRs[Airlock Microgateway] documentation for a full reference of supported configuration options for `Gateway` resources.
+
+=== Example
+
+[source,yaml]
+----
+airlock_microgateway:
+  gateways:
+    airlock/gateway-1:
+      spec:
+        gatewayClassName: airlock-microgateway
+        listeners:
+          - allowedRoutes:
+              namespaces:
+                from: All
+            name: http
+            port: 80
+            protocol: HTTP
+
+  gateway_parameters:
+    airlock/gatewayparams: { ... }
+
+  gateway_classes:
+    airlock-microgateway:
+      parametersRef: "airlock/gatewayparams"
+----
 
 == `helm_values`
 

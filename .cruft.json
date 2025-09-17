@@ -7,7 +7,7 @@
       "name": "airlock-microgateway",
       "slug": "airlock-microgateway",
       "parameter_key": "airlock_microgateway",
-      "test_cases": "defaults disable-gateway-api olm",
+      "test_cases": "defaults disable-gateway-api olm resources",
       "add_lib": "n",
       "add_pp": "n",
       "add_golden": "y",
