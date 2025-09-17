@@ -174,6 +174,9 @@ If both `spec.gatewayClassName` and `spec.infrastructure.parametersRef` are prov
 
 See the https://gateway-api.sigs.k8s.io/reference/spec/#gateway[Gateway API] and https://docs.airlock.com/microgateway/latest/index/1726159368159.html#Configuration_examples_of_K8s_Gateway_API_CRs[Airlock Microgateway] documentation for a full reference of supported configuration options for `Gateway` resources.
 
+TIP: When component `cilium` is installed in the cluster, the component also creates a `CiliumNetworkPolicy` which allows traffic from identity `world` for each managed `Gateway` resource.
+>>>>>>> 7173a80 (Create `CiliumNetworkPolicy` when Cilium is installed)
+
 === Example
 
 [source,yaml]
