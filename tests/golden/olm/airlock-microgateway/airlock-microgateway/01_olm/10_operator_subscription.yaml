@@ -13,6 +13,8 @@ spec:
     env:
       - name: GATEWAY_API_POD_MONITOR_CREATE
         value: 'true'
+      - name: GATEWAY_API_BACKEND_TLS_POLICY_API_GROUP
+        value: x-openshift.microgateway.airlock.com
   installPlanApproval: Automatic
   name: airlock-microgateway
   source: certified-operators

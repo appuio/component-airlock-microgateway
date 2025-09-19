@@ -9,6 +9,8 @@ parameters:
 
   airlock_microgateway:
     install_method: olm
+    airlock_xopenshift:
+      enabled: true
     gateway_classes:
       test:
         spec:
