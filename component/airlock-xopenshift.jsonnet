@@ -1,5 +1,6 @@
 local com = import 'lib/commodore.libjsonnet';
 local kap = import 'lib/kapitan.libjsonnet';
+local kube = import 'lib/kube.libjsonnet';
 
 local inv = kap.inventory();
 local params = inv.parameters.airlock_microgateway;
@@ -34,9 +35,70 @@ local xopenshift_crds = [
   if std.member(std.objectFields(enabled_crds), basename(crd.metadata.name))
 ];
 
+local aggregate_crs(crdname) =
+  local rule = {
+    apiGroups: [ xopenshift_group ],
+    resources: [ basename(crdname) ],
+  };
+  [
+    kube.ClusterRole('%s-crdview' % crdname) {
+      metadata+: {
+        labels: {
+          'rbac.authorization.k8s.io/aggregate-to-view': 'true',
+        },
+        name: '%s-crdview' % crdname,
+      },
+      rules: [ {
+        apiGroups: [ 'apiextensions.k8s.io' ],
+        resourceNames: [ crdname ],
+        resources: [ 'customresourcedefinitions' ],
+        verbs: [ 'get' ],
+      } ],
+    },
+    kube.ClusterRole('%s-view' % crdname) {
+      metadata+: {
+        labels: {
+          'rbac.authorization.k8s.io/aggregate-to-view': 'true',
+        },
+        name: '%s-view' % crdname,
+      },
+      rules: [
+        rule {
+          verbs: [ 'get', 'list', 'watch' ],
+        },
+      ],
+    },
+    kube.ClusterRole('%s-edit' % crdname) {
+      metadata: {
+        labels: {
+          'rbac.authorization.k8s.io/aggregate-to-edit': 'true',
+        },
+        name: '%s-edit' % crdname,
+      },
+      rules: [
+        rule {
+          verbs: [ 'create', 'delete', 'update', 'patch' ],
+        },
+      ],
+    },
+    kube.ClusterRole('%s-admin' % crdname) {
+      metadata: {
+        labels: {
+          'rbac.authorization.k8s.io/aggregate-to-admin': 'true',
+        },
+        name: '%s-admin' % crdname,
+      },
+      rules: [
+        rule {
+          verbs: [ '*' ],
+        },
+      ],
+    },
+  ];
+
 if params.install_method == 'olm' && params.airlock_xopenshift.enabled then
   {
-    [crd.metadata.name]: crd
+    [crd.metadata.name]: [ crd ] + aggregate_crs(crd.metadata.name)
     for crd in xopenshift_crds
   } +
   {
