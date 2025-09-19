@@ -117,3 +117,17 @@ local gateway_cnps = [
   [if std.length(params.gateways) > 0 && has_cilium then '01_gateway_networkpolicies']:
     gateway_cnps,
 }
++
+(
+  if params.gateway_listener_manager.enabled then
+    (import 'gateway-listener-manager.libsonnet')
+  else
+    {}
+)
++
+(
+  if params.httproute_certificate_manager.enabled then
+    (import 'httproute-certificate-manager.libsonnet')
+  else
+    {}
+)
