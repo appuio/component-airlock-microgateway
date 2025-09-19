@@ -7,13 +7,13 @@ local params = inv.parameters.airlock_microgateway;
 
 local namespace = params.namespace;
 
-local sa = kube.ServiceAccount('listenermanager-manager') {
+local sa = kube.ServiceAccount('gateway-listener-manager') {
   metadata+: {
     namespace: namespace,
   },
 };
 
-local cr = kube.ClusterRole('espejote:listenermanager') {
+local cr = kube.ClusterRole('espejote:gateway-listener-manager') {
   rules: [
     {
       apiGroups: [ 'gateway.networking.k8s.io' ],
@@ -33,12 +33,12 @@ local cr = kube.ClusterRole('espejote:listenermanager') {
   ],
 };
 
-local crb = kube.ClusterRoleBinding('espejote:listenermanager') {
+local crb = kube.ClusterRoleBinding('espejote:gateway-listener-manager') {
   roleRef_: cr,
   subjects_: [ sa ],
 };
 
-local role = kube.Role('espejote:listenermanager') {
+local role = kube.Role('espejote:gateway-listener-manager') {
   metadata+: {
     namespace: namespace,
   },
@@ -51,7 +51,7 @@ local role = kube.Role('espejote:listenermanager') {
   ],
 };
 
-local rb = kube.RoleBinding('espejote:listenermanager') {
+local rb = kube.RoleBinding('espejote:gateway-listener-manager') {
   metadata+: {
     namespace: namespace,
   },
@@ -60,26 +60,19 @@ local rb = kube.RoleBinding('espejote:listenermanager') {
 };
 
 local jsonnetlib =
-  esp.jsonnetLibrary('listenermanager', namespace) {
+  esp.jsonnetLibrary('gateway-listener-manager', namespace) {
     spec: {
       data: {
         'config.json': std.manifestJson({
-          matchAnnotation: params.listener_manager.match_annotation,
-          tlsSecretAnnotation: params.listener_manager.tls_secret_annotation,
+          createListenerAnnotation: params.gateway_listener_manager.create_listener_annotation,
+          tlsSecretNameAnnotation: params.gateway_listener_manager.tls_secret_name_annotation,
         }),
       },
     },
   };
 
-local jsonnetlib_ref = {
-  apiVersion: jsonnetlib.apiVersion,
-  kind: jsonnetlib.kind,
-  name: jsonnetlib.metadata.name,
-  namespace: jsonnetlib.metadata.namespace,
-};
-
 local managedresource =
-  esp.managedResource('listenermanager', namespace) {
+  esp.managedResource('gateway-listener-manager', namespace) {
     metadata+: {
       annotations: {
         'syn.tools/description': |||
@@ -89,7 +82,6 @@ local managedresource =
     },
     spec: {
       serviceAccountRef: { name: sa.metadata.name },
-      applyOptions: { force: true },
       context: [
         {
           name: 'gateways',
@@ -115,19 +107,15 @@ local managedresource =
             namespace: '',  // watch all namespaces
           },
         },
-        {
-          name: 'jsonnetlib',
-          watchResource: jsonnetlib_ref,
-        },
       ],
-      template: importstr 'espejote-templates/listener-manager.jsonnet',
+      template: importstr 'espejote-templates/gateway-listener-manager.jsonnet',
     },
   };
 
 if std.member(inv.applications, 'espejote') then
   {
-    '80_listener_manager_rbac': [ sa, cr, crb, role, rb ],
-    '80_listener_manager_managedresource': [ jsonnetlib, managedresource ],
+    '80_gateway_listener_manager_rbac': [ sa, cr, crb, role, rb ],
+    '80_gateway_listener_manager_managedresource': [ jsonnetlib, managedresource ],
   }
 else
   error 'Application "espejote" required for the listener manager feature.'

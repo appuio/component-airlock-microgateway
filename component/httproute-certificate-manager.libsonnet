@@ -7,13 +7,13 @@ local params = inv.parameters.airlock_microgateway;
 
 local namespace = params.namespace;
 
-local sa = kube.ServiceAccount('httproute-cert-creator-manager') {
+local sa = kube.ServiceAccount('httproute-certificate-manager') {
   metadata+: {
     namespace: namespace,
   },
 };
 
-local cr = kube.ClusterRole('espejote:httproute-cert-creator') {
+local cr = kube.ClusterRole('espejote:httproute-certificate-manager') {
   rules: [
     {
       apiGroups: [ 'cert-manager.io' ],
@@ -22,18 +22,18 @@ local cr = kube.ClusterRole('espejote:httproute-cert-creator') {
     },
     {
       apiGroups: [ 'gateway.networking.k8s.io' ],
-      resources: [ 'httproutes' ],
+      resources: [ 'gateways', 'httproutes' ],
       verbs: [ 'get', 'list', 'watch' ],
     },
   ],
 };
 
-local crb = kube.ClusterRoleBinding('espejote:httproute-cert-creator') {
+local crb = kube.ClusterRoleBinding('espejote:httproute-certificate-manager') {
   roleRef_: cr,
   subjects_: [ sa ],
 };
 
-local role = kube.Role('espejote:httproute-cert-creator') {
+local role = kube.Role('espejote:httproute-certificate-manager') {
   metadata+: {
     namespace: namespace,
   },
@@ -46,7 +46,7 @@ local role = kube.Role('espejote:httproute-cert-creator') {
   ],
 };
 
-local rb = kube.RoleBinding('espejote:httproute-cert-creator') {
+local rb = kube.RoleBinding('espejote:httproute-certificate-manager') {
   metadata+: {
     namespace: namespace,
   },
@@ -55,14 +55,15 @@ local rb = kube.RoleBinding('espejote:httproute-cert-creator') {
 };
 
 local jsonnetlib =
-  esp.jsonnetLibrary('httproute-cert-creator', namespace) {
+  esp.jsonnetLibrary('httproute-certificate-manager', namespace) {
     spec: {
       data: {
         'config.json': std.manifestJson({
-          secretNameAnnotation: params.httproute_cert.secret_name_annotation,
-          clusterIssuerAnnotation: params.httproute_cert.cluster_issuer_annotation,
-          issuerAnnotation: params.httproute_cert.issuer_annotation,
-          defaultIssuerRef: params.httproute_cert.default_issuer_ref,
+          tlsSecretNameAnnotation: params.httproute_certificate_manager.tls_secret_name_annotation,
+          clusterIssuerAnnotation: params.httproute_certificate_manager.cluster_issuer_annotation,
+          issuerAnnotation: params.httproute_certificate_manager.issuer_annotation,
+          gatewayDefaultClusterIssuerAnnotation: params.httproute_certificate_manager.gateway_default_cluster_issuer_annotation,
+          createCertificateAnnotation: params.httproute_certificate_manager.create_certificate_annotation,
         }),
       },
     },
@@ -76,7 +77,7 @@ local jsonnetlib_ref = {
 };
 
 local managedresource =
-  esp.managedResource('httproute-cert-creator', namespace) {
+  esp.managedResource('httproute-certificate-manager', namespace) {
     metadata+: {
       annotations: {
         'syn.tools/description': |||
@@ -86,13 +87,20 @@ local managedresource =
     },
     spec: {
       serviceAccountRef: { name: sa.metadata.name },
-      applyOptions: { force: true },
       context: [
         {
           name: 'httproutes',
           resource: {
             apiVersion: 'gateway.networking.k8s.io/v1',
             kind: 'HTTPRoute',
+            namespace: '',  // all namespaces
+          },
+        },
+        {
+          name: 'gateways',
+          resource: {
+            apiVersion: 'gateway.networking.k8s.io/v1',
+            kind: 'Gateway',
             namespace: '',  // all namespaces
           },
         },
@@ -109,14 +117,14 @@ local managedresource =
           watchResource: jsonnetlib_ref,
         },
       ],
-      template: importstr 'espejote-templates/httproute-cert-creator.jsonnet',
+      template: importstr 'espejote-templates/httproute-certificate-manager.jsonnet',
     },
   };
 
 if std.member(inv.applications, 'espejote') then
   {
-    '80_httproute_cert_creator_rbac': [ sa, cr, crb, role, rb ],
-    '80_httproute_cert_creator_managedresource': [ jsonnetlib, managedresource ],
+    '80_httproute_certificate_manager_rbac': [ sa, cr, crb, role, rb ],
+    '80_httproute_certificate_manager_managedresource': [ jsonnetlib, managedresource ],
   }
 else
-  error 'Application "espejote" required for the httproute-cert-creator feature.'
+  error 'Application "espejote" required for the httproute-certificate-manager feature.'

@@ -1,29 +1,16 @@
 local esp = import 'espejote.libsonnet';
-local config = import 'listenermanager/config.json';
+local config = import 'gateway-listener-manager/config.json';
 
-local matchAnnotation = config.matchAnnotation;
-local tlsSecretAnnotation = config.tlsSecretAnnotation;
+local createListenerAnnotation = config.createListenerAnnotation;
+local tlsSecretNameAnnotation = config.tlsSecretNameAnnotation;
 
-local finalizer = 'airlock-microgateway.appuio.io/listenermanager';
-local parentRefTrackAnnotation = 'internal.listenermanager.airlock-microgateway.appuio.io/track-parent-refs';
-
-// Returns all duplicates in an array based on an id function.
-local findDuplicates(a, id=function(o) o) =
-  std.foldl(
-    function(prev, o)
-      prev {
-        set: std.set(super.set + [ o ], id),
-        duplicates: super.duplicates + if std.member(std.map(id, super.set), id(o)) then [ o ] else [],
-      },
-    a,
-    { set: [], duplicates: [] }
-  )
-;
+local finalizer = 'airlock-microgateway.appuio.io/gateway-listener-manager';
+local parentRefTrackAnnotation = 'internal.gateway-listener-manager.airlock-microgateway.appuio.io/track-parent-refs';
 
 local inDelete(obj) = std.get(obj.metadata, 'deletionTimestamp', '') != '';
 
 local wantsHttpsListener(obj) = std.get(
-  std.get(obj.metadata, 'annotations', {}), matchAnnotation, 'false'
+  std.get(obj.metadata, 'annotations', {}), createListenerAnnotation, 'false'
 ) == 'true';
 
 local routeHostnameRefs(route) =
@@ -80,17 +67,13 @@ local ensureListenerAndFinalizer(obj) =
   local desiredListeners = routeHostnameRefs(obj);
   local secretName = std.get(
     std.get(obj.metadata, 'annotations', {}),
-    tlsSecretAnnotation,
+    tlsSecretNameAnnotation,
     ''
   );
   traceJSON('ensureListenerAndFinalizer', [
     // Remove listeners from gateways that are no longer referenced by this HTTPRoute
     esp.applyOptions(
-      applyObjFromObj(gw) {
-        spec: {
-          listeners: [],
-        },
-      },
+      applyObjFromObj(gw),
       fieldManager=httpRouteFieldManager(obj)
     )
     for gw in std.setDiff(std.set(prevParentRefs(obj), gfRefId), std.set(obj.spec.parentRefs, gfRefId), gfRefId)
@@ -99,7 +82,7 @@ local ensureListenerAndFinalizer(obj) =
     esp.applyOptions(
       applyObjFromObj(gw) {
         spec: {
-          listeners: [
+          [if secretName != '' then 'listeners']: [
             {
               name: 'https-%s-%s-%s' % [ h.namespace, h.name, h.pos ],
               hostname: h.hostname,
@@ -128,7 +111,6 @@ local ensureListenerAndFinalizer(obj) =
               },
             }
             for h in desiredListeners
-            if secretName != ''
           ],
         },
       },
@@ -148,8 +130,8 @@ local ensureListenerAndFinalizer(obj) =
   ]);
 
 // cleanupAndRemoveFinalizer applies empty objects to all previously referenced gateways and to the HTTPRoute itself, removing all listeners and the finalizer.
-// A empty object with the correct fieldManager is enough to remove fields we previously managed.
-// Because the we set the fieldManager to the HTTPRoute specific one, we don't accidentally remove listeners created by other HTTPRoutes.
+// An empty object with the correct fieldManager is enough to remove fields we previously managed.
+// Because we set the fieldManager to the HTTPRoute specific one, we don't accidentally remove listeners created by other HTTPRoutes.
 local cleanupAndRemoveFinalizer(obj) =
   local gateways = esp.context().gateways;
   local targetGws = [ gw for gw in gateways if std.member(obj.spec.parentRefs, gwRef(gw)) ];
@@ -166,7 +148,7 @@ local cleanupAndRemoveFinalizer(obj) =
 
 if esp.triggerName() == 'httproute' then
   local tdata = esp.triggerData();
-  if tdata != null then (
+  if tdata.resource != null then (
     if !inDelete(tdata.resource) && wantsHttpsListener(tdata.resource) then
       ensureListenerAndFinalizer(tdata.resource)
     else

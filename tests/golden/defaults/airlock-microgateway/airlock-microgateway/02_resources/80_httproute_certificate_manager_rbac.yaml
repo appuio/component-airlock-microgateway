@@ -3,8 +3,8 @@ kind: ServiceAccount
 metadata:
   annotations: {}
   labels:
-    name: httproute-cert-creator-manager
-  name: httproute-cert-creator-manager
+    name: httproute-certificate-manager
+  name: httproute-certificate-manager
   namespace: syn-airlock-microgateway
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -12,8 +12,8 @@ kind: ClusterRole
 metadata:
   annotations: {}
   labels:
-    name: espejote-httproute-cert-creator
-  name: espejote:httproute-cert-creator
+    name: espejote-httproute-certificate-manager
+  name: espejote:httproute-certificate-manager
 rules:
   - apiGroups:
       - cert-manager.io
@@ -24,6 +24,7 @@ rules:
   - apiGroups:
       - gateway.networking.k8s.io
     resources:
+      - gateways
       - httproutes
     verbs:
       - get
@@ -35,15 +36,15 @@ kind: ClusterRoleBinding
 metadata:
   annotations: {}
   labels:
-    name: espejote-httproute-cert-creator
-  name: espejote:httproute-cert-creator
+    name: espejote-httproute-certificate-manager
+  name: espejote:httproute-certificate-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: espejote:httproute-cert-creator
+  name: espejote:httproute-certificate-manager
 subjects:
   - kind: ServiceAccount
-    name: httproute-cert-creator-manager
+    name: httproute-certificate-manager
     namespace: syn-airlock-microgateway
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,8 +52,8 @@ kind: Role
 metadata:
   annotations: {}
   labels:
-    name: espejote-httproute-cert-creator
-  name: espejote:httproute-cert-creator
+    name: espejote-httproute-certificate-manager
+  name: espejote:httproute-certificate-manager
   namespace: syn-airlock-microgateway
 rules:
   - apiGroups:
@@ -69,14 +70,14 @@ kind: RoleBinding
 metadata:
   annotations: {}
   labels:
-    name: espejote-httproute-cert-creator
-  name: espejote:httproute-cert-creator
+    name: espejote-httproute-certificate-manager
+  name: espejote:httproute-certificate-manager
   namespace: syn-airlock-microgateway
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: espejote:httproute-cert-creator
+  name: espejote:httproute-certificate-manager
 subjects:
   - kind: ServiceAccount
-    name: httproute-cert-creator-manager
+    name: httproute-certificate-manager
     namespace: syn-airlock-microgateway
