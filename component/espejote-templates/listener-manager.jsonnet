@@ -1,4 +1,8 @@
 local esp = import 'espejote.libsonnet';
+local config = import 'listenermanager/config.json';
+
+local matchAnnotation = config.matchAnnotation;
+local tlsSecretAnnotation = config.tlsSecretAnnotation;
 
 local finalizer = 'airlock-microgateway.appuio.io/listenermanager';
 local parentRefTrackAnnotation = 'internal.listenermanager.airlock-microgateway.appuio.io/track-parent-refs';
@@ -19,9 +23,7 @@ local findDuplicates(a, id=function(o) o) =
 local inDelete(obj) = std.get(obj.metadata, 'deletionTimestamp', '') != '';
 
 local wantsHttpsListener(obj) = std.get(
-  std.get(obj.metadata, 'annotations', {}),
-  'alpha.appuio.io/create-gateway-https-listener',
-  'false'
+  std.get(obj.metadata, 'annotations', {}), matchAnnotation, 'false'
 ) == 'true';
 
 local routeHostnameRefs(route) =
@@ -76,11 +78,11 @@ local ensureListenerAndFinalizer(obj) =
   local gateways = esp.context().gateways;
   local targetGws = traceJSON('targetGws', [ gw for gw in gateways if std.member(obj.spec.parentRefs, gwRef(gw)) ]);
   local desiredListeners = routeHostnameRefs(obj);
-  local certSecrets = std.parseJson(std.get(
+  local secretName = std.get(
     std.get(obj.metadata, 'annotations', {}),
-    'alpha.appuio.io/gateway-certificate-secrets',
-    '{}'
-  ));
+    tlsSecretAnnotation,
+    ''
+  );
   traceJSON('ensureListenerAndFinalizer', [
     // Remove listeners from gateways that are no longer referenced by this HTTPRoute
     esp.applyOptions(
@@ -99,7 +101,6 @@ local ensureListenerAndFinalizer(obj) =
         spec: {
           listeners: [
             {
-              local secretName = std.get(certSecrets, h.hostname),
               name: 'https-%s-%s-%s' % [ h.namespace, h.name, h.pos ],
               hostname: h.hostname,
               port: 443,
@@ -127,7 +128,7 @@ local ensureListenerAndFinalizer(obj) =
               },
             }
             for h in desiredListeners
-            if std.objectHas(certSecrets, h.hostname)
+            if secretName != ''
           ],
         },
       },
@@ -146,28 +147,27 @@ local ensureListenerAndFinalizer(obj) =
     },
   ]);
 
+// cleanupAndRemoveFinalizer applies empty objects to all previously referenced gateways and to the HTTPRoute itself, removing all listeners and the finalizer.
+// A empty object with the correct fieldManager is enough to remove fields we previously managed.
+// Because the we set the fieldManager to the HTTPRoute specific one, we don't accidentally remove listeners created by other HTTPRoutes.
 local cleanupAndRemoveFinalizer(obj) =
   local gateways = esp.context().gateways;
   local targetGws = [ gw for gw in gateways if std.member(obj.spec.parentRefs, gwRef(gw)) ];
   [
     esp.applyOptions(
-      applyObjFromObj(gw) {
-        spec: { listeners: [] },
-      },
+      applyObjFromObj(gw),
       fieldManager=httpRouteFieldManager(obj)
     )
     for gw in targetGws
   ] + [
-    applyObjFromObj(obj) {
-      metadata+: { finalizers: [] },
-    },
+    applyObjFromObj(obj),
   ]
 ;
 
 if esp.triggerName() == 'httproute' then
   local tdata = esp.triggerData();
-  if tdata != null && wantsHttpsListener(tdata.resource) then (
-    if !inDelete(tdata.resource) then
+  if tdata != null then (
+    if !inDelete(tdata.resource) && wantsHttpsListener(tdata.resource) then
       ensureListenerAndFinalizer(tdata.resource)
     else
       cleanupAndRemoveFinalizer(tdata.resource)

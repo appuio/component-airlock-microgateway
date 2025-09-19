@@ -14,6 +14,20 @@ parameters:
         matchLabels:
           'appuio.ch/waf': 'airlock'
 
+    listener_manager:
+      enabled: false
+      match_annotation: alpha.appuio.io/create-gateway-https-listener
+      tls_secret_annotation: ${airlock_microgateway:httproute_cert:secret_name_annotation}
+
+    httproute_cert:
+      enabled: false
+      secret_name_annotation: alpha.httproute-cert.appuio.io/secret-name
+      cluster_issuer_annotation: alpha.httproute-cert.appuio.io/cluster-issuer
+      issuer_annotation: alpha.httproute-cert.appuio.io/issuer
+      default_issuer_ref:
+        kind: ClusterIssuer
+        name: letsencrypt-production-airlock-gateway
+
     gateway_api:
       # Installs upstream Kubernetes Gateway API if true
       enabled: true

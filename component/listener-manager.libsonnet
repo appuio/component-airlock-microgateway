@@ -64,7 +64,8 @@ local jsonnetlib =
     spec: {
       data: {
         'config.json': std.manifestJson({
-          TODO: 'TODO',
+          matchAnnotation: params.listener_manager.match_annotation,
+          tlsSecretAnnotation: params.listener_manager.tls_secret_annotation,
         }),
       },
     },

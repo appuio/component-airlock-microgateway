@@ -59,7 +59,10 @@ local jsonnetlib =
     spec: {
       data: {
         'config.json': std.manifestJson({
-          TODO: 'TODO',
+          secretNameAnnotation: params.httproute_cert.secret_name_annotation,
+          clusterIssuerAnnotation: params.httproute_cert.cluster_issuer_annotation,
+          issuerAnnotation: params.httproute_cert.issuer_annotation,
+          defaultIssuerRef: params.httproute_cert.default_issuer_ref,
         }),
       },
     },

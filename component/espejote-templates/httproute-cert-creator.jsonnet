@@ -1,7 +1,11 @@
 local esp = import 'espejote.libsonnet';
 
-local clusterIssuerAnnotation = 'alpha.httproute-cert.appuio.io/cluster-issuer';
-local issuerAnnotation = 'alpha.httproute-cert.appuio.io/issuer';
+local config = import 'httproute-cert-creator/config.json';
+
+local clusterIssuerAnnotation = config.clusterIssuerAnnotation;
+local issuerAnnotation = config.issuerAnnotation;
+local secretNameAnnotation = config.secretNameAnnotation;
+local defaultIssuerRef = config.defaultIssuerRef;
 
 local issuerForRoute(route) =
   local annotations = std.get(route.metadata, 'annotations', {});
@@ -20,8 +24,8 @@ local issuerForRoute(route) =
   else
     {
       group: 'cert-manager.io',
-      kind: 'ClusterIssuer',
-      name: 'letsencrypt-production',
+      kind: defaultIssuerRef.kind,
+      name: defaultIssuerRef.name,
     };
   assert ref.name != '' : 'issuer name must not be empty';
   ref
@@ -30,7 +34,7 @@ local issuerForRoute(route) =
 local certForHTTRoute(route) =
   local secretName = std.get(
     std.get(route.metadata, 'annotations', {}),
-    'alpha.httproute-cert.appuio.io/secret-name',
+    secretNameAnnotation,
     ''
   );
   if secretName == '' || std.length(std.get(route.spec, 'hostnames', [])) == 0 then
