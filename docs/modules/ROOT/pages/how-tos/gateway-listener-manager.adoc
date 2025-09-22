@@ -1,0 +1,235 @@
+= Manage Gateway Listeners through HTTPRoutes
+
+This page documents the Gateway Listener Manager and HTTPRoute Certificate Manager features of this component.
+
+== Overview
+
+The Gateway Listener Manager allows merging multiple gateway listeners, based on `HTTPRoutes` into a single gateway.
+The HTTPRoute Certificate Manager allows automatic management of TLS certificates for `HTTPRoute` resources using cert-manager.
+
+image:gateway-listener-manager.drawio.svg[]
+
+== Create a HTTPRoute with HTTPS Listener and Certificate Management
+
+[NOTE]
+====
+This tutorial assumes that you already have a working `Service` resource and know which Gateway you want to attach the `HTTPRoute` to.
+====
+
+. Define variables
++
+[source,bash]
+----
+NAMESPACE=your-namespace
+HOSTNAME=your.domain.com
+GATEWAY_NAME=your-gateway
+GATEWAY_NAMESPACE=your-gateway-namespace
+SERVICE_NAME=your-service
+SERVICE_PORT=80
+----
+
+. Verify preconditions
++
+[source,bash]
+----
+kubectl get gateway -n $GATEWAY_NAMESPACE $GATEWAY_NAME -ojson | jq '.metadata.annotations["airlock-microgateway.appuio.io/httproute-default-cluster-issuer"] or error("Gateway has no default issuer. Set either `airlock-microgateway.appuio.io/cluster-issuer` or `airlock-microgateway.appuio.io/issuer` annotation on the HTTPRoute.")'
+----
+
+. Create the HTTPRoute with HTTPS listener and certificate management annotations
++
+[source,bash]
+----
+ROUTE_NAME=${SERVICE_NAME} # adjust this to your preferences as needed
+cat <<EOF | kubectl apply -n $NAMESPACE -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ${ROUTE_NAME}
+  annotations:
+    airlock-microgateway.appuio.io/tls-secret-name: ${ROUTE_NAME}-tls
+    airlock-microgateway.appuio.io/create-certificate: "true"
+    airlock-microgateway.appuio.io/create-gateway-https-listener: "true"
+spec:
+  hostnames:
+  - ${HOSTNAME}
+  parentRefs:
+  - name: ${GATEWAY_NAME}
+    namespace: ${GATEWAY_NAMESPACE}
+    kind: Gateway
+    group: gateway.networking.k8s.io
+  rules:
+  - backendRefs:
+    - name: ${SERVICE_NAME}
+      port: ${SERVICE_PORT}
+      kind: Service
+      group: ''
+      weight: 100
+    matches:
+    - path:
+        type: PathPrefix
+        value: /
+EOF
+----
+
+. Allow the gateway to access the tls secrets in the namespace of the HTTPRoute
++
+[source,bash]
+----
+cat <<EOF | kubectl apply -n $NAMESPACE -f -
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: ${GATEWAY_NAME}-secrets
+  namespace: ${NAMESPACE}
+spec:
+  from:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    namespace: ${GATEWAY_NAMESPACE}
+  to:
+  - group: ""
+    kind: Secret <1>
+EOF
+----
+<1> You can restrict access to only specific secrets by adding a `name` field here.
+
+. Request the page over HTTPS
+
+== Update a HTTPRoute to use HTTPS Listener and Certificate Management
+
+[NOTE]
+====
+This tutorial assumes that you already have a `HTTPRoute` resource.
+====
+
+. Define variables
++
+[source,bash]
+----
+NAMESPACE=your-namespace
+ROUTE_NAME=your-httproute
+----
+
+. Verify preconditions
++
+[source,bash]
+----
+kubectl get httproute -n $NAMESPACE $ROUTE_NAME -ojson | jq '.spec.hostnames | if length < 1 then error("Expected HTTPRoute to have at least one hostname") end'
+kubectl get httproute -n $NAMESPACE $ROUTE_NAME -ojson | jq '[.spec.parentRefs[] | select(.group == "gateway.networking.k8s.io" and .kind == "Gateway")] | if length < 1 then error("Expected HTTPRoute to have at least one Gateway") end'
+GW_REF=$(kubectl get httproute -n $NAMESPACE $ROUTE_NAME -ojson | jq '[.spec.parentRefs[] | select(.group == "gateway.networking.k8s.io" and .kind == "Gateway")] | if length != 1 then error("More than one gateway, manually select the required one") end | .[0]')
+kubectl get gateway -n $(echo $GW_REF | jq -r .namespace) $(echo $GW_REF | jq -r .name) -ojson | jq '.metadata.annotations["airlock-microgateway.appuio.io/httproute-default-cluster-issuer"] or error("Gateway has no default issuer. Set either `airlock-microgateway.appuio.io/cluster-issuer` or `airlock-microgateway.appuio.io/issuer` annotation on the HTTPRoute.")'
+kubectl get referencegrants -n $NAMESPACE -ojson |\
+  jq --arg gatewayns $(echo $GW_REF | jq -r .namespace) \
+     --arg routename "$ROUTE_NAME-tls" \
+  '
+  [.items[] |
+    select(
+      ([.spec.from[] | select(.group == "gateway.networking.k8s.io" and .kind == "Gateway" and .namespace == $gatewayns)] | length > 0)
+      and
+      ([.spec.to[] | select(.group == "" and .kind == "Secret" and (.name == $routename or .name == null or .name == ""))] | length > 0)
+    )
+  ] | if length < 1 then error("No matching reference grants found") else "Matching grant found" end
+  '
+----
+
+. Create a ReferenceGrant if the step above fails with "No matching reference grants found"
++
+[source,bash]
+----
+GATEWAY_NAME=$(echo $GW_REF | jq -r .name)
+GATEWAY_NAMESPACE=$(echo $GW_REF | jq -r .namespace)
+cat <<EOF | kubectl apply -n $NAMESPACE -f -
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: ${GATEWAY_NAME}-secrets
+  namespace: ${NAMESPACE}
+spec:
+  from:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    namespace: ${GATEWAY_NAMESPACE}
+  to:
+  - group: ""
+    kind: Secret <1>
+EOF
+----
+<1> You can restrict access to only specific secrets by adding a `name` field here.
+
+. Annotate the HTTPRoute to create an HTTPS listener and enable certificate management
++
+[source,bash]
+----
+kubectl annotate httproute -n $NAMESPACE $ROUTE_NAME airlock-microgateway.appuio.io/tls-secret-name="$ROUTE_NAME-tls"
+kubectl annotate httproute -n $NAMESPACE $ROUTE_NAME airlock-microgateway.appuio.io/create-certificate="true"
+kubectl annotate httproute -n $NAMESPACE $ROUTE_NAME airlock-microgateway.appuio.io/create-gateway-https-listener="true"
+----
+
+. Request the page over HTTPS
+
+== Troubleshooting
+
+=== Check error events on the HTTPRoute
+
+[TIP]
+----
+`kubectl describe` might not show all events, so we recommend using `kubectl get events` with a field selector.
+----
+
+[source,bash]
+----
+kubectl get events -n $NAMESPACE --field-selector involvedObject.kind=HTTPRoute,involvedObject.name=$ROUTE_NAME,type=Warning -oyaml
+----
+
+=== Verify that the certificate has been created and is becoming ready
+
+[source,bash]
+----
+kubectl wait certificate -n $NAMESPACE $ROUTE_NAME-tls --for='jsonpath={.status.conditions[?(@.type=="Ready")].status}=True'
+----
+
+=== Verify that the Gateway has been updated with the new listeners
+
+[source,bash]
+----
+GW_REF=$(kubectl get httproute -n $NAMESPACE $ROUTE_NAME -ojson | jq '[.spec.parentRefs[] | select(.group == "gateway.networking.k8s.io" and .kind == "Gateway")] | if length != 1 then error("More than one gateway, manually select the required one") end | .[0]')
+kubectl get gateway -n $(echo $GW_REF | jq -r .namespace) $(echo $GW_REF | jq -r .name) -ojson | jq ".spec.listeners"
+----
+
+=== Verify Gateway listener status
+
+[source,bash]
+----
+GW_REF=$(kubectl get httproute -n $NAMESPACE $ROUTE_NAME -ojson | jq '[.spec.parentRefs[] | select(.group == "gateway.networking.k8s.io" and .kind == "Gateway")] | if length != 1 then error("More than one gateway, manually select the required one") end | .[0]')
+kubectl get gateway -n $(echo $GW_REF | jq -r .namespace) $(echo $GW_REF | jq -r .name) -ojson | jq --arg match "https-$NAMESPACE-$ROUTE_NAME" '.status.listeners[] | select(.name | test($match))'
+----
++
+Search for any status conditions that are of status `False` or `Unknown`.
+
+=== Check if references grant exists
+
+[source,bash]
+----
+GW_REF=$(kubectl get httproute -n $NAMESPACE $ROUTE_NAME -ojson | jq '[.spec.parentRefs[] | select(.group == "gateway.networking.k8s.io" and .kind == "Gateway")] | if length != 1 then error("More than one gateway, manually select the required one") end | .[0]')
+kubectl get referencegrants -n $NAMESPACE -ojson |\
+  jq --arg gatewayns $(echo $GW_REF | jq -r .namespace) \
+     --arg routename "$ROUTE_NAME-tls" \
+  '
+  [.items[] |
+    select(
+      ([.spec.from[] | select(.group == "gateway.networking.k8s.io" and .kind == "Gateway" and .namespace == $gatewayns)] | length > 0)
+      and
+      ([.spec.to[] | select(.group == "" and .kind == "Secret" and (.name == $routename or .name == null or .name == ""))] | length > 0)
+    )
+  ] | if length < 1 then error("No matching reference grants found") else "Matching grant found" end
+  '
+----
+
+=== Force reconciliation if in error backoff
++
+[source,bash]
+----
+kubectl -n $NAMESPACE annotate httproute fortune-go "reconcile=$(date)" --overwrite
+----
++
+This forces the controller to reprocess the `HTTPRoute` and might help if the controller is in an error backoff state.

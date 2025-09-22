@@ -1,0 +1,206 @@
+apiVersion: espejote.io/v1alpha1
+kind: JsonnetLibrary
+metadata:
+  labels:
+    app.kubernetes.io/name: gateway-listener-manager
+  name: gateway-listener-manager
+  namespace: syn-airlock-microgateway
+spec:
+  data:
+    config.json: |-
+      {
+          "createListenerAnnotation": "airlock-microgateway.appuio.io/create-gateway-https-listener",
+          "tlsSecretNameAnnotation": "airlock-microgateway.appuio.io/tls-secret-name"
+      }
+---
+apiVersion: espejote.io/v1alpha1
+kind: ManagedResource
+metadata:
+  annotations:
+    syn.tools/description: |
+      This ManagedResource patches a Gateway found in a HTTPRoutes parentRefs with listeners derived from the route.
+
+      Multiple HTTPRoutes can share the management of a single Gateway listener array by setting custom field managers when applying the listener patches.
+  labels:
+    app.kubernetes.io/name: gateway-listener-manager
+  name: gateway-listener-manager
+  namespace: syn-airlock-microgateway
+spec:
+  context:
+    - name: gateways
+      resource:
+        apiVersion: gateway.networking.k8s.io/v1
+        kind: Gateway
+        namespace: ''
+  serviceAccountRef:
+    name: gateway-listener-manager
+  template: |
+    local esp = import 'espejote.libsonnet';
+    local config = import 'gateway-listener-manager/config.json';
+
+    local createListenerAnnotation = config.createListenerAnnotation;
+    local tlsSecretNameAnnotation = config.tlsSecretNameAnnotation;
+
+    local finalizer = 'airlock-microgateway.appuio.io/gateway-listener-manager';
+    local parentRefTrackAnnotation = 'internal.gateway-listener-manager.airlock-microgateway.appuio.io/track-parent-refs';
+
+    local inDelete(obj) = std.get(obj.metadata, 'deletionTimestamp', '') != '';
+
+    local secretName(obj) =
+      std.get(
+        std.get(obj.metadata, 'annotations', {}),
+        tlsSecretNameAnnotation,
+        ''
+      )
+    ;
+
+    local wantsHttpsListener(obj) =
+      std.get(
+        std.get(obj.metadata, 'annotations', {}), createListenerAnnotation, 'false'
+      ) == 'true'
+      &&
+      secretName(obj) != ''
+    ;
+
+    local routeHostnameRefs(route) =
+      std.mapWithIndex(
+        function(index, hostname)
+          {
+            name: route.metadata.name,
+            namespace: route.metadata.namespace,
+            hostname: hostname,
+            pos: index,
+          },
+        std.get(route.spec, 'hostnames', []),
+      )
+    ;
+
+    local gwRef(gw) = {
+      group: 'gateway.networking.k8s.io',
+      kind: 'Gateway',
+      name: gw.metadata.name,
+      namespace: gw.metadata.namespace,
+    };
+
+    local gfRefId(gwRef) = '%(group)s/%(kind)s/%(namespace)s/%(name)s' % gwRef;
+
+    // applyObjFromObj strips all fields except apiVersion, kind, namespace, and name from the given object
+    local applyObjFromObj(obj) = {
+      apiVersion: obj.apiVersion,
+      kind: obj.kind,
+      metadata: {
+        name: obj.metadata.name,
+        namespace: obj.metadata.namespace,
+      },
+    };
+
+    local httpRouteFieldManager(obj) =
+      'esp:httproute:%(namespace)s:%(name)s' % obj.metadata
+    ;
+
+    local traceJSON(msg, obj) =
+      std.trace('%s: %s' % [ msg, std.manifestJsonMinified(obj) ], obj)
+    ;
+
+    local prevParentRefs(obj) =
+      std.parseJson(std.get(
+        std.get(obj.metadata, 'annotations', {}),
+        parentRefTrackAnnotation,
+        '[]'
+      ))
+    ;
+
+    local ensureListenerAndFinalizer(obj) =
+      local gateways = esp.context().gateways;
+      local targetGws = traceJSON('targetGws', [ gw for gw in gateways if std.member(obj.spec.parentRefs, gwRef(gw)) ]);
+      local desiredListeners = routeHostnameRefs(obj);
+      traceJSON('ensureListenerAndFinalizer', [
+        // Remove listeners from gateways that are no longer referenced by this HTTPRoute
+        esp.applyOptions(
+          applyObjFromObj(gw),
+          fieldManager=httpRouteFieldManager(obj)
+        )
+        for gw in std.setDiff(std.set(prevParentRefs(obj), gfRefId), std.set(obj.spec.parentRefs, gfRefId), gfRefId)
+      ] + [
+        // Ensure desired listeners on all target gateways
+        esp.applyOptions(
+          applyObjFromObj(gw) {
+            spec: {
+              listeners: [
+                {
+                  name: 'https-%s-%s-%s' % [ h.namespace, h.name, h.pos ],
+                  hostname: h.hostname,
+                  port: 443,
+                  protocol: 'HTTPS',
+                  tls: {
+                    mode: 'Terminate',
+                    certificateRefs: [
+                      {
+                        group: '',
+                        kind: 'Secret',
+                        name: secretName(obj),
+                        namespace: obj.metadata.namespace,
+                      },
+                    ],
+                  },
+                  allowedRoutes: {
+                    namespaces: {
+                      from: 'Selector',
+                      selector: {
+                        matchLabels: {
+                          'kubernetes.io/metadata.name': obj.metadata.namespace,
+                        },
+                      },
+                    },
+                  },
+                }
+                for h in desiredListeners
+              ],
+            },
+          },
+          fieldManager=httpRouteFieldManager(obj)
+        )
+        for gw in targetGws
+      ] + [
+        // Ensure finalizer and track parentRefs in annotation
+        applyObjFromObj(obj) {
+          metadata+: {
+            finalizers: [ finalizer ],
+            annotations+: {
+              [parentRefTrackAnnotation]: std.manifestJsonMinified(obj.spec.parentRefs),
+            },
+          },
+        },
+      ]);
+
+    // cleanupAndRemoveFinalizer applies empty objects to all previously referenced gateways and to the HTTPRoute itself, removing all listeners and the finalizer.
+    // An empty object with the correct fieldManager is enough to remove fields we previously managed.
+    // Because we set the fieldManager to the HTTPRoute specific one, we don't accidentally remove listeners created by other HTTPRoutes.
+    local cleanupAndRemoveFinalizer(obj) =
+      local gateways = esp.context().gateways;
+      local targetGws = [ gw for gw in gateways if std.member(obj.spec.parentRefs, gwRef(gw)) ];
+      [
+        esp.applyOptions(
+          applyObjFromObj(gw),
+          fieldManager=httpRouteFieldManager(obj)
+        )
+        for gw in targetGws
+      ] + [
+        applyObjFromObj(obj),
+      ]
+    ;
+
+    if esp.triggerName() == 'httproute' then
+      local tdata = esp.triggerData();
+      if tdata.resource != null then (
+        if !inDelete(tdata.resource) && wantsHttpsListener(tdata.resource) then
+          ensureListenerAndFinalizer(tdata.resource)
+        else
+          cleanupAndRemoveFinalizer(tdata.resource)
+      )
+  triggers:
+    - name: httproute
+      watchResource:
+        apiVersion: gateway.networking.k8s.io/v1
+        kind: HTTPRoute
+        namespace: ''
