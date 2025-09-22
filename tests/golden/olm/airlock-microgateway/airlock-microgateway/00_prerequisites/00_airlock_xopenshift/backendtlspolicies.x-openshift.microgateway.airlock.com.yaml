@@ -646,3 +646,68 @@ status:
     plural: ''
   conditions: null
   storedVersions: null
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: 'true'
+  name: backendtlspolicies.x-openshift.microgateway.airlock.com-crdview
+rules:
+  - apiGroups:
+      - apiextensions.k8s.io
+    resourceNames:
+      - backendtlspolicies.x-openshift.microgateway.airlock.com
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations: {}
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: 'true'
+  name: backendtlspolicies.x-openshift.microgateway.airlock.com-view
+rules:
+  - apiGroups:
+      - x-openshift.microgateway.airlock.com
+    resources:
+      - backendtlspolicies
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-edit: 'true'
+  name: backendtlspolicies.x-openshift.microgateway.airlock.com-edit
+rules:
+  - apiGroups:
+      - x-openshift.microgateway.airlock.com
+    resources:
+      - backendtlspolicies
+    verbs:
+      - create
+      - delete
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: 'true'
+  name: backendtlspolicies.x-openshift.microgateway.airlock.com-admin
+rules:
+  - apiGroups:
+      - x-openshift.microgateway.airlock.com
+    resources:
+      - backendtlspolicies
+    verbs:
+      - '*'
