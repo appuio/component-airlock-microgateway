@@ -171,7 +171,7 @@ kubectl annotate httproute -n $NAMESPACE $ROUTE_NAME airlock-microgateway.appuio
 
 === Check error events on the HTTPRoute
 
-[TIP]
+[NOTE]
 ----
 `kubectl describe` might not show all events, so we recommend using `kubectl get events` with a field selector.
 ----
@@ -203,7 +203,7 @@ kubectl get gateway -n $(echo $GW_REF | jq -r .namespace) $(echo $GW_REF | jq -r
 GW_REF=$(kubectl get httproute -n $NAMESPACE $ROUTE_NAME -ojson | jq '[.spec.parentRefs[] | select(.group == "gateway.networking.k8s.io" and .kind == "Gateway")] | if length != 1 then error("More than one gateway, manually select the required one") end | .[0]')
 kubectl get gateway -n $(echo $GW_REF | jq -r .namespace) $(echo $GW_REF | jq -r .name) -ojson | jq --arg match "https-$NAMESPACE-$ROUTE_NAME" '.status.listeners[] | select(.name | test($match))'
 ----
-+
+
 Search for any status conditions that are of status `False` or `Unknown`.
 
 === Check if references grant exists
@@ -226,10 +226,10 @@ kubectl get referencegrants -n $NAMESPACE -ojson |\
 ----
 
 === Force reconciliation if in error backoff
-+
+
 [source,bash]
 ----
 kubectl -n $NAMESPACE annotate httproute fortune-go "reconcile=$(date)" --overwrite
 ----
-+
+
 This forces the controller to reprocess the `HTTPRoute` and might help if the controller is in an error backoff state.
