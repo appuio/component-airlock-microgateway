@@ -172,9 +172,9 @@ kubectl annotate httproute -n $NAMESPACE $ROUTE_NAME airlock-microgateway.appuio
 === Check error events on the HTTPRoute
 
 [NOTE]
-----
+====
 `kubectl describe` might not show all events, so we recommend using `kubectl get events` with a field selector.
-----
+====
 
 [source,bash]
 ----
