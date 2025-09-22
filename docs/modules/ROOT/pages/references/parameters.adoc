@@ -58,6 +58,100 @@ default:: `appuio.ch/waf: airlock`
 
 Labels used to match namespaces for the network policy.
 
+== `gateway_listener_manager`
+
+[horizontal]
+type:: object
+
+Configuration for the Gateway Listener Manager.
+Gateway Listener Manager allows merging multiple gateway listeners, based on `HTTPRoutes` into a single gateway.
+
+See xref:how-tos/gateway-listener-manager.adoc[] for more details.
+
+=== `enabled`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+Whether to enable the Gateway Listener Manager.
+
+=== `create_listener_annotation`
+
+[horizontal]
+type:: string
+default:: `airlock-microgateway.appuio.io/create-gateway-https-listener`
+
+The annotation to use on `HTTPRoute` resources to create an HTTPS listener automatically.
+Must be set to `ANNOTATION: "true"` in the resource annotations.
+
+=== `tls_secret_name_annotation`
+
+[horizontal]
+type:: string
+default:: `airlock-microgateway.appuio.io/tls-secret-name`
+
+The annotation to use on `HTTPRoute` resources to specify the name of the TLS secret to use for HTTPS listeners.
+
+== `httproute_certificate_manager`
+
+[horizontal]
+type:: object
+
+Configuration for the HTTPRoute Certificate Manager.
+HTTPRoute Certificate Manager allows automatic management of TLS certificates for `HTTPRoute` resources using cert-manager.
+
+See xref:how-tos/gateway-listener-manager.adoc[] for more details.
+
+=== `enabled`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+Whether to enable the HTTPRoute Certificate Manager.
+
+=== `tls_secret_name_annotation`
+
+[horizontal]
+type:: string
+default:: `${airlock_microgateway:gateway_listener_manager:tls_secret_name_annotation}`
+
+The annotation to use on `HTTPRoute` resources to specify the name of the TLS secret to create the certificate in.
+
+=== `create_certificate_annotation`
+
+[horizontal]
+type:: string
+default:: `airlock-microgateway.appuio.io/create-certificate`
+
+The annotation to use on `HTTPRoute` resources to create a certificate automatically.
+Must be set to `ANNOTATION: "true"` in the resource annotations.
+
+=== `gateway_default_cluster_issuer_annotation`
+
+[horizontal]
+type:: string
+default:: `airlock-microgateway.appuio.io/gateway-default-cluster-issuer`
+
+The annotation to use on parent `Gateway` resources to specify the default cluster issuer for certificates.
+If the resource has no `issuer_annotation` or `cluster_issuer_annotation`, this cluster issuer will be used.
+
+=== `cluster_issuer_annotation`
+
+[horizontal]
+type:: string
+default:: `airlock-microgateway.appuio.io/cluster-issuer`
+
+The annotation to use on `HTTPRoute` resources to specify the cluster issuer for certificates.
+
+=== `issuer_annotation`
+
+[horizontal]
+type:: string
+default:: `airlock-microgateway.appuio.io/issuer`
+
+The annotation to use on `HTTPRoute` resources to specify the issuer for certificates.
 
 == `gateway_api`
 
