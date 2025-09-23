@@ -229,7 +229,7 @@ kubectl get referencegrants -n $NAMESPACE -ojson |\
 
 [source,bash]
 ----
-kubectl -n $NAMESPACE annotate httproute fortune-go "reconcile=$(date)" --overwrite
+kubectl -n $NAMESPACE annotate httproute $ROUTE_NAME "reconcile=$(date)" --overwrite
 ----
 
 This forces the controller to reprocess the `HTTPRoute` and might help if the controller is in an error backoff state.
