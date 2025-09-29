@@ -346,6 +346,33 @@ airlock_microgateway:
       parametersRef: "airlock/gatewayparams"
 ----
 
+== `alerts`
+
+[horizontal]
+type:: object
+
+This parameter allows users to disable or patch alerts managed by the component.
+
+NOTE: The component currently expects that an `openshift4-monitoring`-style alert patching library is available for the target cluster's distribution's monitoring stack.
+
+
+== `alerts.ignoreNames`
+
+[horizontal]
+type:: list
+default:: `[]`
+
+Users can add alert names which they want to disable in this list.
+
+=== `alerts.patches`
+
+[horizontal]
+type:: object
+default:: `{}`
+
+Users can customize alerts through this parameter.
+The component looks for alert names it knows in this parameter, and applies the provided value, if any, over the default alert configuration.
+
 == `helm_values`
 
 [horizontal]
