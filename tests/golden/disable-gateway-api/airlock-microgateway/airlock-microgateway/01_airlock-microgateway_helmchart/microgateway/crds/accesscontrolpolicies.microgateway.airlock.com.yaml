@@ -5,7 +5,7 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.17.1
   labels:
     app.kubernetes.io/name: airlock-microgateway-operator
-    app.kubernetes.io/version: 4.5.2
+    app.kubernetes.io/version: 4.5.7
     gateway.networking.k8s.io/policy: direct
   name: accesscontrolpolicies.microgateway.airlock.com
 spec:
@@ -136,7 +136,7 @@ spec:
                                   properties:
                                     claim:
                                       description: Claim specifies a condition on
-                                        a JWT claim.
+                                        an ID token claim.
                                       properties:
                                         name:
                                           description: Name of the claim.
@@ -221,7 +221,7 @@ spec:
                                   properties:
                                     claim:
                                       description: Claim specifies a condition on
-                                        a JWT claim.
+                                        an ID token claim.
                                       properties:
                                         name:
                                           description: Name of the claim.
