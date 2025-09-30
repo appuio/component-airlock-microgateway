@@ -8,8 +8,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.5.2
-    helm.sh/chart: microgateway-4.5.2
+    app.kubernetes.io/version: 4.5.7
+    helm.sh/chart: microgateway-4.5.7
   name: airlock-microgateway-operator-immutable-labels-syn-airlock-microgateway
 spec:
   failurePolicy: Fail
