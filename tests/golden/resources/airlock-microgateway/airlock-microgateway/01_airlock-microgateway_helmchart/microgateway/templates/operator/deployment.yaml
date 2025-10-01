@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.5.7
-    helm.sh/chart: microgateway-4.5.7
+    app.kubernetes.io/version: 4.7.1
+    helm.sh/chart: microgateway-4.7.1
   name: airlock-microgateway-operator
   namespace: syn-airlock-microgateway
 spec:
@@ -23,7 +23,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: a75494f1acaa35685da5ca59b1a22be8de4fe794aa3d41b02ad16fd0b583774c
+        checksum/config: 3c30371989ae87165124fc1d95bfa2195b54c30c0af0301cb4bfca1b94a18835
         kubectl.kubernetes.io/default-container: manager
       labels:
         app.kubernetes.io/component: controller
@@ -31,17 +31,17 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: microgateway-operator
         app.kubernetes.io/part-of: microgateway
-        app.kubernetes.io/version: 4.5.7
-        helm.sh/chart: microgateway-4.5.7
+        app.kubernetes.io/version: 4.7.1
+        helm.sh/chart: microgateway-4.7.1
     spec:
       containers:
         - args:
             - --config=/app/config/operator_config.yaml
           env:
             - name: ENGINE_IMAGE
-              value: quay.io/airlock/microgateway-engine@sha256:0784f288e9f34569a8db588398345bfc4096e8ec0629db70b25d6ca8a18fc8cc
+              value: quay.io/airlock/microgateway-engine@sha256:5cd7ea8e3d9bf5fbb1d6e05063f1cbbdfcef1b18cb4fbf020566e16b28b273f6
             - name: SESSION_AGENT_IMAGE
-              value: quay.io/airlock/microgateway-session-agent@sha256:c3b94df48d6f06241bc5d55717fcbe83cf82ca94d29ee75ae5658654fcc70405
+              value: quay.io/airlock/microgateway-session-agent@sha256:ba260cd5f9365de7439d0d62f9428ab2e8de7c7504a963f081d09bf4a3575645
             - name: OPERATOR_NAME
               valueFrom:
                 fieldRef:
@@ -52,6 +52,10 @@ spec:
                   fieldPath: metadata.namespace
             - name: LOG_LEVEL
               value: info
+            - name: SIDECAR_GATEWAY_ENABLED
+              value: 'true'
+            - name: SIDECAR_GATEWAY_POD_MONITOR_CREATE
+              value: 'false'
             - name: GATEWAY_API_ENABLED
               value: 'true'
             - name: GATEWAY_API_CONTROLLER_NAME
@@ -60,7 +64,7 @@ spec:
               value: 'true'
             - name: GATEWAY_API_POD_MONITOR_ADDITIONAL_LABELS
               value: release=kube-prometheus-stack
-          image: quay.io/airlock/microgateway-operator@sha256:e04544213bfb8e6db26c4b76d985045ce1f4e306a96dfbbe1055bbfe1644b9f4
+          image: quay.io/airlock/microgateway-operator@sha256:67946b2bb5c2f8e2e2ef3e0e2758a973e219d609ea9c4f6c6057b150737c79be
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -88,6 +92,13 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 2500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
