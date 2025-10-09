@@ -13,6 +13,14 @@ parameters:
         source: https://raw.githubusercontent.com/appuio/component-openshift4-monitoring/v7.2.0/lib/openshift4-monitoring-alert-patching.libsonnet
         output_path: vendor/lib/alert-patching.libsonnet
 
+  facts:
+    distribution: openshift4
+  dynamic_facts:
+    openshiftVersion:
+      Major: '4'
+      Minor: '19'
+      Patch: '0'
+
   airlock_microgateway:
     install_method: olm
     airlock_xopenshift:

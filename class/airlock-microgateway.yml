@@ -2,16 +2,6 @@ parameters:
   =_helm_chart_name: "microgateway"
   =_release_name: "airlock-microgateway"
   =_kapitan:
-    k8s_gw_api:
-      'True':
-        input_paths:
-          - ${_base_directory}/manifests/gateway-api/standard-install.yaml
-        input_type: copy
-        output_path: airlock-microgateway/00_prerequisites/00_gateway_api/
-      'False':
-        input_paths: []
-        input_type: jsonnet
-        output_path: ''
     olm:
       dependencies:
         - type: https
@@ -35,13 +25,10 @@ parameters:
             - ${_base_directory}/component/olm.jsonnet
           input_type: jsonnet
           output_path: airlock-microgateway/01_olm/
-        - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}
-        - input_paths:
-            - ${_base_directory}/component/airlock-xopenshift.jsonnet
-          input_type: jsonnet
-          output_path: airlock-microgateway/00_prerequisites/00_airlock_xopenshift
         - input_paths:
             - ${_base_directory}/component/main.jsonnet
+            - ${_base_directory}/component/airlock-gateway-api.jsonnet
+            - ${_base_directory}/component/airlock-xopenshift.jsonnet
           input_type: jsonnet
           output_path: airlock-microgateway/00_prerequisites/
         - input_paths:
@@ -73,7 +60,6 @@ parameters:
             - ${_base_directory}/component/namespace.jsonnet
           input_type: jsonnet
           output_path: airlock-microgateway/00_prerequisites/
-        - ${_kapitan:k8s_gw_api:${airlock_microgateway:gateway_api:enabled}}
         - output_path: airlock-microgateway/01_airlock-microgateway_helmchart/
           input_type: helm
           input_paths:
@@ -84,6 +70,7 @@ parameters:
           helm_values: ${airlock_microgateway:helm_values}
         - input_paths:
             - ${_base_directory}/component/main.jsonnet
+            - ${_base_directory}/component/airlock-gateway-api.jsonnet
           input_type: jsonnet
           output_path: airlock-microgateway/00_prerequisites/
         - input_paths:

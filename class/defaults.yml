@@ -6,6 +6,7 @@ parameters:
 
     # Possible values: "helm", "olm"
     install_method: helm
+    openshift_version: ""
 
     license: ""
 

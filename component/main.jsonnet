@@ -28,69 +28,6 @@ local net_pol = kube.NetworkPolicy('allow-from-waf-namespaces') {
   },
 };
 
-local rules_resources_gateway_ronly = {
-  apiGroups: [ 'gateway.networking.k8s.io' ],
-  resources: [
-    'gatewayclasses',
-  ],
-  verbs: [ 'get', 'list', 'watch' ],
-};
-local rules_resources_gateway_read = {
-  apiGroups: [ 'gateway.networking.k8s.io' ],
-  resources: [
-    'backendtlspolicies',
-    'gateways',
-    'grpcroutes',
-    'httproutes',
-    'referencegrants',
-    'tcproutes',
-    'tlsroutes',
-    'udproutes',
-  ],
-  verbs: [ 'get', 'list', 'watch' ],
-};
-local rbac_aggregated_gateway_view = kube.ClusterRole('networking-gatewayapi-aggregated-view') {
-  metadata: {
-    labels: {
-      'rbac.authorization.k8s.io/aggregate-to-view': 'true',
-      'rbac.authorization.k8s.io/aggregate-to-cluster-reader': 'true',
-    },
-    name: 'networking-gatewayapi-aggregated-view',
-  },
-  rules: [
-    rules_resources_gateway_ronly,
-    rules_resources_gateway_read,
-  ],
-};
-local rbac_aggregated_gateway_edit = kube.ClusterRole('networking-gatewayapi-aggregated-edit') {
-  metadata: {
-    labels: {
-      'rbac.authorization.k8s.io/aggregate-to-edit': 'true',
-    },
-    name: 'networking-gatewayapi-aggregated-edit',
-  },
-  rules: [
-    rules_resources_gateway_ronly,
-    rules_resources_gateway_read {
-      verbs: [ '*' ],
-    },
-  ],
-};
-local rbac_aggregated_gateway_admin = kube.ClusterRole('networking-gatewayapi-aggregated-admin') {
-  metadata: {
-    labels: {
-      'rbac.authorization.k8s.io/aggregate-to-admin': 'true',
-    },
-    name: 'networking-gatewayapi-aggregated-admin',
-  },
-  rules: [
-    rules_resources_gateway_ronly,
-    rules_resources_gateway_read {
-      verbs: [ '*' ],
-    },
-  ],
-};
-
 local rules_resources_airlock = {
   apiGroups: [ 'microgateway.airlock.com' ],
   resources: [ '*' ],
@@ -139,11 +76,6 @@ local rbac_aggregated_airlock_admin = kube.ClusterRole('airlock-microgateway-agg
 {
   '01_license_secret': license_secret,
   '01_network_policy': net_pol,
-  [if params.gateway_api.enabled then '02_rbac_aggregated_gateway']: [
-    rbac_aggregated_gateway_view,
-    rbac_aggregated_gateway_edit,
-    rbac_aggregated_gateway_admin,
-  ],
   [if params.install_method == 'helm' then '02_rbac_aggregated_airlock']: [
     rbac_aggregated_airlock_view,
     rbac_aggregated_airlock_edit,

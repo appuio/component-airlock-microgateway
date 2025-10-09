@@ -10,6 +10,13 @@ metadata:
 spec:
   channel: stable
   config:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: node-role.kubernetes.io/infra
+                  operator: Exists
     env:
       - name: GATEWAY_API_POD_MONITOR_CREATE
         value: 'true'
