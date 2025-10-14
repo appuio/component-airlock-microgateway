@@ -26,7 +26,7 @@ local operator_rules = prom.PrometheusRule('operator-rules') {
             rules: [
               {
                 alert: 'AirlockMicrogatewayLicenseExpiresSoon',
-                expr: '(microgateway_license_expiry_timestamp_seconds - time()) / (60*60*24) < 30',
+                expr: 'max(microgateway_license_expiry_timestamp_seconds) - time() < 30*24*3600',
                 annotations: {
                   summary: 'Airlock Microgateway license expires in less than a month',
                   description: 'The Airlock Microgateway license expires in {{ $value|humanizeDuration }}. Contact the customer/Ergon to renew the license.',
@@ -37,7 +37,7 @@ local operator_rules = prom.PrometheusRule('operator-rules') {
               },
               {
                 alert: 'AirlockMicrogatewayLicenseExpiresVerySoon',
-                expr: '(microgateway_license_expiry_timestamp_seconds - time()) / (60*60*24) < 10',
+                expr: 'max(microgateway_license_expiry_timestamp_seconds) - time() < 10*24*3600',
                 annotations: {
                   summary: 'Airlock Microgateway license expires in less than 10 days',
                   description: 'The Airlock Microgateway license expires in {{ $value|humanizeDuration }}. Contact the customer/Ergon to renew the license.',

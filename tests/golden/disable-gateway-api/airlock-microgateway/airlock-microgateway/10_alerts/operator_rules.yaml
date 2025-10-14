@@ -15,8 +15,7 @@ spec:
             description: The Airlock Microgateway license expires in {{ $value|humanizeDuration
               }}. Contact the customer/Ergon to renew the license.
             summary: Airlock Microgateway license expires in less than a month
-          expr: (microgateway_license_expiry_timestamp_seconds - time()) / (60*60*24)
-            < 30
+          expr: max(microgateway_license_expiry_timestamp_seconds) - time() < 30*24*3600
           labels:
             severity: warning
             syn: 'true'
@@ -26,8 +25,7 @@ spec:
             description: The Airlock Microgateway license expires in {{ $value|humanizeDuration
               }}. Contact the customer/Ergon to renew the license.
             summary: Airlock Microgateway license expires in less than 10 days
-          expr: (microgateway_license_expiry_timestamp_seconds - time()) / (60*60*24)
-            < 10
+          expr: max(microgateway_license_expiry_timestamp_seconds) - time() < 10*24*3600
           labels:
             severity: critical
             syn: 'true'
