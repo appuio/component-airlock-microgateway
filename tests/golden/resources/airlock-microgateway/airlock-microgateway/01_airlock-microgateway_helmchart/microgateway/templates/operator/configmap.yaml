@@ -2,40 +2,40 @@ apiVersion: v1
 data:
   engine_bootstrap_config_template.yaml: |
     # Base configuration, admin interface on port 19000
+    layered_runtime:
+      layers:
+        - name: static_layer
+          static_layer:
+            # disable the new JSON formatter as it is not omitting empty fields
+            # see https://github.com/envoyproxy/envoy/issues/37941
+            envoy.reloadable_features.logging_with_fast_json_formatter: false
+            # disable the new http2 codec
+            envoy.reloadable_features.http2_use_oghttp2: false
     admin:
       address:
         socket_address:
           address: 127.0.0.1
           port_value: 19000
     dynamic_resources:
-      cds_config:
-        initial_fetch_timeout: 10s
-        resource_api_version: V3
-        api_config_source:
-          api_type: GRPC
-          transport_api_version: V3
-          grpc_services:
+      ads_config:
+        api_type: GRPC
+        transport_api_version: V3
+        grpc_services:
           - envoy_grpc:
               cluster_name: xds_cluster
-          set_node_on_first_message_only: true
-          # Prevent Envoy Node from overloading the xDS server due to rejected configuration when using xDS SotW gRPC
-          rate_limit_settings:
-            max_tokens: 5
-            fill_rate: 0.2
+        set_node_on_first_message_only: true
+        # Prevent Envoy Node from overloading the xDS server due to rejected configuration when using xDS SotW gRPC
+        rate_limit_settings:
+          max_tokens: $(ADS_RATE_LIMIT_MAX_TOKENS)
+          fill_rate: $(ADS_RATE_LIMIT_FILL_RATE)
+      cds_config:
+        resource_api_version: V3
+        initial_fetch_timeout: 10s
+        ads: {}
       lds_config:
         resource_api_version: V3
         initial_fetch_timeout: 10s
-        api_config_source:
-          api_type: GRPC
-          transport_api_version: V3
-          grpc_services:
-          - envoy_grpc:
-              cluster_name: xds_cluster
-          set_node_on_first_message_only: true
-          # Prevent Envoy Node from overloading the xDS server due to rejected configuration when using xDS SotW gRPC
-          rate_limit_settings:
-            max_tokens: 5
-            fill_rate: 0.2
+        ads: {}
     static_resources:
       listeners:
       - name: probe
@@ -296,6 +296,10 @@ data:
       seccompProfile:
         type: RuntimeDefault
       runAsUser: $(SECURITYCONTEXT_UID)
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
   network_validator_container_template.yaml: |
     name: "$(NETWORK_VALIDATOR_NAME)"
     image: "$(ENGINE_IMAGE)"
@@ -334,8 +338,6 @@ data:
         sessionAgentContainerTemplate: "/app/config/sidecar/session_agent_container_template.yaml"
     engine:
       bootstrapConfigTemplate: "/app/config/engine_bootstrap_config_template.yaml"
-    podMonitor:
-      create: false
   session_agent_container_template.yaml: |
     name: "$(SESSION_AGENT_NAME)"
     image: "$(SESSION_AGENT_IMAGE)"
@@ -404,7 +406,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.5.7
-    helm.sh/chart: microgateway-4.5.7
+    app.kubernetes.io/version: 4.7.2
+    helm.sh/chart: microgateway-4.7.2
   name: airlock-microgateway-operator-config
   namespace: syn-airlock-microgateway

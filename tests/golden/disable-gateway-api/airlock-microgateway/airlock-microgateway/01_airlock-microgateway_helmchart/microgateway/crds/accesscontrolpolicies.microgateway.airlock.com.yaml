@@ -2,10 +2,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.18.0
   labels:
     app.kubernetes.io/name: airlock-microgateway-operator
-    app.kubernetes.io/version: 4.5.7
+    app.kubernetes.io/version: 4.7.2
     gateway.networking.k8s.io/policy: direct
   name: accesscontrolpolicies.microgateway.airlock.com
 spec:
@@ -63,6 +63,25 @@ spec:
                             description: Authentication specifies that clients need
                               to be authenticated with the provided method.
                             properties:
+                              jwt:
+                                description: JWT configures client authentication
+                                  using JWT.
+                                properties:
+                                  jwtRef:
+                                    description: JWTRef selects the JWT configuration
+                                      to apply.
+                                    properties:
+                                      name:
+                                        description: Name of the resource
+                                        maxLength: 253
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - name
+                                    type: object
+                                required:
+                                  - jwtRef
+                                type: object
                               oidc:
                                 description: OIDC configures client authentication
                                   using OpenID Connect.
@@ -79,12 +98,61 @@ spec:
                                           always:
                                             description: Always strategy defines a
                                               strategy for checking every request.
+                                            properties:
+                                              onError:
+                                                default: Block
+                                                description: |-
+                                                  OnError specifies the behavior for a request if the token introspection returns an error, e.g., timeouts or 5xx errors.
+                                                  _Block_: The current in-flight request is blocked.
+                                                  _InvalidateToken_: Behaves as if the token introspection had returned `false`. This results in an invalidation of the current and requesting of a new token.
+                                                  _Pass_: Behaves as if the token introspection had returned `true`.
+                                                enum:
+                                                  - Block
+                                                  - InvalidateToken
+                                                  - Pass
+                                                type: string
+                                            type: object
+                                          periodic:
+                                            description: |-
+                                              Periodic strategy defines a time-based strategy for checking requests.
+                                              Introspection is non-blocking, concurrent requests proceed without delay.
+                                            properties:
+                                              onError:
+                                                default: InvalidateToken
+                                                description: |-
+                                                  OnError specifies the behavior for a request if the token introspection returns an error, e.g., timeouts or 5xx errors.
+                                                  _InvalidateToken_: Behaves as if the token introspection had returned `false`. This results in an invalidation of the current and requesting of a new token.
+                                                  _Pass_: Behaves as if the token introspection had returned `true`.
+                                                enum:
+                                                  - InvalidateToken
+                                                  - Pass
+                                                type: string
+                                              period:
+                                                description: |-
+                                                  Period specifies the minimum time interval between token introspections for requests part of the same session. Once the interval has elapsed, introspection will be performed for the next request in the session.
+                                                  Must be >= '1s'.
+                                                type: string
+                                                x-kubernetes-validations:
+                                                  - message: Period must be >= '1s'.
+                                                    rule: duration(self) >= duration('1s')
+                                            required:
+                                              - period
                                             type: object
                                           random:
-                                            description: Random strategy defines a
-                                              probabilistic strategy for checking
-                                              the `x-th` request.
+                                            description: |-
+                                              Random strategy defines a probabilistic strategy for checking the `x-th` request.
+                                              Introspection is non-blocking, concurrent requests proceed without delay.
                                             properties:
+                                              onError:
+                                                default: InvalidateToken
+                                                description: |-
+                                                  OnError specifies the behavior for a request if the token introspection returns an error, e.g., timeouts or 5xx errors.
+                                                  _InvalidateToken_: Behaves as if the token introspection had returned `false`. This results in an invalidation of the current and requesting of a new token.
+                                                  _Pass_: Behaves as if the token introspection had returned `true`.
+                                                enum:
+                                                  - InvalidateToken
+                                                  - Pass
+                                                type: string
                                               probability:
                                                 description: |-
                                                   Probability specifies the probability in % with which a request is selected to be introspected.
@@ -112,6 +180,7 @@ spec:
                                     properties:
                                       name:
                                         description: Name of the resource
+                                        maxLength: 253
                                         minLength: 1
                                         type: string
                                     required:
@@ -130,6 +199,79 @@ spec:
                               all be satisfied for the request to be authorized.
                             items:
                               properties:
+                                jwt:
+                                  description: JWT specifies a condition on the JWT.
+                                  properties:
+                                    claim:
+                                      description: Claim specifies a condition on
+                                        a JWT claim.
+                                      properties:
+                                        name:
+                                          description: Name of the claim.
+                                          minLength: 1
+                                          type: string
+                                        value:
+                                          description: |-
+                                            Value of the claim. If not specified, only existence of the claim is checked (any value is allowed).
+
+                                            Value matching is only supported if the data type of the claim is either primitive (`number`, `boolean`, `string`) or `array` of primitives.
+                                            In case of a non-string value, the match will be performed against the stringified value.
+
+                                            If the claim has an unsupported data type (e.g. `object` or `null`), its value will never match.
+                                          properties:
+                                            matcher:
+                                              description: StringMatcher defines the
+                                                way to match a string.
+                                              properties:
+                                                contains:
+                                                  description: |-
+                                                    Contains defines a substring match on the substring specified here. Empty contains match is not allowed, please use regex instead.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                                exact:
+                                                  description: |-
+                                                    Exact defines an explicit match on the string specified here.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                                ignoreCase:
+                                                  default: false
+                                                  description: IgnoreCase indicates
+                                                    whether the matching should be
+                                                    case-insensitive. In case of a
+                                                    regex match, the regex gets wrapped
+                                                    with a group `(?i:...)`.
+                                                  type: boolean
+                                                prefix:
+                                                  description: |-
+                                                    Prefix defines a prefix match on the prefix specified here. Empty prefix is not allowed, please use regex instead.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                                regex:
+                                                  description: |-
+                                                    Regex defines a regex match on the regular expression specified here. Google's [RE2 regex engine](https://github.com/google/re2/wiki/Syntax) is used.
+                                                    The regex matches only single-line by default, even with ".*". To match a multi-line string prepend (?s) to your regex.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                                suffix:
+                                                  description: |-
+                                                    Suffix defines a suffix match on the suffix specified here. Empty suffix is not allowed, please use regex instead.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                              type: object
+                                          required:
+                                            - matcher
+                                          type: object
+                                      required:
+                                        - name
+                                      type: object
+                                  required:
+                                    - claim
+                                  type: object
                                 oidc:
                                   description: OIDC specifies a condition on the result
                                     of an OpenID Connect flow.
@@ -204,8 +346,6 @@ spec:
                                   required:
                                     - claim
                                   type: object
-                              required:
-                                - oidc
                               type: object
                             minItems: 1
                             type: array
@@ -215,6 +355,79 @@ spec:
                               authorized.
                             items:
                               properties:
+                                jwt:
+                                  description: JWT specifies a condition on the JWT.
+                                  properties:
+                                    claim:
+                                      description: Claim specifies a condition on
+                                        a JWT claim.
+                                      properties:
+                                        name:
+                                          description: Name of the claim.
+                                          minLength: 1
+                                          type: string
+                                        value:
+                                          description: |-
+                                            Value of the claim. If not specified, only existence of the claim is checked (any value is allowed).
+
+                                            Value matching is only supported if the data type of the claim is either primitive (`number`, `boolean`, `string`) or `array` of primitives.
+                                            In case of a non-string value, the match will be performed against the stringified value.
+
+                                            If the claim has an unsupported data type (e.g. `object` or `null`), its value will never match.
+                                          properties:
+                                            matcher:
+                                              description: StringMatcher defines the
+                                                way to match a string.
+                                              properties:
+                                                contains:
+                                                  description: |-
+                                                    Contains defines a substring match on the substring specified here. Empty contains match is not allowed, please use regex instead.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                                exact:
+                                                  description: |-
+                                                    Exact defines an explicit match on the string specified here.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                                ignoreCase:
+                                                  default: false
+                                                  description: IgnoreCase indicates
+                                                    whether the matching should be
+                                                    case-insensitive. In case of a
+                                                    regex match, the regex gets wrapped
+                                                    with a group `(?i:...)`.
+                                                  type: boolean
+                                                prefix:
+                                                  description: |-
+                                                    Prefix defines a prefix match on the prefix specified here. Empty prefix is not allowed, please use regex instead.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                                regex:
+                                                  description: |-
+                                                    Regex defines a regex match on the regular expression specified here. Google's [RE2 regex engine](https://github.com/google/re2/wiki/Syntax) is used.
+                                                    The regex matches only single-line by default, even with ".*". To match a multi-line string prepend (?s) to your regex.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                                suffix:
+                                                  description: |-
+                                                    Suffix defines a suffix match on the suffix specified here. Empty suffix is not allowed, please use regex instead.
+                                                    Only one of exact, prefix, suffix, regex or contains can be set.
+                                                  minLength: 1
+                                                  type: string
+                                              type: object
+                                          required:
+                                            - matcher
+                                          type: object
+                                      required:
+                                        - name
+                                      type: object
+                                  required:
+                                    - claim
+                                  type: object
                                 oidc:
                                   description: OIDC specifies a condition on the result
                                     of an OpenID Connect flow.
@@ -289,8 +502,6 @@ spec:
                                   required:
                                     - claim
                                   type: object
-                              required:
-                                - oidc
                               type: object
                             minItems: 1
                             type: array
@@ -309,6 +520,7 @@ spec:
                                   properties:
                                     name:
                                       description: Name of the resource
+                                      maxLength: 253
                                       minLength: 1
                                       type: string
                                   required:
@@ -331,7 +543,7 @@ spec:
                         type: object
                       requestConditions:
                         description: |-
-                          RequestConditions defines additional request properties which must be matched in order for this policy to apply. A policy without request conditions will always match.
+                          RequestConditions defines additional request properties which must all be matched in order for this policy to apply. A policy without request conditions will always match.
 
                           WARNING: There is currently a limitation that if `authentication.oidc` is configured for this policy, you must ensure that the request condition also matches logout requests and callback redirects from the OIDC Provider as configured in the OIDCRelyingParty (`pathMapping.logoutPath` / `pathMapping.redirectPath`).
                         properties:
@@ -572,6 +784,46 @@ spec:
                             required:
                               - cidrRanges
                             type: object
+                        type: object
+                      tokenExchange:
+                        description: TokenExchange configures how downstream authentication
+                          tokens (e.g. JWT or OIDC Access Token) are exchanged with
+                          an OAuth2 Token Exchange Server.
+                        properties:
+                          actions:
+                            description: Actions specifies the chain of token exchange
+                              actions to execute.
+                            items:
+                              properties:
+                                tokenExchangeRef:
+                                  description: TokenExchangeRef selects a TokenExchange
+                                    to perform.
+                                  properties:
+                                    name:
+                                      description: Name of the resource
+                                      maxLength: 253
+                                      minLength: 1
+                                      type: string
+                                  required:
+                                    - name
+                                  type: object
+                              required:
+                                - tokenExchangeRef
+                              type: object
+                            minItems: 1
+                            type: array
+                          onFailure:
+                            default: Block
+                            description: |-
+                              OnFailure configures what should happen, if the token exchange fails. Meaning of the possible values:
+                              _Block_: The downstream request is blocked.
+                              _Pass_: Processing of the downstream request will proceed, but no exchanged token will be available (e.g. for identity propagation).
+                            enum:
+                              - Block
+                              - Pass
+                            type: string
+                        required:
+                          - actions
                         type: object
                     required:
                       - authorization
