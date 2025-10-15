@@ -90,16 +90,17 @@ local is_openshift_419_or_higher =
     ).Minor
   ) >= 19;
 
-if params.gateway_api.enabled && !is_openshift_419_or_higher then
+if params.gateway_api.enabled then
   {
-    ['00_gateway_api/' + crd.metadata.name]: [ crd ]
-    for crd in gateway_crds
-  } + {
     '00_gateway_api/aggregated_rbac': [
       rbac_aggregated_gateway_view,
       rbac_aggregated_gateway_edit,
       rbac_aggregated_gateway_admin,
     ],
+  } + {
+    ['00_gateway_api/' + crd.metadata.name]: [ crd ]
+    for crd in gateway_crds
+    if !is_openshift_419_or_higher
   }
 else
   {}
