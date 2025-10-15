@@ -98,7 +98,7 @@ local aggregate_crs(crdname) =
 
 if params.install_method == 'olm' && params.airlock_xopenshift.enabled then
   {
-    [crd.metadata.name]: [ crd ] + aggregate_crs(crd.metadata.name)
+    ['00_airlock_xopenshift/' + crd.metadata.name]: [ crd ] + aggregate_crs(crd.metadata.name)
     for crd in xopenshift_crds
   } +
   {
