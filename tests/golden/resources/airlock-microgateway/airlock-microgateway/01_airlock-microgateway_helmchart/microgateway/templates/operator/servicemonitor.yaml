@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.5.7
-    helm.sh/chart: microgateway-4.5.7
+    app.kubernetes.io/version: 4.7.2
+    helm.sh/chart: microgateway-4.7.2
     release: kube-prometheus-stack
   name: airlock-microgateway-operator
   namespace: syn-airlock-microgateway
@@ -40,8 +40,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.5.7
-    helm.sh/chart: microgateway-4.5.7
+    app.kubernetes.io/version: 4.7.2
+    helm.sh/chart: microgateway-4.7.2
     release: kube-prometheus-stack
   name: airlock-microgateway-operator-leader
   namespace: syn-airlock-microgateway

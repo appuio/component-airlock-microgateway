@@ -2,10 +2,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.18.0
   labels:
     app.kubernetes.io/name: airlock-microgateway-operator
-    app.kubernetes.io/version: 4.5.7
+    app.kubernetes.io/version: 4.7.2
   name: headerrewrites.microgateway.airlock.com
 spec:
   group: microgateway.airlock.com
@@ -88,8 +88,8 @@ spec:
                                 type: string
                               requestConditions:
                                 description: RequestConditions defines additional
-                                  request properties which must be matched in order
-                                  for this operation to be applied.
+                                  request properties which must all be matched in
+                                  order for this operation to be applied.
                                 properties:
                                   header:
                                     description: Header defines the matching headers
@@ -493,8 +493,8 @@ spec:
                                     type: string
                                   requestConditions:
                                     description: RequestConditions defines additional
-                                      request properties which must be matched in
-                                      order for this operation to be applied.
+                                      request properties which must be all matched
+                                      in order for this operation to be applied.
                                     properties:
                                       header:
                                         description: Header defines the matching headers
@@ -884,8 +884,8 @@ spec:
                                 type: string
                               requestConditions:
                                 description: RequestConditions defines additional
-                                  request properties which must be matched in order
-                                  for this operation to be applied.
+                                  request properties which must all be matched in
+                                  order for this operation to be applied.
                                 properties:
                                   header:
                                     description: Header defines the matching headers
@@ -1152,7 +1152,7 @@ spec:
                             upstream response headers.
                           properties:
                             csp:
-                              default: true
+                              default: false
                               description: |-
                                 CSP sets a content security policy which allows only same-origin requests except for images
                                 if the 'Content-Security-Policy' header is not set by the upstream.
@@ -1234,8 +1234,8 @@ spec:
                                 type: string
                               requestConditions:
                                 description: RequestConditions defines additional
-                                  request properties which must be matched in order
-                                  for this operation to be applied.
+                                  request properties which must all be matched in
+                                  order for this operation to be applied.
                                 properties:
                                   header:
                                     description: Header defines the matching headers
@@ -1633,8 +1633,8 @@ spec:
                                     type: string
                                   requestConditions:
                                     description: RequestConditions defines additional
-                                      request properties which must be matched in
-                                      order for this operation to be applied.
+                                      request properties which must all be matched
+                                      in order for this operation to be applied.
                                     properties:
                                       header:
                                         description: Header defines the matching headers
@@ -2064,8 +2064,8 @@ spec:
                                 type: string
                               requestConditions:
                                 description: RequestConditions defines additional
-                                  request properties which must be matched in order
-                                  for this operation to be applied.
+                                  request properties which must all be matched in
+                                  order for this operation to be applied.
                                 properties:
                                   header:
                                     description: Header defines the matching headers

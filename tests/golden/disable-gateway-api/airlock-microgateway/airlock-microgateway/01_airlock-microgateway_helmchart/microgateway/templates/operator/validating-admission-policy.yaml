@@ -8,8 +8,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.5.7
-    helm.sh/chart: microgateway-4.5.7
+    app.kubernetes.io/version: 4.7.2
+    helm.sh/chart: microgateway-4.7.2
   name: airlock-microgateway-operator-immutable-labels-syn-airlock-microgateway
 spec:
   failurePolicy: Fail
@@ -58,3 +58,38 @@ spec:
     - expression: object.metadata.?labels[?'gateway.networking.k8s.io/gateway-name']
         == oldObject.metadata.?labels[?'gateway.networking.k8s.io/gateway-name']
       message: label 'gateway.networking.k8s.io/gateway-name' is immutable
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  annotations: null
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: airlock-microgateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: microgateway-operator
+    app.kubernetes.io/part-of: microgateway
+    app.kubernetes.io/version: 4.7.2
+    helm.sh/chart: microgateway-4.7.2
+  name: airlock-microgateway-operator-envoycluster-name-syn-airlock-microgateway
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups:
+          - microgateway.airlock.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - envoyclusters
+  validations:
+    - expression: has(object.spec.value) && object.spec.value.name == 'envoycluster/'
+        + variables.namespacedName
+      messageExpression: '"spec.value.name must be set to ''envoycluster/" + variables.namespacedName
+        + "'' based on this EnvoyCluster''s namespaced name"'
+  variables:
+    - expression: object.metadata.namespace + '/' + object.metadata.name
+      name: namespacedName

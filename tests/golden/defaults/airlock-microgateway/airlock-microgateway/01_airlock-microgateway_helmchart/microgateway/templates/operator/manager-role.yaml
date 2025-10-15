@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.5.7
-    helm.sh/chart: microgateway-4.5.7
+    app.kubernetes.io/version: 4.7.2
+    helm.sh/chart: microgateway-4.7.2
   name: airlock-microgateway-operator-manager-syn-airlock-microgateway
 rules:
   - apiGroups:
@@ -115,18 +115,15 @@ rules:
   - apiGroups:
       - gateway.networking.k8s.io
     resources:
-      - backendtlspolicies
-      - gateways
-      - httproutes
-      - referencegrants
+      - gatewayclasses
     verbs:
       - get
       - list
+      - patch
       - watch
   - apiGroups:
       - gateway.networking.k8s.io
     resources:
-      - backendtlspolicies/status
       - gatewayclasses/finalizers
       - gatewayclasses/status
       - gateways/finalizers
@@ -138,12 +135,30 @@ rules:
   - apiGroups:
       - gateway.networking.k8s.io
     resources:
-      - gatewayclasses
+      - gateways
+      - httproutes
+      - referencegrants
     verbs:
       - get
       - list
-      - patch
       - watch
+  - apiGroups:
+      - gateway.networking.k8s.io
+      - x-openshift.microgateway.airlock.com
+    resources:
+      - backendtlspolicies
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - gateway.networking.k8s.io
+      - x-openshift.microgateway.airlock.com
+    resources:
+      - backendtlspolicies/status
+    verbs:
+      - patch
+      - update
   - apiGroups:
       - microgateway.airlock.com
     resources:
@@ -155,12 +170,14 @@ rules:
       - csrfprotections
       - denyrules
       - envoyclusters
+      - envoyextensionpolicies
       - envoyhttpfilters
       - gatewayparameters
       - graphqls
       - headerrewrites
       - identitypropagations
       - jwks
+      - jwts
       - limits
       - oidcproviders
       - oidcrelyingparties
@@ -169,6 +186,7 @@ rules:
       - redisproviders
       - sessionhandlings
       - telemetries
+      - tokenexchanges
     verbs:
       - get
       - list
@@ -178,6 +196,7 @@ rules:
     resources:
       - accesscontrolpolicies/status
       - contentsecuritypolicies/status
+      - envoyextensionpolicies/status
     verbs:
       - patch
       - update
