@@ -420,6 +420,55 @@ default:: `${airlock_microgateway:olm:version}`
 
 The OLM channel to use.
 
+=== `upgrade_strategy`
+
+[horizontal]
+type:: object
+
+Configuration for the OLM upgrade strategy.
+
+==== `manual_upgrade`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+Whether to enable manual upgrade approval for OLM installations.
+When set to `true`, the OLM subscription will use `installPlanApproval: Manual`, requiring manual approval for operator upgrades.
+
+==== `upgrade_job_hook`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+If the `openshift-upgrade-controller` application is present, this will create an `UpgradeJobHook` that automatically approves install plans during cluster upgrades.
+
+==== `upgrade_job_selector`
+
+[horizontal]
+type:: dict
+default:: `{}`
+example::
++
+[source,yaml]
+----
+upgrade_job_selector:
+  matchLabels:
+    appuio-managed-upgrade: 'true'
+----
+
+Selects which `UpgradeJob` objects the hook applies to.
+
+==== `approve_delay`
+
+[horizontal]
+type:: string
+default:: `0d`
+
+Configure the delay, how old the `InstallPlan` has to be, before approving install plans during cluster upgrades.
+This uses Go duration format (e.g., `1d`, `2d`, `1w`).
+
 === `config`
 
 [horizontal]
