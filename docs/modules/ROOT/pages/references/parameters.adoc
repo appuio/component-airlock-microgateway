@@ -424,6 +424,15 @@ The OLM channel to use.
 
 [horizontal]
 type:: object
+default::
++
+[source,yaml]
+----
+upgrade_strategy:
+  manual_upgrade: false
+  upgrade_job_hook: true
+  upgrade_job_selector: {}
+----
 
 Configuration for the OLM upgrade strategy.
 
@@ -440,9 +449,16 @@ When set to `true`, the OLM subscription will use `installPlanApproval: Manual`,
 
 [horizontal]
 type:: boolean
-default:: `false`
+default:: `true`
 
 If the `openshift-upgrade-controller` application is present, this will create an `UpgradeJobHook` that automatically approves install plans during cluster upgrades.
+
+[NOTE]
+====
+The `UpgradeJobHook`compares the creation timestamps of the last `InstallPlan` and the `UpgradeJob` it's running for.
+Only the newest install plan which is older than the `UpgradeJob` for which the hook is running will be approved.
+This ensures that upgrades to the operator are done in sync with the general upgrade schedule of the cluster.
+====
 
 ==== `upgrade_job_selector`
 
@@ -453,21 +469,13 @@ example::
 +
 [source,yaml]
 ----
-upgrade_job_selector:
-  matchLabels:
-    appuio-managed-upgrade: 'true'
+upgrade_strategy:
+  upgrade_job_selector:
+    matchLabels:
+      appuio-managed-upgrade: 'true'
 ----
 
 Selects which `UpgradeJob` objects the hook applies to.
-
-==== `approve_delay`
-
-[horizontal]
-type:: string
-default:: `0d`
-
-Configure the delay, how old the `InstallPlan` has to be, before approving install plans during cluster upgrades.
-This uses Go duration format (e.g., `1d`, `2d`, `1w`).
 
 === `config`
 

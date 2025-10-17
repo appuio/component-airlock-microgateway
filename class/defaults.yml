@@ -71,9 +71,8 @@ parameters:
       channel: "${airlock_microgateway:olm:version}"
       upgrade_strategy:
         manual_upgrade: false
-        upgrade_job_hook: false
+        upgrade_job_hook: true
         upgrade_job_selector: {}
-        approve_delay: 0d # 0 days
       config:
         create_pod_monitor: true
 

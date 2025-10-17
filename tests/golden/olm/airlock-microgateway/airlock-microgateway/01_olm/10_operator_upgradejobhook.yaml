@@ -38,10 +38,9 @@ data:
   approve: |
     #!/bin/bash
 
-    ONE_WEEK_AGO=$(date -v-${APPROVE_DELAY} -u +%Y-%m-%dT%H:%M:%SZ)
-    INSTALLPLAN=$(kubectl -n syn-airlock-microgateway get ip -ojson | jq -r --arg date ${ONE_WEEK_AGO} '.items | sort_by(.metadata.creationTimestamp) | reverse | [.[] |  select((.spec.approved != true) and (.metadata.creationTimestamp < $date))][0] | .metadata.name')
-    if [ ${INSTALLPLAN} != "null" ]; then
-      kubectl patch installplan ${INSTALLPLAN} -n ${NAMESPACE} --type merge --patch '{"spec":{"approved":true}}';
+    AIRLOCK_INSTALLPLAN=$(kubectl -n "${AIRLOCK_NAMESPACE}" get ip -ojson | jq -r --arg upgrade_job "${JOB_metadata_creationTimestamp}" '.items | sort_by(.metadata.creationTimestamp) | reverse | [.[] |  select((.spec.approved != true) and (.metadata.creationTimestamp < $upgrade_job))][0] | .metadata.name')
+    if [ "${AIRLOCK_INSTALLPLAN}" != "null" ]; then
+      kubectl patch installplan "${AIRLOCK_INSTALLPLAN}" -n "${AIRLOCK_NAMESPACE}" --type merge --patch '{"spec":{"approved":true}}';
     fi
 kind: ConfigMap
 metadata:
@@ -68,9 +67,7 @@ spec:
               command:
                 - /usr/local/bin/approve
               env:
-                - name: APPROVE_DELAY
-                  value: 0d
-                - name: NAMESPACE
+                - name: AIRLOCK_NAMESPACE
                   value: syn-airlock-microgateway
               image: $(registry)s/$(image)s:$(tag)s
               imagePullPolicy: IfNotPresent

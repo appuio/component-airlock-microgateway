@@ -133,8 +133,7 @@ local manual_approval_upgradehook = {
                 image: '$(registry)s/$(image)s:$(tag)s' % params.images.oc,
                 command: [ '/usr/local/bin/approve' ],
                 env_: {
-                  NAMESPACE: params.namespace,
-                  APPROVE_DELAY: params.olm.upgrade_strategy.approve_delay,
+                  AIRLOCK_NAMESPACE: params.namespace,
                 },
                 volumeMounts_: {
                   scripts: {
