@@ -69,6 +69,10 @@ parameters:
     olm:
       version: "stable"
       channel: "${airlock_microgateway:olm:version}"
+      upgrade_strategy:
+        manual_upgrade: false
+        upgrade_job_hook: true
+        upgrade_job_selector: {}
       config:
         create_pod_monitor: true
 
@@ -76,3 +80,9 @@ parameters:
       microgateway:
         version: "4.7.2"
         source: "oci://quay.io/airlockcharts/microgateway"
+
+    images:
+      oc:
+        registry: quay.io
+        image: appuio/oc
+        tag: v4.19

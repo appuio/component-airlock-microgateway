@@ -1,4 +1,6 @@
 # Overwrite parameters here
+applications:
+  - openshift-upgrade-controller
 
 parameters:
   kapitan:
@@ -21,8 +23,18 @@ parameters:
       Minor: '19'
       Patch: '0'
 
+  openshift_upgrade_controller:
+    namespace: appuio-openshift-upgrade-controller
+
   airlock_microgateway:
     install_method: olm
+    olm:
+      upgrade_strategy:
+        manual_upgrade: true
+        upgrade_job_hook: true
+        upgrade_job_selector:
+          matchLabels:
+            appuio-managed-upgrade: 'true'
     airlock_xopenshift:
       enabled: true
     gateway_classes:

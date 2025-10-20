@@ -22,7 +22,7 @@ spec:
         value: 'true'
       - name: GATEWAY_API_BACKEND_TLS_POLICY_API_GROUP
         value: x-openshift.microgateway.airlock.com
-  installPlanApproval: Automatic
+  installPlanApproval: Manual
   name: airlock-microgateway
   source: certified-operators
   sourceNamespace: openshift-operators-redhat
