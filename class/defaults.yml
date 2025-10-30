@@ -37,8 +37,8 @@ parameters:
 
     airlock_xopenshift:
       enabled: false
-      version: "v1.3.0"
-      channel: experimental
+      version: "v1.4.0"
+      channel: standard
       crds:
         backendtlspolicies: BACKEND_TLS_POLICY
 
