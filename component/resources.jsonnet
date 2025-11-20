@@ -9,9 +9,9 @@ local params = inv.parameters.airlock_microgateway;
 
 local has_cilium = std.member(inv.applications, 'cilium');
 
-local GatewayParameter = function(name='') {
+local GatewayParameters = function(name='') {
   apiVersion: 'microgateway.airlock.com/v1alpha1',
-  kind: 'GatewayParameter',
+  kind: 'GatewayParameters',
   metadata: {
     name: name,
   },
@@ -111,7 +111,7 @@ local gateway_cnps = [
   [if std.length(params.gateway_classes) > 0 then '01_gateway_classes']:
     com.generateResources(referencedParam(params.gateway_classes), GatewayClass),
   [if std.length(params.gateway_parameters) > 0 then '01_gateway_parameters']:
-    com.generateResources(namespaced(params.gateway_parameters), GatewayParameter),
+    com.generateResources(namespaced(params.gateway_parameters), GatewayParameters),
   [if std.length(params.gateways) > 0 then '01_gateways']:
     com.generateResources(namespaced(params.gateways), Gateway),
   [if std.length(params.gateways) > 0 && has_cilium then '01_gateway_networkpolicies']:

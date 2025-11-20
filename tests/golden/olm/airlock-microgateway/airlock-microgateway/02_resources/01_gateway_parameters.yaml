@@ -1,5 +1,5 @@
 apiVersion: microgateway.airlock.com/v1alpha1
-kind: GatewayParameter
+kind: GatewayParameters
 metadata:
   name: airlock
   namespace: airlock-gateway
@@ -21,7 +21,7 @@ spec:
     level: info
 ---
 apiVersion: microgateway.airlock.com/v1alpha1
-kind: GatewayParameter
+kind: GatewayParameters
 metadata:
   name: airlock
   namespace: syn-airlock-microgateway
