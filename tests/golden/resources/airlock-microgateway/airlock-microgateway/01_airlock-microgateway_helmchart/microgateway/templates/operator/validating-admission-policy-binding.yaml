@@ -8,8 +8,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.3
-    helm.sh/chart: microgateway-4.7.3
+    app.kubernetes.io/version: 4.7.4
+    helm.sh/chart: microgateway-4.7.4
   name: airlock-microgateway-operator-immutable-labels-syn-airlock-microgateway
 spec:
   matchResources: null
@@ -27,8 +27,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.3
-    helm.sh/chart: microgateway-4.7.3
+    app.kubernetes.io/version: 4.7.4
+    helm.sh/chart: microgateway-4.7.4
   name: airlock-microgateway-operator-envoycluster-name-syn-airlock-microgateway
 spec:
   matchResources: null
