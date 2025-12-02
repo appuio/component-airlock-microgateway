@@ -1,6 +1,8 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
+  annotations:
+    test: xy
   name: gateway-1
   namespace: airlock
 spec:
