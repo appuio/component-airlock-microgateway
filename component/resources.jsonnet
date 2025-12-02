@@ -50,7 +50,7 @@ local namespacedName(name, namespace='') = {
 
 local namespaced(obj) = {
   ['%(namespace)s_%(name)s' % namespacedName(name)]: obj[name] {
-    metadata: {
+    metadata+: {
       namespace: namespacedName(name).namespace,
       name: namespacedName(name).name,
     },

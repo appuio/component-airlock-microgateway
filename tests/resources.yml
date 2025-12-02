@@ -42,6 +42,9 @@ parameters:
 
     gateways:
       airlock/gateway-1:
+        metadata:
+          annotations:
+            test: xy
         spec:
           gatewayClassName: airlock-microgateway
           listeners:
