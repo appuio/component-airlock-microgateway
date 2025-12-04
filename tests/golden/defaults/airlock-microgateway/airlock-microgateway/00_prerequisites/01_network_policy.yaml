@@ -1,7 +1,6 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  annotations: {}
   labels:
     name: allow-from-waf-namespaces
   name: allow-from-waf-namespaces
