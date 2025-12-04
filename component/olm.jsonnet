@@ -1,5 +1,5 @@
+local kube = import 'kube-ssa-compat.libsonnet';
 local kap = import 'lib/kapitan.libjsonnet';
-local kube = import 'lib/kube.libjsonnet';
 local operatorlib = import 'lib/openshift4-operators.libsonnet';
 
 // The hiera parameters for the component

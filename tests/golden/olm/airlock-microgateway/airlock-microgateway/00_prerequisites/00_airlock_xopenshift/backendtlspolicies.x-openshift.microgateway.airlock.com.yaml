@@ -650,7 +650,6 @@ status:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     rbac.authorization.k8s.io/aggregate-to-view: 'true'
   name: backendtlspolicies.x-openshift.microgateway.airlock.com-crdview
@@ -667,7 +666,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  annotations: {}
   labels:
     rbac.authorization.k8s.io/aggregate-to-view: 'true'
   name: backendtlspolicies.x-openshift.microgateway.airlock.com-view
