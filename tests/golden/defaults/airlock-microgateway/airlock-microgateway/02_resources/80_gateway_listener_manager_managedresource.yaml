@@ -113,6 +113,8 @@ spec:
     local ensureListenerAndFinalizer(obj) =
       local gateways = esp.context().gateways;
       local targetGws = traceJSON('targetGws', [ gw for gw in gateways if std.member(obj.spec.parentRefs, gwRef(gw)) ]);
+      local removedGwRefs = std.setDiff(std.set(prevParentRefs(obj), gfRefId), std.set(obj.spec.parentRefs, gfRefId), gfRefId);
+      local removedGws = traceJSON('removedGws', [ gw for gw in gateways if std.member(removedGwRefs, gwRef(gw)) ]);
       local desiredListeners = routeHostnameRefs(obj);
       traceJSON('ensureListenerAndFinalizer', [
         // Remove listeners from gateways that are no longer referenced by this HTTPRoute
@@ -120,7 +122,7 @@ spec:
           applyObjFromObj(gw),
           fieldManager=httpRouteFieldManager(obj)
         )
-        for gw in std.setDiff(std.set(prevParentRefs(obj), gfRefId), std.set(obj.spec.parentRefs, gfRefId), gfRefId)
+        for gw in removedGws
       ] + [
         // Ensure desired listeners on all target gateways
         esp.applyOptions(
