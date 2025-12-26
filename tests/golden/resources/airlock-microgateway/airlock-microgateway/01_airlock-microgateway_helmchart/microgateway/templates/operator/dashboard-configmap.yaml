@@ -582,9 +582,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-accessctrllogs
   namespace: syn-airlock-microgateway
 ---
@@ -880,9 +880,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-blocklogs
   namespace: syn-airlock-microgateway
 ---
@@ -1886,9 +1886,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-blockmetrics
   namespace: syn-airlock-microgateway
 ---
@@ -1908,6 +1908,12 @@ data:
       ],
       "__elements": {},
       "__requires": [
+        {
+          "type": "panel",
+          "id": "barchart",
+          "name": "Bar chart",
+          "version": ""
+        },
         {
           "type": "grafana",
           "id": "grafana",
@@ -2000,7 +2006,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               },
@@ -2040,7 +2047,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
               "legendFormat": "Total Requests",
               "range": true,
               "refId": "A"
@@ -2061,6 +2068,16 @@ data:
                 "mode": "thresholds"
               },
               "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "0%"
+                    }
+                  },
+                  "type": "value"
+                },
                 {
                   "options": {
                     "match": "null+nan",
@@ -2121,7 +2138,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=~\"[45]\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))/\nsum (increase(envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=~\"[45]\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))/\nsum (increase(envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
               "legendFormat": "Request Error Rate",
               "range": true,
               "refId": "Request Error Rate"
@@ -2186,7 +2203,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"1\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"1\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
               "legendFormat": "Total 1xx Requests",
               "range": true,
               "refId": "Total 1xx Requests"
@@ -2251,7 +2268,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"2\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"2\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
               "legendFormat": "Total 2xx Requests",
               "range": true,
               "refId": "Total 2xx Requests"
@@ -2327,7 +2344,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"3\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"3\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
               "legendFormat": "Total 3xx Requests",
               "range": true,
               "refId": "Total 3xx Requests"
@@ -2407,7 +2424,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"4\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"4\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
               "legendFormat": "Total 4xx Requests",
               "range": true,
               "refId": "Total 4xx Requests"
@@ -2487,7 +2504,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"5\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_http_downstream_rq_xx{envoy_response_code_class=\"5\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
               "legendFormat": "Total 5xx Requests",
               "range": true,
               "refId": "Total 5xx Requests"
@@ -2629,7 +2646,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "legendFormat": "Requests per second",
               "range": true,
@@ -2641,7 +2658,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (rate(envoy_http_downstream_rq_xx{envoy_response_code_class=~\"[45]\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]) or on() vector(0))/\nsum (rate(envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum (rate(envoy_http_downstream_rq_xx{envoy_response_code_class=~\"[45]\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]) or on() vector(0))/\nsum (rate(envoy_http_downstream_rq_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Error rate",
@@ -2783,7 +2800,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.25, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+              "expr": "histogram_quantile(0.25, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
               "legendFormat": "25th Percentile",
               "range": true,
               "refId": "25th Percentile"
@@ -2794,7 +2811,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.5, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+              "expr": "histogram_quantile(0.5, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
               "hide": false,
               "instant": false,
               "legendFormat": "50th Percentile",
@@ -2807,7 +2824,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.95, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
               "hide": false,
               "instant": false,
               "legendFormat": "95th Percentile",
@@ -2904,7 +2921,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"1\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"1\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "legendFormat": "1xx Requests per second",
               "range": true,
@@ -2999,7 +3016,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"3\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"3\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "legendFormat": "3xx Requests per second",
               "range": true,
@@ -3095,7 +3112,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"2\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"2\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "legendFormat": "2xx Requests per second",
               "range": true,
@@ -3191,7 +3208,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"4\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"4\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "legendFormat": "4xx Requests per second",
               "range": true,
@@ -3287,7 +3304,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"5\", envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class=\"5\", envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "legendFormat": "5xx Requests per second",
               "range": true,
@@ -3305,9 +3322,9 @@ data:
             "x": 0,
             "y": 38
           },
-          "id": 23,
+          "id": 35,
           "panels": [],
-          "title": "Downstream Connection Metrics",
+          "title": "Downstream TLS Connection Metrics",
           "type": "row"
         },
         {
@@ -3315,7 +3332,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Number of connections from downstream clients.",
+          "description": "Number of successful TLS handshakes from downstream clients.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3326,7 +3343,8 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": 0
                   }
                 ]
               },
@@ -3339,6 +3357,879 @@ data:
             "w": 5,
             "x": 0,
             "y": 39
+          },
+          "id": 36,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "round(sum(increase(envoy_listener_ssl_handshake{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+              "legendFormat": "TLS Connection Handshakes",
+              "range": true,
+              "refId": "TLS Connection Handshakes"
+            }
+          ],
+          "title": "TLS Connection Handshakes",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Percentage of downstream TLS connection errors (does not include failed certificate verifications).",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "0%"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "color": "text",
+                      "index": 0,
+                      "text": "0%"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 5,
+            "y": 39
+          },
+          "id": 37,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum (increase(envoy_listener_ssl_connection_error{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))/\nsum (increase(envoy_listener_ssl_handshake{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "legendFormat": "TLS Connection Error Rate",
+              "range": true,
+              "refId": "TLS Connection Error Rate"
+            }
+          ],
+          "title": "TLS Connection Error Rate",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Number of downstream TLS connection errors (does not include failed certificate verifications).",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 10,
+            "y": 39
+          },
+          "id": 39,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "round(sum (increase(envoy_listener_ssl_connection_error{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+              "legendFormat": "TLS Connection Errors",
+              "range": true,
+              "refId": "TLS Connection Errors"
+            }
+          ],
+          "title": "TLS Connection Errors",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS connection handshakes and number of TLS connection errors per second.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "TLS connection errors per second",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "TLS connection errors per second"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "orange",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.stacking",
+                    "value": {
+                      "group": "A",
+                      "mode": "none"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "TLS handshakes per second"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "blue",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 44
+          },
+          "id": 32,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(envoy_listener_ssl_handshake{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "hide": false,
+              "legendFormat": "TLS handshakes per second",
+              "range": true,
+              "refId": "TLS handshakes per second"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(envoy_listener_ssl_connection_error{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "TLS connection errors per second",
+              "range": true,
+              "refId": "TLS connection errors per second"
+            }
+          ],
+          "title": "TLS Connections",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS protocols by versions used in successful TLS connections.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 53
+          },
+          "id": 34,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.8,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "Field",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(sum by (envoy_ssl_version) (increase(envoy_listener_ssl_versions{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "TLS Protocols"
+            }
+          ],
+          "title": "TLS Protocols",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "labelsToFields": false,
+                "reducers": [
+                  "lastNotNull"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Last *": "# Observations"
+                }
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS signature algorithms used in successful mTLS connections.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 53
+          },
+          "id": 40,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.8,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "Field",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(sum by (envoy_ssl_sigalg) (increase(envoy_listener_ssl_sigalgs{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "TLS Signature Algorithms"
+            }
+          ],
+          "title": "TLS Signature Algorithms",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "reducers": [
+                  "lastNotNull"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Last *": "# Observations"
+                }
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS Ciphers used in successful TLS connections.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 61
+          },
+          "id": 33,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.8,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "Field",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(sum by (envoy_ssl_cipher) (increase(envoy_listener_ssl_ciphers{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "TLS Ciphers"
+            }
+          ],
+          "title": "TLS Ciphers",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "labelsToFields": false,
+                "reducers": [
+                  "lastNotNull"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Last *": "# Observations"
+                }
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS Curves used in successful TLS connections.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 61
+          },
+          "id": 38,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.8,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "maxHeight": 600,
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "Field",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(sum by (envoy_ssl_curve) (increase(envoy_listener_ssl_curves{envoy_listener_address!~\"^(dynamic-probe|probe|metrics|admin)$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "TLS Curves"
+            }
+          ],
+          "title": "TLS Curves",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "labelsToFields": false,
+                "reducers": [
+                  "lastNotNull"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Last *": "# Observations"
+                }
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 69
+          },
+          "id": 23,
+          "panels": [],
+          "title": "Downstream TCP Connection Metrics",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Number of newly established TCP connections from downstream clients.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 0,
+            "y": 70
           },
           "id": 26,
           "options": {
@@ -3366,13 +4257,13 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(envoy_http_downstream_cx_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "round(sum(increase(envoy_http_downstream_cx_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range])))",
               "legendFormat": "Total Connections",
               "range": true,
               "refId": "Total Connections"
             }
           ],
-          "title": "Connections",
+          "title": "TCP Connections",
           "type": "stat"
         },
         {
@@ -3403,7 +4294,7 @@ data:
             "h": 5,
             "w": 5,
             "x": 5,
-            "y": 39
+            "y": 70
           },
           "id": 29,
           "options": {
@@ -3431,7 +4322,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(envoy_http_downstream_cx_rx_bytes_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "sum(increase(envoy_http_downstream_cx_rx_bytes_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
               "legendFormat": "Data received",
               "range": true,
               "refId": "Data received"
@@ -3468,7 +4359,7 @@ data:
             "h": 5,
             "w": 5,
             "x": 10,
-            "y": 39
+            "y": 70
           },
           "id": 28,
           "options": {
@@ -3496,7 +4387,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(envoy_http_downstream_cx_tx_bytes_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
+              "expr": "sum(increase(envoy_http_downstream_cx_tx_bytes_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[$__range]))",
               "legendFormat": "Data sent",
               "range": true,
               "refId": "Data sent"
@@ -3510,7 +4401,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Connections per second from downstream clients.",
+          "description": "Newly established connections per second from downstream clients.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3567,7 +4458,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 44
+            "y": 75
           },
           "id": 1,
           "options": {
@@ -3591,7 +4482,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_cx_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_cx_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "legendFormat": "Connections per second",
               "range": true,
@@ -3708,7 +4599,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 44
+            "y": 75
           },
           "id": 8,
           "options": {
@@ -3732,7 +4623,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.25, sum(rate(envoy_http_downstream_cx_length_ms_bucket{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+              "expr": "histogram_quantile(0.25, sum(rate(envoy_http_downstream_cx_length_ms_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
               "legendFormat": "25th Percentile",
               "range": true,
               "refId": "25th Percentile"
@@ -3743,7 +4634,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.5, sum(rate(envoy_http_downstream_cx_length_ms_bucket{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+              "expr": "histogram_quantile(0.5, sum(rate(envoy_http_downstream_cx_length_ms_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
               "hide": false,
               "instant": false,
               "legendFormat": "50th Percentile",
@@ -3756,7 +4647,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "histogram_quantile(0.95, sum(rate(envoy_http_downstream_cx_length_ms_bucket{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(envoy_http_downstream_cx_length_ms_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
               "hide": false,
               "instant": false,
               "legendFormat": "95th Percentile",
@@ -3829,7 +4720,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 52
+            "y": 83
           },
           "id": 22,
           "options": {
@@ -3853,7 +4744,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_cx_rx_bytes_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_cx_rx_bytes_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "hide": false,
               "instant": false,
               "legendFormat": "Data received",
@@ -3926,7 +4817,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 52
+            "y": 83
           },
           "id": 5,
           "options": {
@@ -3950,7 +4841,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(rate(envoy_http_downstream_cx_tx_bytes_total{envoy_http_conn_manager_prefix=\"http\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
+              "expr": "sum(rate(envoy_http_downstream_cx_tx_bytes_total{envoy_http_conn_manager_prefix=~\".*/hcm$\",managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m]))",
               "legendFormat": "Data sent",
               "range": true,
               "refId": "Data sent"
@@ -4079,7 +4970,7 @@ data:
       "timezone": "browser",
       "title": "Airlock Microgateway Downstream - Metrics",
       "uid": "aeidgtlu8wqv4c",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }
 kind: ConfigMap
@@ -4092,9 +4983,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-downstreammetrics
   namespace: syn-airlock-microgateway
 ---
@@ -4611,9 +5502,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-headerlogs
   namespace: syn-airlock-microgateway
 ---
@@ -5842,9 +6733,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-license
   namespace: syn-airlock-microgateway
 ---
@@ -6101,9 +6992,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-logonlylogs
   namespace: syn-airlock-microgateway
 ---
@@ -6965,9 +7856,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-logonlymetrics
   namespace: syn-airlock-microgateway
 ---
@@ -7643,7 +8534,7 @@ data:
                                 {
                                     "id": "custom.cellOptions",
                                     "value": {
-                                        "type": "auto"
+                                        "type": "markdown"
                                     }
                                 }
                             ]
@@ -7870,7 +8761,7 @@ data:
                             "uid": "${DS_PROMETHEUS}"
                         },
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.25, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=\"http\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+                        "expr": "histogram_quantile(0.25, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
                         "instant": false,
                         "legendFormat": "25th Percentile",
                         "range": true,
@@ -7882,7 +8773,7 @@ data:
                             "uid": "${DS_PROMETHEUS}"
                         },
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.5, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=\"http\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+                        "expr": "histogram_quantile(0.5, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
                         "hide": false,
                         "instant": false,
                         "legendFormat": "50th Percentile",
@@ -7895,7 +8786,7 @@ data:
                             "uid": "${DS_PROMETHEUS}"
                         },
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=\"http\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\",gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
+                        "expr": "histogram_quantile(0.95, sum(rate(envoy_http_downstream_rq_time_bucket{envoy_http_conn_manager_prefix=~\".*/hcm$\", managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\",gateway=~\"${gateway_name:regex}\"}[1m])) by (le))",
                         "hide": false,
                         "instant": false,
                         "legendFormat": "95th Percentile",
@@ -8251,9 +9142,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-overview
   namespace: syn-airlock-microgateway
 ---
@@ -8823,9 +9714,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-requestlogs
   namespace: syn-airlock-microgateway
 ---
@@ -9135,34 +10026,20 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Readiness status of the Airlock Microgateway Engine container.",
+          "description": "Version of the Airlock Microgateway Engine container.",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "fixedColor": "text",
+                "mode": "fixed"
               },
               "mappings": [
                 {
                   "options": {
-                    "0": {
-                      "color": "orange",
-                      "index": 2,
-                      "text": "Warn"
-                    },
-                    "1": {
-                      "color": "green",
-                      "index": 0,
-                      "text": "OK"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "match": "null+nan",
+                    "match": "null",
                     "result": {
-                      "color": "#83807d",
-                      "index": 1,
+                      "color": "#808080",
+                      "index": 0,
                       "text": "n/a"
                     }
                   },
@@ -9182,12 +10059,12 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 3,
+            "h": 4,
             "w": 4,
             "x": 0,
             "y": 5
           },
-          "id": 20,
+          "id": 36,
           "options": {
             "colorMode": "value",
             "graphMode": "none",
@@ -9198,7 +10075,7 @@ data:
               "calcs": [
                 "last"
               ],
-              "fields": "",
+              "fields": "/^version$/",
               "values": false
             },
             "showPercentChange": false,
@@ -9214,14 +10091,15 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "kube_pod_container_status_ready{container=\"airlock-microgateway-engine\",pod=\"${pod}\"}",
+              "expr": "microgateway_build_info{container=\"airlock-microgateway-engine\",pod=\"${pod}\"}",
+              "format": "table",
               "instant": true,
-              "legendFormat": "Health",
+              "legendFormat": "Version",
               "range": false,
-              "refId": "A"
+              "refId": "Version"
             }
           ],
-          "title": "Readiness Microgateway Engine",
+          "title": "Airlock Microgateway Engine Version",
           "type": "stat"
         },
         {
@@ -9230,87 +10108,120 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "State of the Envoy Server",
+          "description": "CPU usage over time of the Airlock Microgateway Engine container.",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "fixedColor": "super-light-green",
+                "mode": "fixed"
               },
-              "fieldMinMax": false,
-              "mappings": [
-                {
-                  "options": {
-                    "0": {
-                      "color": "green",
-                      "index": 0,
-                      "text": "LIVE"
-                    },
-                    "1": {
-                      "color": "yellow",
-                      "index": 1,
-                      "text": "DRAINING"
-                    },
-                    "2": {
-                      "color": "yellow",
-                      "index": 2,
-                      "text": "PRE_INITIALIZING"
-                    },
-                    "3": {
-                      "color": "yellow",
-                      "index": 3,
-                      "text": "INITIALIZING"
-                    }
-                  },
-                  "type": "value"
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
                 },
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "color": "#808080",
-                      "index": 4,
-                      "text": "n/a"
-                    }
-                  },
-                  "type": "special"
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
-              ],
+              },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "super-light-green",
+                    "value": 0
                   }
                 ]
               },
-              "unit": "string"
+              "unit": "sishort"
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Request"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "green",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Limit"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "yellow",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
-            "h": 3,
-            "w": 4,
+            "h": 7,
+            "w": 6,
             "x": 4,
             "y": 5
           },
-          "id": 39,
+          "id": 3,
           "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "firstNotNull"
-              ],
-              "fields": "",
-              "values": true
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
           },
           "pluginVersion": "11.4.0",
           "targets": [
@@ -9319,35 +10230,42 @@ data:
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "disableTextWrap": false,
               "editorMode": "code",
-              "exemplar": false,
-              "expr": "envoy_server_state{gateway_kind=\"${gateway_kind}\", gateway=\"${gateway_name}\", container=\"airlock-microgateway-engine\", pod=\"${pod}\"}",
-              "format": "table",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "instant": true,
-              "legendFormat": "__auto",
-              "range": false,
-              "refId": "Errors",
-              "useBackend": false
-            }
-          ],
-          "title": "Envoy Server State",
-          "transformations": [
+              "expr": " sum(kube_pod_container_resource_limits{pod=\"${pod}\",container=\"airlock-microgateway-engine\",resource=\"cpu\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Limit",
+              "range": true,
+              "refId": "CPU Limit"
+            },
             {
-              "id": "organize",
-              "options": {
-                "excludeByName": {},
-                "includeByName": {},
-                "indexByName": {},
-                "renameByName": {
-                  "Value": "Envoy Server State"
-                }
-              }
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": " sum(kube_pod_container_resource_requests{pod=\"${pod}\",container=\"airlock-microgateway-engine\",resource=\"cpu\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Request",
+              "range": true,
+              "refId": "CPU Requested"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "rate(container_cpu_usage_seconds_total{pod=\"${pod}\",container=\"airlock-microgateway-engine\"}[$__rate_interval])",
+              "hide": false,
+              "legendFormat": "Usage",
+              "range": true,
+              "refId": "CPU Usage"
             }
           ],
-          "type": "stat"
+          "title": "CPU Usage Microgateway Engine",
+          "type": "timeseries"
         },
         {
           "datasource": {
@@ -9386,6 +10304,7 @@ data:
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -9449,9 +10368,9 @@ data:
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 8,
+            "h": 7,
+            "w": 6,
+            "x": 10,
             "y": 5
           },
           "id": 10,
@@ -9604,9 +10523,9 @@ data:
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 12,
+            "h": 7,
+            "w": 6,
+            "x": 16,
             "y": 5
           },
           "id": 33,
@@ -9660,7 +10579,131 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "CPU usage over time of the Airlock Microgateway Engine container.",
+          "description": "State of the Envoy Server",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "fieldMinMax": false,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "green",
+                      "index": 0,
+                      "text": "LIVE"
+                    },
+                    "1": {
+                      "color": "yellow",
+                      "index": 1,
+                      "text": "DRAINING"
+                    },
+                    "2": {
+                      "color": "yellow",
+                      "index": 2,
+                      "text": "PRE_INITIALIZING"
+                    },
+                    "3": {
+                      "color": "yellow",
+                      "index": 3,
+                      "text": "INITIALIZING"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "color": "#808080",
+                      "index": 4,
+                      "text": "n/a"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "string"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 9
+          },
+          "id": 39,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "firstNotNull"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "envoy_server_state{gateway_kind=\"${gateway_kind}\", gateway=\"${gateway_name}\", container=\"airlock-microgateway-engine\", pod=\"${pod}\"}",
+              "format": "table",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "Errors",
+              "useBackend": false
+            }
+          ],
+          "title": "Envoy Server State",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Value": "Envoy Server State"
+                }
+              }
+            }
+          ],
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "CPU usage over time of the Airlock Microgateway Session Agent container.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -9755,12 +10798,12 @@ data:
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 16,
-            "y": 5
+            "h": 7,
+            "w": 6,
+            "x": 4,
+            "y": 12
           },
-          "id": 3,
+          "id": 41,
           "options": {
             "legend": {
               "calcs": [],
@@ -9782,7 +10825,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": " sum(kube_pod_container_resource_limits{pod=\"${pod}\",container=\"airlock-microgateway-engine\",resource=\"cpu\"})",
+              "expr": " sum(kube_pod_container_resource_limits{pod=\"${pod}\",container=\"airlock-microgateway-session-agent\",resource=\"cpu\"})",
               "hide": false,
               "instant": false,
               "legendFormat": "Limit",
@@ -9795,7 +10838,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": " sum(kube_pod_container_resource_requests{pod=\"${pod}\",container=\"airlock-microgateway-engine\",resource=\"cpu\"})",
+              "expr": " sum(kube_pod_container_resource_requests{pod=\"${pod}\",container=\"airlock-microgateway-session-agent\",resource=\"cpu\"})",
               "hide": false,
               "instant": false,
               "legendFormat": "Request",
@@ -9808,14 +10851,178 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "rate(container_cpu_usage_seconds_total{pod=\"${pod}\",container=\"airlock-microgateway-engine\"}[$__rate_interval])",
+              "expr": "rate(container_cpu_usage_seconds_total{pod=\"${pod}\",container=\"airlock-microgateway-session-agent\"}[$__rate_interval])",
               "hide": false,
               "legendFormat": "Usage",
               "range": true,
               "refId": "CPU Usage"
             }
           ],
-          "title": "CPU Usage Microgateway Engine",
+          "title": "CPU Usage Microgateway Session Agent",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Memory usage over time of the Airlock Microgateway Session Agent container.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Limit"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "yellow",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Request"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "green",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 6,
+            "x": 10,
+            "y": 12
+          },
+          "id": 40,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "kube_pod_container_resource_limits{pod=\"${pod}\",container=\"airlock-microgateway-session-agent\",resource=\"memory\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Limit",
+              "range": true,
+              "refId": "Memory Limit"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "kube_pod_container_resource_requests{pod=\"${pod}\", container=\"airlock-microgateway-session-agent\", resource=\"memory\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Request",
+              "range": true,
+              "refId": "Memory Request"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "container_memory_usage_bytes{pod=\"${pod}\",container=\"airlock-microgateway-session-agent\"}",
+              "hide": false,
+              "legendFormat": "Usage",
+              "range": true,
+              "refId": "Memory Usage"
+            }
+          ],
+          "title": "Memory Microgateway Session Agent",
           "type": "timeseries"
         },
         {
@@ -9912,10 +11119,10 @@ data:
             ]
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 20,
-            "y": 5
+            "h": 7,
+            "w": 6,
+            "x": 16,
+            "y": 12
           },
           "id": 7,
           "options": {
@@ -9966,20 +11173,34 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Version of the Airlock Microgateway Engine container.",
+          "description": "Readiness status of the Airlock Microgateway Engine container.",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "text",
-                "mode": "fixed"
+                "mode": "thresholds"
               },
               "mappings": [
                 {
                   "options": {
-                    "match": "null",
-                    "result": {
-                      "color": "#808080",
+                    "0": {
+                      "color": "orange",
+                      "index": 2,
+                      "text": "Warn"
+                    },
+                    "1": {
+                      "color": "green",
                       "index": 0,
+                      "text": "OK"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "color": "#83807d",
+                      "index": 1,
                       "text": "n/a"
                     }
                   },
@@ -9991,7 +11212,7 @@ data:
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -10000,11 +11221,11 @@ data:
           },
           "gridPos": {
             "h": 3,
-            "w": 8,
+            "w": 4,
             "x": 0,
-            "y": 8
+            "y": 13
           },
-          "id": 36,
+          "id": 20,
           "options": {
             "colorMode": "value",
             "graphMode": "none",
@@ -10015,7 +11236,7 @@ data:
               "calcs": [
                 "last"
               ],
-              "fields": "/^version$/",
+              "fields": "",
               "values": false
             },
             "showPercentChange": false,
@@ -10031,15 +11252,108 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "microgateway_build_info{container=\"airlock-microgateway-engine\",pod=\"${pod}\"}",
-              "format": "table",
+              "expr": "kube_pod_container_status_ready{container=\"airlock-microgateway-engine\",pod=\"${pod}\"}",
               "instant": true,
-              "legendFormat": "Version",
+              "legendFormat": "Health",
               "range": false,
-              "refId": "Version"
+              "refId": "A"
             }
           ],
-          "title": "Airlock Microgateway Engine Version",
+          "title": "Engine Readiness",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Readiness status of the Airlock Microgateway Session Agent container.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "orange",
+                      "index": 2,
+                      "text": "Warn"
+                    },
+                    "1": {
+                      "color": "green",
+                      "index": 0,
+                      "text": "OK"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "color": "#83807d",
+                      "index": 1,
+                      "text": "n/a"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 0,
+            "y": 16
+          },
+          "id": 42,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "kube_pod_container_status_ready{container=\"airlock-microgateway-session-agent\",pod=\"${pod}\"}",
+              "instant": true,
+              "legendFormat": "Health",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "Session Agent Readiness",
           "type": "stat"
         }
       ],
@@ -10137,7 +11451,7 @@ data:
               "type": "prometheus",
               "uid": "${DS_PROMETHEUS}"
             },
-            "definition": "label_values(microgateway_build_info{gateway_kind=\"$gateway_kind\", namespace=\"$namespace\", gateway=\"$gateway_name\"},pod)",
+            "definition": "query_result(max_over_time(microgateway_build_info{container=\"airlock-microgateway-engine\", gateway_kind=\"$gateway_kind\", namespace=\"$namespace\", gateway=\"$gateway_name\"}[$__range]) > 0)",
             "description": "Allows to select the pod to display the system metrics for.",
             "hide": 2,
             "includeAll": true,
@@ -10146,12 +11460,12 @@ data:
             "name": "pod",
             "options": [],
             "query": {
-              "qryType": 1,
-              "query": "label_values(microgateway_build_info{gateway_kind=\"$gateway_kind\", namespace=\"$namespace\", gateway=\"$gateway_name\"},pod)",
+              "qryType": 3,
+              "query": "query_result(max_over_time(microgateway_build_info{container=\"airlock-microgateway-engine\", gateway_kind=\"$gateway_kind\", namespace=\"$namespace\", gateway=\"$gateway_name\"}[$__range]) > 0)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,
-            "regex": "",
+            "regex": "/pod=\"([^\"]+)\"/",
             "type": "query"
           }
         ]
@@ -10164,7 +11478,7 @@ data:
       "timezone": "browser",
       "title": "Airlock Microgateway System - Metrics",
       "uid": "ceg3c5leab4ddfzkd",
-      "version": 2,
+      "version": 4,
       "weekStart": ""
     }
 kind: ConfigMap
@@ -10177,9 +11491,9 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-systemmetrics
   namespace: syn-airlock-microgateway
 ---
@@ -10199,6 +11513,12 @@ data:
       ],
       "__elements": {},
       "__requires": [
+        {
+          "type": "panel",
+          "id": "barchart",
+          "name": "Bar chart",
+          "version": ""
+        },
         {
           "type": "grafana",
           "id": "grafana",
@@ -10330,7 +11650,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range]))",
+              "expr": "round(sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range])))",
               "legendFormat": "Total Requests",
               "range": true,
               "refId": "Total Requests"
@@ -10351,6 +11671,16 @@ data:
                 "mode": "thresholds"
               },
               "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "0%"
+                    }
+                  },
+                  "type": "value"
+                },
                 {
                   "options": {
                     "match": "null+nan",
@@ -10476,7 +11806,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"1..\"}[$__range]) or on () vector(0))",
+              "expr": "round(sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"1..\"}[$__range])) or on () vector(0))",
               "legendFormat": "Total 1xx Requests",
               "range": true,
               "refId": "1xx Requests"
@@ -10541,7 +11871,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"2..\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"2..\"}[$__range])))",
               "legendFormat": "Total 2xx Requests",
               "range": true,
               "refId": "2xx Requests"
@@ -10617,7 +11947,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"3..\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"3..\"}[$__range])))",
               "legendFormat": "Total 3xx Requests",
               "range": true,
               "refId": "3xx Requests"
@@ -10697,7 +12027,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"4..\"}[$__range]))",
+              "expr": "round(sum(increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"4..\"}[$__range])))",
               "legendFormat": "Total 4xx Requests",
               "range": true,
               "refId": "4xx Requests"
@@ -10777,7 +12107,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"5..\"}[$__range]))",
+              "expr": "round(sum (increase(envoy_cluster_upstream_rq{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`, envoy_response_code=~\"5..\"}[$__range])))",
               "legendFormat": "Total 5xx Requests",
               "range": true,
               "refId": "5xx Requests"
@@ -11600,6 +12930,852 @@ data:
             "x": 0,
             "y": 38
           },
+          "id": 32,
+          "panels": [],
+          "title": "Upstream TLS Connection Metrics",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Number of successful TLS handshakes to upstream backends.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 0,
+            "y": 39
+          },
+          "id": 33,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(sum(increase(envoy_cluster_ssl_handshake{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range])))",
+              "instant": false,
+              "legendFormat": "TLS Connection Handshakes",
+              "range": true,
+              "refId": "TLS Connection Handshakes",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              }
+            }
+          ],
+          "title": "TLS Connection Handshakes",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Percentage of TLS connection errors to upstream backends (does not include failed certificate verifications).",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "text",
+                      "index": 1,
+                      "text": "0%"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "color": "text",
+                      "index": 0,
+                      "text": "0%"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 4,
+            "y": 39
+          },
+          "id": 34,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum (increase(envoy_cluster_ssl_connection_error{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range]))/\nsum (increase(envoy_cluster_ssl_handshake{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range]))",
+              "legendFormat": "TLS Connection Error Rate",
+              "range": true,
+              "refId": "TLS Connection Error Rate",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              }
+            }
+          ],
+          "title": "TLS Connection Error Rate",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Number of TLS connection errors to upstream backends (does not include failed certificate verifications).",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 8,
+            "y": 39
+          },
+          "id": 35,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "round(sum (increase(envoy_cluster_ssl_connection_error{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range])))",
+              "legendFormat": "TLS Connection errors",
+              "range": true,
+              "refId": "TLS Connection errors",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              }
+            }
+          ],
+          "title": "TLS Connection Errors",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS connection handshakes and number of TLS connection errors per second.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "TLS connection errors per second"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "orange",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 44
+          },
+          "id": 36,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "editorMode": "code",
+              "expr": "sum(rate(envoy_cluster_ssl_handshake{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[1m]))",
+              "legendFormat": "TLS handshakes per second",
+              "range": true,
+              "refId": "TLS handshakes per second",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              }
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(envoy_cluster_ssl_connection_error{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[1m]))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "TLS connection errors per second",
+              "range": true,
+              "refId": "TLS connection errors per second"
+            }
+          ],
+          "title": "TLS Connections",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS protocols by versions used in successful TLS connections.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 54
+          },
+          "id": 37,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.8,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "Field",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum by (envoy_ssl_version) (increase(envoy_cluster_ssl_versions{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range]))",
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "TLS Protocols",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              }
+            }
+          ],
+          "title": "TLS Protocols",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "labelsToFields": false,
+                "reducers": [
+                  "lastNotNull"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Field": false
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Last *": "# Observations"
+                }
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS signature algorithms used in successful TLS connections.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 54
+          },
+          "id": 40,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.8,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "Field",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(sum by (envoy_ssl_sigalg) (increase(envoy_cluster_ssl_sigalgs{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range])))",
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "TLS Signature Algorithms",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              }
+            }
+          ],
+          "title": "TLS Signature Algorithms",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "reducers": [
+                  "lastNotNull"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Last *": "# Observations"
+                }
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS ciphers used in successful TLS connections.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 61
+          },
+          "id": 38,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.8,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "Field",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(sum by (cipher_suite) (increase(envoy_cluster_ssl_ciphers{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range])))",
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "TLS Ciphers",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              }
+            }
+          ],
+          "title": "TLS Ciphers",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "labelsToFields": false,
+                "reducers": [
+                  "lastNotNull"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Last *": "# Observations"
+                }
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "TLS curves used in successful TLS connections.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 61
+          },
+          "id": 39,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.8,
+            "fullHighlight": false,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "orientation": "horizontal",
+            "showValue": "never",
+            "stacking": "none",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            },
+            "xField": "Field",
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "11.4.0",
+          "targets": [
+            {
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "round(sum by (envoy_ssl_curve) (increase(envoy_cluster_ssl_curves{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range])))",
+              "instant": true,
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "TLS Curves",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              }
+            }
+          ],
+          "title": "TLS Curves",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "reducers": [
+                  "lastNotNull"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "Last *": "# Observations"
+                }
+              }
+            }
+          ],
+          "type": "barchart"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 68
+          },
           "id": 23,
           "panels": [],
           "title": "Upstream Connection Metrics",
@@ -11610,7 +13786,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Number of connections towards upstream applications.",
+          "description": "Number of newly established connections towards upstream applications.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -11633,7 +13809,7 @@ data:
             "h": 5,
             "w": 4,
             "x": 0,
-            "y": 39
+            "y": 69
           },
           "id": 26,
           "options": {
@@ -11661,7 +13837,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(envoy_cluster_upstream_cx_total{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range]))",
+              "expr": "round(sum(increase(envoy_cluster_upstream_cx_total{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range])))",
               "legendFormat": "Total Connections",
               "range": true,
               "refId": "Connections"
@@ -11702,7 +13878,7 @@ data:
             "h": 5,
             "w": 4,
             "x": 4,
-            "y": 39
+            "y": 69
           },
           "id": 27,
           "options": {
@@ -11730,7 +13906,7 @@ data:
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(envoy_cluster_upstream_cx_connect_fail{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range]))",
+              "expr": "round(sum(increase(envoy_cluster_upstream_cx_connect_fail{managed_by=~\"${operator:regex}\", namespace=~\"${namespace:regex}\", gateway_kind=~\"${gateway_kind:regex}\", gateway=~\"${gateway_name:regex}\", envoy_cluster_name=~`(^upstream_.+|^httproute/.+)`,upstream=~`(${gateway_httproute:regex}|${sidecar_application_port:regex})`}[$__range])))",
               "legendFormat": "Total Failed Connections",
               "range": true,
               "refId": "Total Failed Connections"
@@ -11767,7 +13943,7 @@ data:
             "h": 5,
             "w": 4,
             "x": 8,
-            "y": 39
+            "y": 69
           },
           "id": 28,
           "options": {
@@ -11832,7 +14008,7 @@ data:
             "h": 5,
             "w": 4,
             "x": 12,
-            "y": 39
+            "y": 69
           },
           "id": 29,
           "options": {
@@ -11874,7 +14050,7 @@ data:
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Number of connections per second to upstream applications.",
+          "description": "Number of newly established connections per second to upstream applications.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -11931,7 +14107,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 44
+            "y": 74
           },
           "id": 1,
           "options": {
@@ -12027,7 +14203,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 44
+            "y": 74
           },
           "id": 2,
           "options": {
@@ -12122,7 +14298,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 52
+            "y": 82
           },
           "id": 5,
           "options": {
@@ -12217,7 +14393,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 52
+            "y": 82
           },
           "id": 22,
           "options": {
@@ -12359,7 +14535,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 60
+            "y": 90
           },
           "id": 8,
           "options": {
@@ -12525,7 +14701,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 60
+            "y": 90
           },
           "id": 4,
           "options": {
@@ -12748,7 +14924,7 @@ data:
       "timezone": "browser",
       "title": "Airlock Microgateway Upstream - Metrics",
       "uid": "cehkyfe2vvaddswwa",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }
 kind: ConfigMap
@@ -12761,8 +14937,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: microgateway-operator
     app.kubernetes.io/part-of: microgateway
-    app.kubernetes.io/version: 4.7.5
+    app.kubernetes.io/version: 4.8.1
     grafana_dashboard: '1'
-    helm.sh/chart: microgateway-4.7.5
+    helm.sh/chart: microgateway-4.8.1
   name: airlock-microgateway-dashboard-upstreammetrics
   namespace: syn-airlock-microgateway
