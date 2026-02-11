@@ -1,3 +1,24 @@
 # Overwrite parameters here
+parameters:
+  airlock_microgateway:
+    defaultSpec: {} # global defaults
 
-# parameters: {...}
+  vshn_airlock_prod:
+    defaultSpec: {} # environment defaults
+    instances:
+      gateway-prod-01: # instance config
+        namespace: vshn-airlock-prod-01
+        spec: {}
+      gateway-prod-02: # instance config
+        namespace: vshn-airlock-prod-02
+        spec: {}
+
+  vshn_airlock_dev:
+    defaultSpec: {} # environment defaults
+    instances:
+      gateway-dev-01: # instance configs
+        namespace: vshn-airlock-dev-01
+        spec: {}
+      gateway-dev-02: # instance configs
+        namespace: vshn-airlock-dev-01
+        spec: {}
