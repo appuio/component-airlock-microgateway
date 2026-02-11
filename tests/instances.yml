@@ -1,4 +1,3 @@
----
 applications:
   - airlock-microgateway
 
@@ -11,37 +10,6 @@ parameters:
   #        source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
   #        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
   airlock_microgateway:
-    instances:
-      vshn-default-test-01:
-        gateway:
-          spec:
-            gatewayClassName: test-default
-            listeners:
-              - allowedRoutes:
-                  namespaces:
-                    from: All
-                name: http
-                port: 80
-                protocol: HTTP
-        gatewayParameters:
-          spec:
-            kubernetes:
-              deployment:
-                placement:
-                  affinity:
-                    podAntiAffinity:
-                      requiredDuringSchedulingIgnoredDuringExecution:
-                        - labelSelector:
-                            matchExpressions:
-                              - key: gateway.networking.k8s.io/gateway-name
-                                operator: In
-                                values:
-                                  - "vshn-test-default-01"
-                          topologyKey: kubernetes.io/hostname
-                  nodeSelector:
-                    node-role.kubernetes.io/test: ""
-      vshn-test-default-02: {}
-
     default:
       namespace:
         labels:
@@ -60,51 +28,15 @@ parameters:
       pdb:
         metadata:
           labels:
-            gateway.networking.k8s.io/gateway-name: vshn-default-test-01
-          name: vshn-default-test-01
-          namespace: vshn-default-test-01
+            gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+          name: vshn-instances-test-01
+          namespace: vshn-instances-test-01
         spec:
           minAvailable: 1
           selector:
             matchLabels:
-              "gateway.networking.k8s.io/gateway-name": vshn-default-test-01
+              "gateway.networking.k8s.io/gateway-name": vshn-instances-test-01
           unhealthyPodEvictionPolicy: IfHealthyBudget
-      gatewayParameters:
-        spec:
-          defaults:
-            downstream:
-              remoteIP:
-                proxyProtocol: {}
-            sessionHandlingRef:
-              name: redis-session
-          features:
-            envoyExtensionPolicyEnabled: true
-            insecureTLSAllowed: true
-          kubernetes:
-            deployment:
-              automountServiceAccountToken: false
-              engineContainer:
-                resources:
-                  requests:
-                    cpu: 100m
-                    memory: 256Mi
-                  limits:
-                    cpu: 1
-                    memory: 512Mi
-              placement:
-                affinity:
-                  podAntiAffinity:
-                    requiredDuringSchedulingIgnoredDuringExecution:
-                      - labelSelector:
-                          matchExpressions:
-                            - key: gateway.networking.k8s.io/gateway-name
-                              operator: In
-                              values:
-                                - "vshn-default-test-01"
-                        topologyKey: kubernetes.io/hostname
-                nodeSelector:
-                  node-role.kubernetes.io/infra: ""
-              replicas: 2
       redisProvider:
         spec:
           auth:
@@ -158,9 +90,10 @@ parameters:
           podSelector:
             matchLabels:
               gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
-              gateway.networking.k8s.io/gateway-name: vshn-default-test-01
+              gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
           policyTypes: [Egress]
           egress:
+            # allow Microgateway Operator
             - to:
                 - namespaceSelector:
                     matchLabels:
@@ -168,21 +101,14 @@ parameters:
               ports:
                 - port: 13377
                   protocol: TCP
-            - to:
-                - namespaceSelector:
-                    matchLabels:
-                      kubernetes.io/metadata.name: openshift-dns
-              ports:
-                - port: 5353
-                  protocol: UDP
       httpRedirect:
         metadata:
           name: http-filter-redirect
-          namespace: vshn-default-test-01
+          namespace: vshn-instances-test-01
         spec:
           parentRefs:
             - group: gateway.networking.k8s.io
-              name: vshn-default-test-01
+              name: vshn-instances-test-01
               kind: Gateway
               sectionName: http-default
           hostnames:
@@ -198,3 +124,86 @@ parameters:
                   requestRedirect:
                     scheme: https
                     statusCode: 301
+
+  instances:
+    default:
+      namespace:
+        labels:
+          appuio.ch/waf: airlock
+          vshn.microgateway/redis-sync-secret: "true"
+      gateway:
+        spec:
+          gatewayClassName: test-default
+          listeners:
+            - allowedRoutes:
+                namespaces:
+                  from: default
+              name: default
+              port: 80
+              protocol: default
+      gatewayParameters:
+        spec:
+          defaults:
+            downstream:
+              remoteIP:
+                proxyProtocol: {}
+            sessionHandlingRef:
+              name: redis-session
+          features:
+            envoyExtensionPolicyEnabled: true
+            insecureTLSAllowed: true
+          kubernetes:
+            deployment:
+              automountServiceAccountToken: false
+              engineContainer:
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    cpu: 1
+                    memory: 512Mi
+              placement:
+                affinity:
+                  podAntiAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                      - labelSelector:
+                          matchExpressions:
+                            - key: gateway.networking.k8s.io/gateway-name
+                              operator: In
+                              values:
+                                - "vshn-instances-test-01"
+                        topologyKey: kubernetes.io/hostname
+                nodeSelector:
+                  node-role.kubernetes.io/infra: ""
+              replicas: 2
+    instances:
+      test-instance-01:
+        gateway:
+          spec:
+            gatewayClassName: test-instances-01
+            listeners:
+              - allowedRoutes:
+                  namespaces:
+                    from: All
+                name: http
+                port: 80
+                protocol: HTTP
+        gatewayParameters:
+          spec:
+            kubernetes:
+              deployment:
+                placement:
+                  affinity:
+                    podAntiAffinity:
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        - labelSelector:
+                            matchExpressions:
+                              - key: gateway.networking.k8s.io/gateway-name
+                                operator: In
+                                values:
+                                  - "vshn-instances-test-01"
+                          topologyKey: kubernetes.io/hostname
+                  nodeSelector:
+                    node-role.kubernetes.io/test: ""
+      test-instance-02: {}

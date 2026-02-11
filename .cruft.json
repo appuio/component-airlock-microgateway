@@ -7,7 +7,7 @@
       "name": "airlock-microgateway",
       "slug": "airlock-microgateway",
       "parameter_key": "airlock_microgateway",
-      "test_cases": "defaults",
+      "test_cases": "defaults instances",
       "add_lib": "n",
       "add_pp": "n",
       "add_golden": "y",

@@ -2,4 +2,7 @@ parameters:
   airlock_microgateway:
     =_metadata:
       multi_tenant: true
-    namespace: syn-airlock-microgateway
+      multi_instance: true
+
+    default: {}
+    instances: {}

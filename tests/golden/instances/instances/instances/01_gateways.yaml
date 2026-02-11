@@ -1,0 +1,374 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: test-instance-01
+  namespace: test-instance-01
+spec:
+  gatewayClassName: test-instances-01
+  listeners:
+    - allowedRoutes:
+        namespaces:
+          from: All
+      name: http
+      port: 80
+      protocol: HTTP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: test-instance-02
+  namespace: test-instance-02
+spec:
+  gatewayClassName: test-default
+  listeners:
+    - allowedRoutes:
+        namespaces:
+          from: default
+      name: default
+      port: 80
+      protocol: default
+    - allowedRoutes:
+        namespaces:
+          from: default
+      name: default
+      port: 80
+      protocol: default
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: test-instance-01
+  namespace: test-instance-01
+spec:
+  defaults:
+    downstream:
+      remoteIP:
+        proxyProtocol: {}
+    sessionHandlingRef:
+      name: redis-session
+  features:
+    envoyExtensionPolicyEnabled: true
+    insecureTLSAllowed: true
+  kubernetes:
+    deployment:
+      automountServiceAccountToken: false
+      engineContainer:
+        resources:
+          limits:
+            cpu: 1
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      placement:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: gateway.networking.k8s.io/gateway-name
+                      operator: In
+                      values:
+                        - vshn-instances-test-01
+                topologyKey: kubernetes.io/hostname
+        nodeSelector:
+          node-role.kubernetes.io/infra: ''
+          node-role.kubernetes.io/test: ''
+      replicas: 2
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: test-instance-02
+  namespace: test-instance-02
+spec:
+  defaults:
+    downstream:
+      remoteIP:
+        proxyProtocol: {}
+    sessionHandlingRef:
+      name: redis-session
+  features:
+    envoyExtensionPolicyEnabled: true
+    insecureTLSAllowed: true
+  kubernetes:
+    deployment:
+      automountServiceAccountToken: false
+      engineContainer:
+        resources:
+          limits:
+            cpu: 1
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      placement:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: gateway.networking.k8s.io/gateway-name
+                      operator: In
+                      values:
+                        - vshn-instances-test-01
+                topologyKey: kubernetes.io/hostname
+        nodeSelector:
+          node-role.kubernetes.io/infra: ''
+      replicas: 2
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-filter-redirect
+  namespace: test-instance-01
+spec:
+  hostnames:
+    - '*.test.com'
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: vshn-instances-test-01
+      sectionName: http-default
+  rules:
+    - filters:
+        - requestRedirect:
+            scheme: https
+            statusCode: 301
+          type: RequestRedirect
+      matches:
+        - method: GET
+          path:
+            type: PathPrefix
+            value: /
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-filter-redirect
+  namespace: test-instance-02
+spec:
+  hostnames:
+    - '*.test.com'
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: vshn-instances-test-01
+      sectionName: http-default
+  rules:
+    - filters:
+        - requestRedirect:
+            scheme: https
+            statusCode: 301
+          type: RequestRedirect
+      matches:
+        - method: GET
+          path:
+            type: PathPrefix
+            value: /
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  gateway.networking.k8s.io/gateway-name: test-instance-01
+  labels:
+    gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  name: vshn-instances-test-01
+  namespace: test-instance-01
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  gateway.networking.k8s.io/gateway-name: test-instance-02
+  labels:
+    gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  name: vshn-instances-test-01
+  namespace: test-instance-02
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  namespace: test-instance-01
+spec:
+  egress:
+    - ports:
+        - port: 13377
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: syn-airlock-microgateway
+  podSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  policyTypes:
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  namespace: test-instance-02
+spec:
+  egress:
+    - ports:
+        - port: 13377
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: syn-airlock-microgateway
+  podSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  policyTypes:
+    - Egress
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: SessionHandling
+metadata:
+  name: test-instance-01
+  namespace: test-instance-01
+spec:
+  auth:
+    password:
+      secretRef:
+        name: redis-password
+    username: default
+  mode:
+    standalone:
+      host: redis-master
+      port: 6379
+  timeouts:
+    connect: 10s
+    maxDuration: 2s
+  tls:
+    certificateVerification:
+      custom:
+        trustedCA:
+          certificates:
+            - secretRef:
+                name: redis-ca
+    clientCertificate:
+      secretRef:
+        name: redis-clientcert
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: SessionHandling
+metadata:
+  name: test-instance-02
+  namespace: test-instance-02
+spec:
+  auth:
+    password:
+      secretRef:
+        name: redis-password
+    username: default
+  mode:
+    standalone:
+      host: redis-master
+      port: 6379
+  timeouts:
+    connect: 10s
+    maxDuration: 2s
+  tls:
+    certificateVerification:
+      custom:
+        trustedCA:
+          certificates:
+            - secretRef:
+                name: redis-ca
+    clientCertificate:
+      secretRef:
+        name: redis-clientcert
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: RedisProvider
+metadata:
+  name: test-instance-01
+  namespace: test-instance-01
+spec:
+  auth:
+    password:
+      secretRef:
+        name: redis-password
+    username: default
+  mode:
+    standalone:
+      host: redis-master
+      port: 6379
+  timeouts:
+    connect: 10s
+    maxDuration: 2s
+  tls:
+    certificateVerification:
+      custom:
+        trustedCA:
+          certificates:
+            - secretRef:
+                name: redis-ca
+    clientCertificate:
+      secretRef:
+        name: redis-clientcert
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: RedisProvider
+metadata:
+  name: test-instance-02
+  namespace: test-instance-02
+spec:
+  auth:
+    password:
+      secretRef:
+        name: redis-password
+    username: default
+  mode:
+    standalone:
+      host: redis-master
+      port: 6379
+  timeouts:
+    connect: 10s
+    maxDuration: 2s
+  tls:
+    certificateVerification:
+      custom:
+        trustedCA:
+          certificates:
+            - secretRef:
+                name: redis-ca
+    clientCertificate:
+      secretRef:
+        name: redis-clientcert
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    appuio.ch/waf: airlock
+    name: test-instance-01
+    openshift.io/cluster-monitoring: 'true'
+    vshn.microgateway/redis-sync-secret: 'true'
+  name: test-instance-01
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    appuio.ch/waf: airlock
+    name: test-instance-02
+    openshift.io/cluster-monitoring: 'true'
+    vshn.microgateway/redis-sync-secret: 'true'
+  name: test-instance-02
