@@ -9,42 +9,43 @@ local inv = kap.inventory();
 local params = inv.parameters.airlock_microgateway;
 
 // main template for airlock-microgateway
-local namespace = (
-  if params.monitoring.enabled && std.member(inv.applications, 'prometheus') then
-    prometheus.RegisterNamespace(kube.Namespace(params.namespace))
-  else if params.monitoring.enabled && inv.parameters.facts.distribution == 'openshift4' then
-    kube.Namespace(params.namespace) {
-      metadata+: {
-        labels+: { 'openshift.io/cluster-monitoring': 'true' },
-      },
-    }
-  else
-    kube.Namespace(params.namespace)
-) + {
-  metadata+: {
-    labels+: com.makeMergeable(params.namespaceLabels),
-  },
+local patchGateways(gateways) = [
+  params.default.gateway + gateway
+  for gateway in gateways
+];
+local extractInstances(field) = {
+  [name]: params.instances[name][field]
+  for name in std.objectFields(params.instances)
+  if std.objectHas(params.instances[name], field)
 };
 
-local params = params.airlock_microgateway;  // This is the merged global defaults and component instance parameters
-
-local make_gateway(name, cfg) = [
-  kube.Namespace(cfg.namespace),
-  gw.Gateway(name) {
-    metadata+: {
-      namespace: cfg.namespace,
-    },
-    spec:
-      params.default + com.makeMergeable(cfg.spec),
-  },
+local patchGatewayParameters(gatewayParameters) = [
+  params.default.gatewayParameters + gatewayParameter
+  for gatewayParameter in gatewayParameters
 ];
 
+local namespace() = [
+  kube.Namespace(instance.key) {
+    metadata+: {
+      labels+: { 'openshift.io/cluster-monitoring': 'true' },
+    },
+  }
+  + {
+    metadata+: {
+      labels+: com.makeMergeable(params.default.namespace.labels),
+    },
+  }
+  for instance in std.objectKeysValues(params.instances)
+];
 // Define outputs below
 {
-  [if std.length(params.gateway_parameters) > 0 then '01_gateway_parameters']:
-    com.generateResources(gw.namespaced(params.gateway_parameters), gw.GatewayParameters),
-  [if std.length(params.gateways) > 0 then '01_gateways']:
-    com.generateResources(gw.namespaced(params.gateways), gw.Gateway),
-  [if std.length(params.gateways) > 0 && gw.has_cilium then '01_gateway_networkpolicies']:
-    gw.gateway_cnps,
+  [if std.length(params.instances) > 0 then '01_gateways']:
+    patchGateways(com.generateResources(extractInstances('gateway'), gw.Gateway)) +
+    patchGatewayParameters(com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters)) +
+    namespace(),
+
+  defaultSpec: [params.default],
+  params: [params],
+  instanceParams: [inv.parameters._instance],
+  //mergedGateway: mergedGateways(),
 }

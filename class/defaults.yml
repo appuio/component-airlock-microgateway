@@ -3,4 +3,16 @@ parameters:
     =_metadata:
       multi_tenant: true
       multi_instance: true
-    namespace: syn-airlock-microgateway
+
+    default:
+      spec:
+        gatewayClassName: microgateway-cloudscale
+        infrastructure:
+          parametersRef:
+            group: microgateway.airlock.com
+            kind: GatewayParameters
+            name: parameters-dev-01
+        listeners:
+          - name: class_default
+            protocol: HTTP
+            port: 80

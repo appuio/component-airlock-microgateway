@@ -19,6 +19,23 @@ parameters:
               name: default
               port: 80
               protocol: default
+
+  instances:
+    default:
+      namespace:
+        labels:
+          appuio.ch/waf: airlock
+          vshn.microgateway/redis-sync-secret: "true"
+      gateway:
+        spec:
+          gatewayClassName: test-default
+          listeners:
+            - allowedRoutes:
+                namespaces:
+                  from: default
+              name: default
+              port: 80
+              protocol: default
       gatewayParameters:
         spec:
           defaults:
@@ -55,21 +72,18 @@ parameters:
                 nodeSelector:
                   node-role.kubernetes.io/infra: ""
               replicas: 2
-
     instances:
       test-instance-01:
         namespace: vshn-airlock-test-01
-        gateway:
-          spec:
-            gatewayClassName: test-instances-01
-            listeners:
-              - allowedRoutes:
-                  namespaces:
-                    from: All
-                name: http
-                port: 80
-                protocol: HTTP
-                gateway_parameters:
+        spec:
+          gatewayClassName: test-instances-01
+          listeners:
+            - allowedRoutes:
+                namespaces:
+                  from: All
+              name: http
+              port: 80
+              protocol: HTTP
         gatewayParameters:
           spec:
             kubernetes:
@@ -87,6 +101,6 @@ parameters:
                           topologyKey: kubernetes.io/hostname
                   nodeSelector:
                     node-role.kubernetes.io/test: ""
-
       test-instance-02:
         namespace: vshn-airlock-test-02
+        spec: {}
