@@ -1,3 +1,42 @@
+egressNetpol:
+  spec:
+    egress:
+      - ports:
+          - port: 13377
+            protocol: TCP
+        to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: syn-airlock-microgateway
+      - ports:
+          - port: 5353
+            protocol: UDP
+        to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: openshift-dns
+      - ports:
+          - port: 6379
+            protocol: TCP
+        to:
+          - namespaceSelector:
+              matchLabels:
+                appcat.vshn.io/claim-namespace: vshn-airlock-redis
+      - ports:
+          - port: 8080
+            protocol: TCP
+          - port: 8443
+            protocol: TCP
+        to:
+          - namespaceSelector:
+              matchLabels:
+                appcat.vshn.io/claim-namespace: broker-test
+    podSelector:
+      matchLabels:
+        gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+        gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+    policyTypes:
+      - Egress
 gateway:
   spec:
     gatewayClassName: test-default
@@ -77,6 +116,18 @@ namespace:
   labels:
     appuio.ch/waf: airlock
     vshn.microgateway/redis-sync-secret: 'true'
+pdb:
+  metadata:
+    labels:
+      gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+    name: vshn-airlock-dev-01
+    namespace: vshn-airlock-dev-01
+  spec:
+    minAvailable: 1
+    selector:
+      matchLabels:
+        gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+    unhealthyPodEvictionPolicy: IfHealthyBudget
 spec:
   gatewayClassName: microgateway-cloudscale
   infrastructure:

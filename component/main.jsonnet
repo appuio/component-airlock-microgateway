@@ -35,6 +35,23 @@ local httpRoute = function(name='') {
   spec: {},
 };
 
+local pdb = function(name='') {
+  apiVersion: 'policy/v1',
+  kind: 'PodDisruptionBudget',
+  metadata: {
+    namespace: name,
+    'gateway.networking.k8s.io/gateway-name': name,
+  },
+};
+
+local egressNetpol = function(name='') {
+  apiVersion: 'networking.k8s.io/v1',
+  kind: 'NetworkPolicy',
+  metadata: {
+    namespace: name,
+  },
+};
+
 local namespace() = [
   kube.Namespace(instance.key) {
     metadata+: {
@@ -54,6 +71,8 @@ local namespace() = [
     patchObjects('gateway', com.generateResources(extractInstances('gateway'), gw.Gateway)) +
     patchObjects('gatewayParameters', com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters)) +
     patchObjects('httpRedirect', com.generateResources(extractInstances('httpRedirect'), httpRoute)) +
+    patchObjects('pdb', com.generateResources(extractInstances('pdb'), pdb)) +
+    patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol)) +
     namespace(),
   httpRouteUnpatched: [com.generateResources(extractInstances('httpRedirect'), httpRoute)],
   defaultSpec: [params.default],
