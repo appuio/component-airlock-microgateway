@@ -14,9 +14,12 @@ local patchGateways(gateways) = [
   for gateway in gateways
 ];
 local extractInstances(field) = {
-  [name]: params.instances[name][field]
+  [name]:
+    if std.objectHas(params.instances[name], field)
+    then params.instances[name][field]
+    else {}
   for name in std.objectFields(params.instances)
-  if std.objectHas(params.instances[name], field)
+
 };
 
 local patchGatewayParameters(gatewayParameters) = [
@@ -46,6 +49,6 @@ local namespace() = [
 
   defaultSpec: [params.default],
   params: [params],
-  instanceParams: [inv.parameters._instance],
+  instanceParams: [params.instances],
   //mergedGateway: mergedGateways(),
 }

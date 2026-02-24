@@ -71,6 +71,16 @@ default:
         protocol: HTTP
 instances:
   test-instance-01:
+    gateway:
+      spec:
+        gatewayClassName: test-instances-01
+        listeners:
+          - allowedRoutes:
+              namespaces:
+                from: All
+            name: http
+            port: 80
+            protocol: HTTP
     gatewayParameters:
       spec:
         kubernetes:
@@ -88,16 +98,4 @@ instances:
                       topologyKey: kubernetes.io/hostname
               nodeSelector:
                 node-role.kubernetes.io/test: ''
-    namespace: vshn-airlock-test-01
-    spec:
-      gatewayClassName: test-instances-01
-      listeners:
-        - allowedRoutes:
-            namespaces:
-              from: All
-          name: http
-          port: 80
-          protocol: HTTP
-  test-instance-02:
-    namespace: vshn-airlock-test-02
-    spec: {}
+  test-instance-02: {}
