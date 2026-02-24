@@ -48,6 +48,29 @@ default:
             nodeSelector:
               node-role.kubernetes.io/infra: ''
           replicas: 2
+  httpRedirect:
+    metadata:
+      name: http-filter-redirect
+      namespace: vshn-airlock-dev-01
+    spec:
+      hostnames:
+        - '*.hintest.ch'
+      parentRefs:
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          name: vshn-airlock-dev-01
+          sectionName: http-default
+      rules:
+        - filters:
+            - requestRedirect:
+                scheme: https
+                statusCode: 301
+              type: RequestRedirect
+          matches:
+            - method: GET
+              path:
+                type: PathPrefix
+                value: /
   namespace:
     labels:
       appuio.ch/waf: airlock

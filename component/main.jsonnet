@@ -7,25 +7,33 @@ local prometheus = import 'lib/prometheus.libsonnet';
 local inv = kap.inventory();
 // The hiera parameters for the component
 local params = inv.parameters.airlock_microgateway;
-
+local metadataNamespace(name) = {
+  metadata: {
+    namespace: name,
+  },
+};
 // main template for airlock-microgateway
-local patchGateways(gateways) = [
-  params.default.gateway + gateway
-  for gateway in gateways
-];
 local extractInstances(field) = {
   [name]:
     if std.objectHas(params.instances[name], field)
-    then params.instances[name][field]
-    else {}
+    then std.mergePatch(params.instances[name][field], metadataNamespace(name))
+    else metadataNamespace(name)
   for name in std.objectFields(params.instances)
-
 };
 
-local patchGatewayParameters(gatewayParameters) = [
-  params.default.gatewayParameters + gatewayParameter
-  for gatewayParameter in gatewayParameters
+local patchObjects(key, objs) = [
+  std.mergePatch(params.default[key], obj)
+  for obj in objs
 ];
+
+local httpRoute = function(name='') {
+  apiVersion: 'gateway.networking.k8s.io/v1',
+  kind: 'HTTPRoute',
+  metadata: {
+    namespace: name,
+  },
+  spec: {},
+};
 
 local namespace() = [
   kube.Namespace(instance.key) {
@@ -43,10 +51,11 @@ local namespace() = [
 // Define outputs below
 {
   [if std.length(params.instances) > 0 then '01_gateways']:
-    patchGateways(com.generateResources(extractInstances('gateway'), gw.Gateway)) +
-    patchGatewayParameters(com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters)) +
+    patchObjects('gateway', com.generateResources(extractInstances('gateway'), gw.Gateway)) +
+    patchObjects('gatewayParameters', com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters)) +
+    patchObjects('httpRedirect', com.generateResources(extractInstances('httpRedirect'), httpRoute)) +
     namespace(),
-
+  httpRouteUnpatched: [com.generateResources(extractInstances('httpRedirect'), httpRoute)],
   defaultSpec: [params.default],
   params: [params],
   instanceParams: [params.instances],

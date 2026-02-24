@@ -2,15 +2,10 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: test-instance-01
+  namespace: test-instance-01
 spec:
   gatewayClassName: test-instances-01
   listeners:
-    - allowedRoutes:
-        namespaces:
-          from: default
-      name: default
-      port: 80
-      protocol: default
     - allowedRoutes:
         namespaces:
           from: All
@@ -23,6 +18,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: test-instance-02
+  namespace: test-instance-02
 spec:
   gatewayClassName: test-default
   listeners:
@@ -37,6 +33,7 @@ apiVersion: microgateway.airlock.com/v1alpha1
 kind: GatewayParameters
 metadata:
   name: test-instance-01
+  namespace: test-instance-01
 spec:
   defaults:
     downstream:
@@ -62,13 +59,6 @@ spec:
         affinity:
           podAntiAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                    - key: gateway.networking.k8s.io/gateway-name
-                      operator: In
-                      values:
-                        - vshn-airlock-dev-01
-                topologyKey: kubernetes.io/hostname
               - labelSelector:
                   matchExpressions:
                     - key: gateway.networking.k8s.io/gateway-name
@@ -85,6 +75,7 @@ apiVersion: microgateway.airlock.com/v1alpha1
 kind: GatewayParameters
 metadata:
   name: test-instance-02
+  namespace: test-instance-02
 spec:
   defaults:
     downstream:
@@ -120,6 +111,56 @@ spec:
         nodeSelector:
           node-role.kubernetes.io/infra: ''
       replicas: 2
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-filter-redirect
+  namespace: test-instance-01
+spec:
+  hostnames:
+    - '*.hintest.ch'
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: vshn-airlock-dev-01
+      sectionName: http-default
+  rules:
+    - filters:
+        - requestRedirect:
+            scheme: https
+            statusCode: 301
+          type: RequestRedirect
+      matches:
+        - method: GET
+          path:
+            type: PathPrefix
+            value: /
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-filter-redirect
+  namespace: test-instance-02
+spec:
+  hostnames:
+    - '*.hintest.ch'
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: vshn-airlock-dev-01
+      sectionName: http-default
+  rules:
+    - filters:
+        - requestRedirect:
+            scheme: https
+            statusCode: 301
+          type: RequestRedirect
+      matches:
+        - method: GET
+          path:
+            type: PathPrefix
+            value: /
 ---
 apiVersion: v1
 kind: Namespace

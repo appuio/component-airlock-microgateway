@@ -19,6 +19,30 @@ parameters:
               name: default
               port: 80
               protocol: default
+      httpRedirect:
+        metadata:
+          name: http-filter-redirect
+          namespace: vshn-airlock-dev-01
+        spec:
+          parentRefs:
+            - group: gateway.networking.k8s.io
+              name: vshn-airlock-dev-01
+              kind: Gateway
+              sectionName: http-default
+          hostnames:
+            - "*.hintest.ch"
+          rules:
+            - matches:
+                - method: GET
+                  path:
+                    type: PathPrefix
+                    value: /
+              filters:
+                - type: RequestRedirect
+                  requestRedirect:
+                    scheme: https
+                    statusCode: 301
+
   instances:
     default:
       namespace:
