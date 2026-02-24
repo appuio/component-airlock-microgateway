@@ -67,6 +67,54 @@ parameters:
                 nodeSelector:
                   node-role.kubernetes.io/infra: ""
               replicas: 2
+      redisProvider:
+        spec:
+          auth:
+            password:
+              secretRef:
+                name: redis-password
+            username: default
+          mode:
+            standalone:
+              host: redis-master.vshn-redis-redis-58ztv.svc.cluster.local
+              port: 6379
+          timeouts:
+            connect: 10s
+            maxDuration: 2s
+          tls:
+            certificateVerification:
+              custom:
+                trustedCA:
+                  certificates:
+                    - secretRef:
+                        name: redis-ca
+            clientCertificate:
+              secretRef:
+                name: redis-clientcert
+      sessionHandling:
+        spec:
+          auth:
+            password:
+              secretRef:
+                name: redis-password
+            username: default
+          mode:
+            standalone:
+              host: redis-master.vshn-redis-redis-58ztv.svc.cluster.local
+              port: 6379
+          timeouts:
+            connect: 10s
+            maxDuration: 2s
+          tls:
+            certificateVerification:
+              custom:
+                trustedCA:
+                  certificates:
+                    - secretRef:
+                        name: redis-ca
+            clientCertificate:
+              secretRef:
+                name: redis-clientcert
       egressNetpol:
         spec:
           podSelector:

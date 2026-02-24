@@ -60,6 +60,33 @@ local Gateway = function(name='') {
     name: name,
   },
 };
+/**
+ * Helper function to create Airlock Microgateway SessionHandling resources
+ *
+ * \arg name used as `metadata.name`
+ * \returns a partial `SessionHandling` object
+ */
+local SessionHandling = function(name='') {
+  apiVersion: '%s/v1alpha1' % airlock_group,
+  kind: 'SessionHandling',
+  metadata: {
+    name: name,
+  },
+};
+
+/**
+ * Helper function to create Airlock Microgateway RedisProvider resources
+ *
+ * \arg name used as `metadata.name`
+ * \returns a partial `RedisProvider` object
+ */
+local RedisProvider = function(name='') {
+  apiVersion: '%s/v1alpha1' % airlock_group,
+  kind: 'RedisProvider',
+  metadata: {
+    name: name,
+  },
+};
 
 {
   GatewayParameters: GatewayParameters,

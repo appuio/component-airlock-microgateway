@@ -73,6 +73,8 @@ local namespace() = [
     patchObjects('httpRedirect', com.generateResources(extractInstances('httpRedirect'), httpRoute)) +
     patchObjects('pdb', com.generateResources(extractInstances('pdb'), pdb)) +
     patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol)) +
+    patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling)) +
+    patchObjects('redisProvider', com.generateResources(extractInstances('redisProvider'), gw.RedisProvider)) +
     namespace(),
   httpRouteUnpatched: [com.generateResources(extractInstances('httpRedirect'), httpRoute)],
   defaultSpec: [params.default],
