@@ -92,6 +92,8 @@ local RedisProvider = function(name='') {
   GatewayParameters: GatewayParameters,
   GatewayClass: GatewayClass,
   Gateway: Gateway,
+  RedisProvider: RedisProvider,
+  SessionHandling: SessionHandling,
 
   gatewayApiGroup: gateway_group,
   airlockApiGroup: airlock_group,

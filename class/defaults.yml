@@ -4,15 +4,5 @@ parameters:
       multi_tenant: true
       multi_instance: true
 
-    default:
-      spec:
-        gatewayClassName: microgateway-cloudscale
-        infrastructure:
-          parametersRef:
-            group: microgateway.airlock.com
-            kind: GatewayParameters
-            name: parameters-dev-01
-        listeners:
-          - name: class_default
-            protocol: HTTP
-            port: 80
+    default: {}
+    instances: {}
