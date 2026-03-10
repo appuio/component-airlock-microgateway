@@ -233,3 +233,26 @@ parameters:
                 ports:
                   - port: 1080
                     protocol: TCP
+        httpRedirect:
+          metadata:
+            name: http-filter-redirect
+            namespace: vshn-airlock-dev-01
+          spec:
+            parentRefs:
+              - group: gateway.networking.k8s.io
+                name: vshn-airlock-dev-01
+                kind: Gateway
+                sectionName: http-default
+            hostnames:
+              - '*.customer.ch'
+            rules:
+              - matches:
+                  - method: GET
+                    path:
+                      type: PathPrefix
+                      value: /
+                filters:
+                  - type: RequestRedirect
+                    requestRedirect:
+                      scheme: https
+                      statusCode: 301
