@@ -33,6 +33,7 @@ jobs:
       matrix:
         instance:
           - defaults
+          - live_example_dev
           - multiple_instances
     defaults:
       run:
@@ -49,6 +50,7 @@ jobs:
       matrix:
         instance:
           - defaults
+          - live_example_dev
           - multiple_instances
     defaults:
       run:

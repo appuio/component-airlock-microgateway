@@ -1,0 +1,90 @@
+applications:
+  - airlock-microgateway
+
+parameters:
+  # Dependency for testing add after RedisProvider, SessionHandling is merged to upstream
+  # remove ./lib/* aterwards
+  #  kapitan:
+  #    dependencies:
+  #      - type: https
+  #        source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
+  #        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
+  airlock_microgateway:
+    default:
+      namespace:
+        labels: {}
+      gateway:
+      gatewayParameters:
+      pdb:
+      redisProvider:
+      sessionHandling:
+      egressNetpol:
+      httpRedirect:
+  live_example_dev:
+    instances:
+      vshn-airlock-dev-01:
+        gateway:
+          metadata:
+            annotations:
+              airlock-microgateway.appuio.io/httproute-default-cluster-issuer: digicert-ev
+            namespace: vshn-airlock-dev-01
+          spec:
+            gatewayClassName: microgateway-cloudscale
+            infrastructure:
+              parametersRef:
+                group: microgateway.airlock.com
+                kind: GatewayParameters
+                name: parameters-dev-01
+            listeners:
+              - name: http-default
+                protocol: HTTP
+                port: 80
+        gatewayParameters:
+          spec:
+            defaults:
+              downstream:
+                remoteIP:
+                  proxyProtocol: {}
+              sessionHandlingRef:
+                name: redis-session
+            features:
+              envoyExtensionPolicyEnabled: true
+              insecureTLSAllowed: true
+            kubernetes:
+              deployment:
+                automountServiceAccountToken: false
+                engineContainer:
+                  resources:
+                    requests:
+                      cpu: 100m
+                      memory: 256Mi
+                    limits:
+                      cpu: 1
+                      memory: 512Mi
+                placement:
+                  affinity:
+                    podAntiAffinity:
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        - labelSelector:
+                            matchExpressions:
+                              - key: gateway.networking.k8s.io/gateway-name
+                                operator: In
+                                values:
+                                  - "vshn-airlock-dev-01"
+                          topologyKey: kubernetes.io/hostname
+                  nodeSelector:
+                    node-role.kubernetes.io/infra: ''
+                replicas: 2
+              service:
+                # 1.1.1.1: Jumphost 1
+                # 1.1.1.2: Jumphost 2
+                # 1.1.1.3: NAT-Address Test Infra
+                annotations:
+                  k8s.cloudscale.ch/loadbalancer-listener-allowed-cidrs: '["42.65.119.49/32", "9b2f:48d7:fad1:7a1c::178/128"]'
+                  k8s.cloudscale.ch/loadbalancer-pool-protocol: proxyv2
+                  k8s.cloudscale.ch/loadbalancer-floating-ips: '["46.246.132.110/32","9b2f:7a1c:fad1/128"]'
+                  k8s.cloudscale.ch/loadbalancer-name: 'ingress-dev-01'
+                externalTrafficPolicy: Local
+                type: LoadBalancer
+            logging:
+              level: info
