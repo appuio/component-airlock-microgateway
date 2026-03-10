@@ -11,6 +11,37 @@ parameters:
   #        source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
   #        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
   airlock_microgateway:
+    instances:
+      vshn-default-test-01:
+        gateway:
+          spec:
+            gatewayClassName: test-default
+            listeners:
+              - allowedRoutes:
+                  namespaces:
+                    from: All
+                name: http
+                port: 80
+                protocol: HTTP
+        gatewayParameters:
+          spec:
+            kubernetes:
+              deployment:
+                placement:
+                  affinity:
+                    podAntiAffinity:
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        - labelSelector:
+                            matchExpressions:
+                              - key: gateway.networking.k8s.io/gateway-name
+                                operator: In
+                                values:
+                                  - "vshn-test-default-01"
+                          topologyKey: kubernetes.io/hostname
+                  nodeSelector:
+                    node-role.kubernetes.io/test: ""
+      vshn-test-default-02: {}
+
     default:
       namespace:
         labels:

@@ -68,7 +68,7 @@ local namespace() = [
 ];
 // Define outputs below
 {
-  [if std.length(params.instances) > 0 then '01_gateways']:
+  '01_gateways':
     patchObjects('gateway', com.generateResources(extractInstances('gateway'), gw.Gateway)) +
     patchObjects('gatewayParameters', com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters)) +
     patchObjects('httpRedirect', com.generateResources(extractInstances('httpRedirect'), httpRoute)) +
