@@ -6,5 +6,7 @@ parameters:
 
     default:
       namespace:
-        labels: {}
+        labels:
+          appuio.ch/waf: airlock
+          vshn.microgateway/redis-sync-secret: "true"
     instances: {}

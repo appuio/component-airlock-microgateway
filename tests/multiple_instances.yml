@@ -127,10 +127,6 @@ parameters:
 
   multiple_instances:
     default:
-      namespace:
-        labels:
-          appuio.ch/waf: airlock
-          vshn.microgateway/redis-sync-secret: "true"
       gateway:
         spec:
           gatewayClassName: test-default
