@@ -12,6 +12,7 @@ local metadataNamespace(name) = {
     namespace: name,
   },
 };
+
 // main template for airlock-microgateway
 local extractInstances(field) = {
   [name]:
@@ -76,9 +77,4 @@ local namespace() = [
     patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling)) +
     patchObjects('redisProvider', com.generateResources(extractInstances('redisProvider'), gw.RedisProvider)) +
     namespace(),
-  httpRouteUnpatched: [com.generateResources(extractInstances('httpRedirect'), httpRoute)],
-  defaultSpec: [params.default],
-  params: [params],
-  instanceParams: [params.instances],
-  //mergedGateway: mergedGateways(),
 }

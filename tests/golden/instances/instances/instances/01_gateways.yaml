@@ -69,7 +69,7 @@ spec:
                     - key: gateway.networking.k8s.io/gateway-name
                       operator: In
                       values:
-                        - vshn-test-test
+                        - vshn-instances-test-01
                 topologyKey: kubernetes.io/hostname
         nodeSelector:
           node-role.kubernetes.io/infra: ''
@@ -111,7 +111,7 @@ spec:
                     - key: gateway.networking.k8s.io/gateway-name
                       operator: In
                       values:
-                        - vshn-airlock-dev-01
+                        - vshn-instances-test-01
                 topologyKey: kubernetes.io/hostname
         nodeSelector:
           node-role.kubernetes.io/infra: ''
@@ -124,11 +124,11 @@ metadata:
   namespace: test-instance-01
 spec:
   hostnames:
-    - '*.hintest.ch'
+    - '*.test.com'
   parentRefs:
     - group: gateway.networking.k8s.io
       kind: Gateway
-      name: vshn-airlock-dev-01
+      name: vshn-instances-test-01
       sectionName: http-default
   rules:
     - filters:
@@ -149,11 +149,11 @@ metadata:
   namespace: test-instance-02
 spec:
   hostnames:
-    - '*.hintest.ch'
+    - '*.test.com'
   parentRefs:
     - group: gateway.networking.k8s.io
       kind: Gateway
-      name: vshn-airlock-dev-01
+      name: vshn-instances-test-01
       sectionName: http-default
   rules:
     - filters:
@@ -172,14 +172,14 @@ kind: PodDisruptionBudget
 metadata:
   gateway.networking.k8s.io/gateway-name: test-instance-01
   labels:
-    gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
-  name: vshn-airlock-dev-01
+    gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  name: vshn-instances-test-01
   namespace: test-instance-01
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
   unhealthyPodEvictionPolicy: IfHealthyBudget
 ---
 apiVersion: policy/v1
@@ -187,14 +187,14 @@ kind: PodDisruptionBudget
 metadata:
   gateway.networking.k8s.io/gateway-name: test-instance-02
   labels:
-    gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
-  name: vshn-airlock-dev-01
+    gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  name: vshn-instances-test-01
   namespace: test-instance-02
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
   unhealthyPodEvictionPolicy: IfHealthyBudget
 ---
 apiVersion: networking.k8s.io/v1
@@ -210,33 +210,10 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: syn-airlock-microgateway
-    - ports:
-        - port: 5353
-          protocol: UDP
-      to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: openshift-dns
-    - ports:
-        - port: 6379
-          protocol: TCP
-      to:
-        - namespaceSelector:
-            matchLabels:
-              appcat.vshn.io/claim-namespace: vshn-airlock-redis
-    - ports:
-        - port: 8080
-          protocol: TCP
-        - port: 8443
-          protocol: TCP
-      to:
-        - namespaceSelector:
-            matchLabels:
-              appcat.vshn.io/claim-namespace: broker-test
   podSelector:
     matchLabels:
       gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
-      gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
   policyTypes:
     - Egress
 ---
@@ -253,33 +230,10 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: syn-airlock-microgateway
-    - ports:
-        - port: 5353
-          protocol: UDP
-      to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: openshift-dns
-    - ports:
-        - port: 6379
-          protocol: TCP
-      to:
-        - namespaceSelector:
-            matchLabels:
-              appcat.vshn.io/claim-namespace: vshn-airlock-redis
-    - ports:
-        - port: 8080
-          protocol: TCP
-        - port: 8443
-          protocol: TCP
-      to:
-        - namespaceSelector:
-            matchLabels:
-              appcat.vshn.io/claim-namespace: broker-test
   podSelector:
     matchLabels:
       gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
-      gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
   policyTypes:
     - Egress
 ---
@@ -296,7 +250,7 @@ spec:
     username: default
   mode:
     standalone:
-      host: redis-master.vshn-redis-redis-58ztv.svc.cluster.local
+      host: redis-master
       port: 6379
   timeouts:
     connect: 10s
@@ -325,7 +279,7 @@ spec:
     username: default
   mode:
     standalone:
-      host: redis-master.vshn-redis-redis-58ztv.svc.cluster.local
+      host: redis-master
       port: 6379
   timeouts:
     connect: 10s
@@ -354,7 +308,7 @@ spec:
     username: default
   mode:
     standalone:
-      host: redis-master.vshn-redis-redis-58ztv.svc.cluster.local
+      host: redis-master
       port: 6379
   timeouts:
     connect: 10s
@@ -383,7 +337,7 @@ spec:
     username: default
   mode:
     standalone:
-      host: redis-master.vshn-redis-redis-58ztv.svc.cluster.local
+      host: redis-master
       port: 6379
   timeouts:
     connect: 10s
