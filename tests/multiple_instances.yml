@@ -125,7 +125,7 @@ parameters:
                     scheme: https
                     statusCode: 301
 
-  instances:
+  multiple_instances:
     default:
       namespace:
         labels:
