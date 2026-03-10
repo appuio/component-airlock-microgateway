@@ -93,7 +93,90 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
+  name: microgateway-egress
   namespace: vshn-airlock-dev-01
+spec:
+  egress:
+    - ports:
+        - port: 13377
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: syn-airlock-microgateway
+    - ports:
+        - port: 5353
+          protocol: UDP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+    - ports:
+        - port: 6379
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              appcat.vshn.io/claim-namespace: vshn-airlock-redis
+    - ports:
+        - port: 8080
+          protocol: TCP
+        - port: 8443
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              appcat.vshn.io/claim-namespace: broker-preprod
+    - ports:
+        - port: 3000
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: customer-arch-test
+    - ports:
+        - port: 443
+          protocol: TCP
+      to:
+        - ipBlock:
+            cidr: 1.1.1.1/32
+    - ports:
+        - port: 443
+          protocol: TCP
+      to:
+        - ipBlock:
+            cidr: 1.1.1.2/32
+    - ports:
+        - port: 443
+          protocol: TCP
+      to:
+        - ipBlock:
+            cidr: 1.1.1.3/32
+    - ports:
+        - port: 80
+          protocol: TCP
+      to:
+        - ipBlock:
+            cidr: 1.1.1.4/32
+    - ports:
+        - port: 8080
+          protocol: TCP
+      to:
+        - ipBlock:
+            cidr: 1.1.1.5/32
+    - ports:
+        - port: 1080
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: qa-airlock-gateway
+  podSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+      gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+  policyTypes:
+    - Egress
 ---
 apiVersion: microgateway.airlock.com/v1alpha1
 kind: SessionHandling
