@@ -98,3 +98,30 @@ parameters:
               matchLabels:
                 "gateway.networking.k8s.io/gateway-name": vshn-airlock-dev-01
             unhealthyPodEvictionPolicy: IfHealthyBudget
+        redisProvider:
+          metadata:
+            name: redis-provider
+            namespace: vshn-airlock-dev-01
+          spec:
+            auth:
+              password:
+                secretRef:
+                  name: redis-password
+              username: default
+            mode:
+              standalone:
+                host: redis-master.vshn-redis-redis-58ztv.svc.cluster.local
+                port: 6379
+            timeouts:
+              connect: 10s
+              maxDuration: 2s
+            tls:
+              certificateVerification:
+                custom:
+                  trustedCA:
+                    certificates:
+                      - secretRef:
+                          name: redis-ca
+              clientCertificate:
+                secretRef:
+                  name: redis-clientcert
