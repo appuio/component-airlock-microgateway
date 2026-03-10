@@ -11,8 +11,6 @@ parameters:
   #        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
   airlock_microgateway:
     default:
-      namespace:
-        labels: {}
       gateway:
       gatewayParameters:
       pdb:

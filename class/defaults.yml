@@ -4,5 +4,7 @@ parameters:
       multi_tenant: true
       multi_instance: true
 
-    default: {}
+    default:
+      namespace:
+        labels: {}
     instances: {}
