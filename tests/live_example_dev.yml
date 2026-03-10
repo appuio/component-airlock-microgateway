@@ -25,7 +25,6 @@ parameters:
           metadata:
             annotations:
               airlock-microgateway.appuio.io/httproute-default-cluster-issuer: digicert-ev
-            namespace: vshn-airlock-dev-01
           spec:
             gatewayClassName: microgateway-cloudscale
             infrastructure:
@@ -91,7 +90,6 @@ parameters:
             labels:
               gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
             name: vshn-airlock-dev-01
-            namespace: vshn-airlock-dev-01
           spec:
             minAvailable: 1
             selector:
@@ -101,7 +99,6 @@ parameters:
         redisProvider:
           metadata:
             name: redis-provider
-            namespace: vshn-airlock-dev-01
           spec:
             auth:
               password:
@@ -128,7 +125,6 @@ parameters:
         sessionHandling:
           metadata:
             name: redis-session
-            namespace: vshn-airlock-dev-01
           spec:
             mode: Enforce
             persistence:
@@ -145,7 +141,6 @@ parameters:
         egressNetpol:
           metadata:
             name: microgateway-egress
-            namespace: vshn-airlock-dev-01
           spec:
             podSelector:
               matchLabels:
@@ -236,7 +231,6 @@ parameters:
         httpRedirect:
           metadata:
             name: http-filter-redirect
-            namespace: vshn-airlock-dev-01
           spec:
             parentRefs:
               - group: gateway.networking.k8s.io
