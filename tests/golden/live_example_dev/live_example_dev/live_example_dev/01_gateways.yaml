@@ -79,7 +79,16 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+  labels:
+    gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+  name: vshn-airlock-dev-01
   namespace: vshn-airlock-dev-01
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+  unhealthyPodEvictionPolicy: IfHealthyBudget
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
