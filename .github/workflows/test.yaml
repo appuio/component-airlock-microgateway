@@ -33,7 +33,7 @@ jobs:
       matrix:
         instance:
           - defaults
-          - instances
+          - multiple_instances
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
