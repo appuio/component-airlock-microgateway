@@ -125,3 +125,20 @@ parameters:
               clientCertificate:
                 secretRef:
                   name: redis-clientcert
+        sessionHandling:
+          metadata:
+            name: redis-session
+            namespace: vshn-airlock-dev-01
+          spec:
+            mode: Enforce
+            persistence:
+              # Specify the Redis database where sessions should be stored
+              redisProviderRef:
+                name: redis-provider
+            defaultTimeouts:
+              # Specify idle timeout of a session
+              idle: 135m # 2h 15m
+              # Specify maximum lifetime of a session
+              lifetime: 735m # 12h 15m
+            cookie:
+              name: CUSTOMER_SESS
