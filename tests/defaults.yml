@@ -10,6 +10,11 @@ parameters:
   #      - type: https
   #        source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
   #        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
+  syn:
+    teams:
+      nunki:
+        instances:
+          - airlock_microgateway
   airlock_microgateway:
     instances:
       vshn-default-test-01:

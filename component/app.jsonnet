@@ -5,7 +5,15 @@ local params = inv.parameters.airlock_microgateway;
 local argocd = import 'lib/argocd.libjsonnet';
 
 local instance = inv.parameters._instance;
-local app = argocd.App(instance, params.namespace, secrets=true, base='airlock_microgateway');
+local app = argocd.App(instance, params.namespace, secrets=true, base='airlock_microgateway') {
+  spec+: {
+    syncPolicy+: {
+      syncOptions+: [
+        'ServerSideApply=true',
+      ],
+    },
+  },
+};
 
 local appPath =
   local project = std.get(app, 'spec', { project: 'syn' }).project;
