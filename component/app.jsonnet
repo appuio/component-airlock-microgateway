@@ -16,7 +16,7 @@ local app = argocd.App(instance, params.namespace, secrets=true, base='airlock_m
 };
 
 local appPath =
-  local project = std.get(app, 'spec', { project: 'syn' }).project;
+  local project = std.get(std.get(app, 'spec', {}), 'project', 'syn');
   if project == 'syn' then 'apps' else 'apps-%s' % project;
 
 {
