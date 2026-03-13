@@ -66,7 +66,7 @@ local namespace() = [
   + {
     metadata+: {
       labels+: com.makeMergeable(params.default.namespace.labels),
-      annotations+: com.makeMergeable(params.default.namespace.annotations),
+      annotations: com.makeMergeable(params.default.namespace.annotations),
     },
   }
   for instance in std.objectKeysValues(params.instances)

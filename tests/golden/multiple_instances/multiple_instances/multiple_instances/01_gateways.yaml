@@ -356,6 +356,7 @@ spec:
 apiVersion: v1
 kind: Namespace
 metadata:
+  annotations: {}
   labels:
     appuio.ch/waf: airlock
     name: test-instance-01
@@ -366,6 +367,7 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  annotations: {}
   labels:
     appuio.ch/waf: airlock
     name: test-instance-02

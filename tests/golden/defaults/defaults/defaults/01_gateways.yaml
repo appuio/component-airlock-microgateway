@@ -364,6 +364,7 @@ spec:
 apiVersion: v1
 kind: Namespace
 metadata:
+  annotations: {}
   labels:
     appuio.ch/waf: airlock
     name: vshn-default-test-01
@@ -374,6 +375,7 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  annotations: {}
   labels:
     appuio.ch/waf: airlock
     name: vshn-test-default-02

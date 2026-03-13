@@ -43,6 +43,10 @@ parameters:
       vshn-test-default-02: {}
 
     default:
+      namespace:
+        labels:
+          appuio.ch/waf: airlock
+          vshn.microgateway/redis-sync-secret: "true"
       gateway:
         spec:
           gatewayClassName: test-default

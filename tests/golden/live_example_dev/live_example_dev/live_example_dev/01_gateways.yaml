@@ -245,9 +245,8 @@ spec:
 apiVersion: v1
 kind: Namespace
 metadata:
+  annotations: {}
   labels:
-    appuio.ch/waf: airlock
     name: vshn-airlock-dev-01
     openshift.io/cluster-monitoring: 'true'
-    vshn.microgateway/redis-sync-secret: 'true'
   name: vshn-airlock-dev-01
