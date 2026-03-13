@@ -104,7 +104,6 @@ local GatewayCNP(name) =
 local gateway_cnps = [
   GatewayCNP(instance.key)
   for instance in std.objectKeysValues(params.instances)
-  if params.instances[instance] != null
 ];
 
 // Define outputs below
