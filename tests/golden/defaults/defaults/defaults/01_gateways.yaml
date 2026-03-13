@@ -164,7 +164,6 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  gateway.networking.k8s.io/gateway-name: vshn-default-test-01
   labels:
     gateway.networking.k8s.io/gateway-name: vshn-default-test-01
   name: vshn-default-test-01
@@ -179,9 +178,8 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  gateway.networking.k8s.io/gateway-name: vshn-test-default-02
   labels:
-    gateway.networking.k8s.io/gateway-name: vshn-default-test-01
+    gateway.networking.k8s.io/gateway-name: vshn-test-default-02
   name: vshn-default-test-01
   namespace: vshn-test-default-02
 spec:
