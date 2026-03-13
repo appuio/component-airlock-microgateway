@@ -45,7 +45,9 @@ local pdb = function(name='') {
   kind: 'PodDisruptionBudget',
   metadata: {
     namespace: name,
-    'gateway.networking.k8s.io/gateway-name': name,
+    labels: {
+      'gateway.networking.k8s.io/gateway-name': name,
+    },
   },
 };
 
