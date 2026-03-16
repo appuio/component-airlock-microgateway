@@ -2,13 +2,12 @@ applications:
   - airlock-microgateway
 
 parameters:
-  # Dependency for testing add after RedisProvider, SessionHandling is merged to upstream
-  # remove ./lib/* aterwards
-  #  kapitan:
-  #    dependencies:
-  #      - type: https
-  #        source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
-  #        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
+  # Dependency for testing with upstream lib
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
+        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
   airlock_microgateway:
     default:
       namespace:
