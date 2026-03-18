@@ -1,6 +1,7 @@
 ---
 applications:
   - airlock-microgateway
+  - cilium
 
 parameters:
   # Dependency for testing with upstream lib
@@ -10,6 +11,7 @@ parameters:
         source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
         output_path: vendor/lib/airlock-microgateway-operator.libsonnet
   airlock_microgateway:
+    operatorNamespace: "test-operator-namespace"
     instances:
       vshn-default-test-01:
         gateway:

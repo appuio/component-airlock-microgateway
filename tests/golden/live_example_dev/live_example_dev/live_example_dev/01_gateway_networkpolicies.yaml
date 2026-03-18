@@ -1,0 +1,13 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: vshn-airlock-dev-01
+  namespace: vshn-airlock-dev-01
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: vshn-airlock-dev-01
+      microgateway.airlock.com/managedBy: ''
+  ingress:
+    - fromEntities:
+        - world

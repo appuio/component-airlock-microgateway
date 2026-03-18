@@ -1,5 +1,6 @@
 applications:
   - airlock-microgateway
+  - cilium
 
 parameters:
   # Dependency for testing with upstream lib
