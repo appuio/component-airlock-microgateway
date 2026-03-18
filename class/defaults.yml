@@ -4,6 +4,7 @@ parameters:
       multi_tenant: true
       multi_instance: true
 
+    operatorNamespace: ""
     default:
       namespace:
         labels: {}

@@ -92,7 +92,7 @@ local GatewayCNP(name) =
       endpointSelector: {
         matchLabels: {
           'gateway.networking.k8s.io/gateway-name': name,
-          'microgateway.airlock.com/managedBy': name,
+          'microgateway.airlock.com/managedBy': params.operatorNamespace,
         },
       },
       ingress: [
