@@ -31,7 +31,7 @@ local patchObjects(key, objs) = [
   for obj in objs
 ];
 
-local httpRoute = function(name='') {
+local httpRoute(name='') = {
   apiVersion: 'gateway.networking.k8s.io/v1',
   kind: 'HTTPRoute',
   metadata: {
@@ -40,7 +40,7 @@ local httpRoute = function(name='') {
   spec: {},
 };
 
-local pdb = function(name='') {
+local pdb(name='') = {
   apiVersion: 'policy/v1',
   kind: 'PodDisruptionBudget',
   metadata: {
@@ -51,7 +51,7 @@ local pdb = function(name='') {
   },
 };
 
-local egressNetpol = function(name='') {
+local egressNetpol(name='') = {
   apiVersion: 'networking.k8s.io/v1',
   kind: 'NetworkPolicy',
   metadata: {
@@ -59,7 +59,7 @@ local egressNetpol = function(name='') {
   },
 };
 
-local namespace() = [
+local namespace = [
   kube.Namespace(instance.key) {
     metadata+: {
       labels+: { 'openshift.io/cluster-monitoring': 'true' },
@@ -118,7 +118,7 @@ local gateway_cnps = [
     patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol)) +
     patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling)) +
     patchObjects('redisProvider', com.generateResources(extractInstances('redisProvider'), gw.RedisProvider)) +
-    namespace(),
+    namespace,
   [if has_cilium then '01_gateway_networkpolicies']:
     gateway_cnps,
 }
