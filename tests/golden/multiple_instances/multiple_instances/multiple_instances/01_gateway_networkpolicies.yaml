@@ -1,0 +1,27 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-instance-01
+  namespace: test-instance-01
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: test-instance-01
+      microgateway.airlock.com/managedBy: ''
+  ingress:
+    - fromEntities:
+        - world
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-instance-02
+  namespace: test-instance-02
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: test-instance-02
+      microgateway.airlock.com/managedBy: ''
+  ingress:
+    - fromEntities:
+        - world
