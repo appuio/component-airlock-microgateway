@@ -31,15 +31,6 @@ local patchObjects(key, objs) = [
   for obj in objs
 ];
 
-local httpRoute(name='') = {
-  apiVersion: 'gateway.networking.k8s.io/v1',
-  kind: 'HTTPRoute',
-  metadata: {
-    namespace: name,
-  },
-  spec: {},
-};
-
 local pdb(name='') = {
   apiVersion: 'policy/v1',
   kind: 'PodDisruptionBudget',
@@ -113,7 +104,7 @@ local gateway_cnps = [
   '01_gateways':
     patchObjects('gateway', com.generateResources(extractInstances('gateway'), gw.Gateway)) +
     patchObjects('gatewayParameters', com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters)) +
-    patchObjects('httpRedirect', com.generateResources(extractInstances('httpRedirect'), httpRoute)) +
+    patchObjects('httpRedirect', com.generateResources(extractInstances('httpRedirect'), gw.HTTPRoute)) +
     patchObjects('pdb', com.generateResources(extractInstances('pdb'), pdb)) +
     patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol)) +
     patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling)) +
