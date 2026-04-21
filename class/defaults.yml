@@ -4,6 +4,8 @@ parameters:
       multi_tenant: true
       multi_instance: true
 
+    debug: false
+
     operatorNamespace: ""
     default:
       namespace:
@@ -16,4 +18,5 @@ parameters:
       sessionHandling: {}
       egressNetpol: {}
       httpRedirect: {}
+      customResponses: {}
     instances: {}

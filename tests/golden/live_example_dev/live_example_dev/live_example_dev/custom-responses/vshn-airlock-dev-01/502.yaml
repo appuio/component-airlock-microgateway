@@ -1,0 +1,13 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: CustomResponse
+metadata:
+  labels:
+    name: '502'
+  name: '502'
+  namespace: vshn-airlock-dev-01
+spec:
+  content:
+    - body:
+        value: |
+          %RESPONSE_CODE%
+      contentType: text/html
