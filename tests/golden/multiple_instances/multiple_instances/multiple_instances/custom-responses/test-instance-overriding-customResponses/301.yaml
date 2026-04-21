@@ -1,0 +1,13 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: CustomResponse
+metadata:
+  labels:
+    name: '301'
+  name: '301'
+  namespace: test-instance-overriding-customResponses
+spec:
+  content:
+    - body:
+        value: |
+          Redirect
+      contentType: text/html

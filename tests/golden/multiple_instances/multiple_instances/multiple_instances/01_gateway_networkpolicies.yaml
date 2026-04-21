@@ -25,3 +25,17 @@ spec:
   ingress:
     - fromEntities:
         - world
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-instance-overriding-customResponses
+  namespace: test-instance-overriding-customResponses
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: test-instance-overriding-customResponses
+      microgateway.airlock.com/managedBy: ''
+  ingress:
+    - fromEntities:
+        - world

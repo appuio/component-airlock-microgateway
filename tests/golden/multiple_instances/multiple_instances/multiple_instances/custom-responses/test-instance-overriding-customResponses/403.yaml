@@ -1,0 +1,17 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: CustomResponse
+metadata:
+  labels:
+    name: '403'
+  name: '403'
+  namespace: test-instance-overriding-customResponses
+spec:
+  content:
+    - body:
+        value: |
+          OVERRIDDENT CONTENT
+      contentType: text/html
+    - body:
+        value: |
+          {"json": "is also possible"}
+      contentType: application/json

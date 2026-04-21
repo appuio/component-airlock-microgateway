@@ -34,6 +34,27 @@ spec:
       port: 80
       protocol: default
 ---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: test-instance-overriding-customResponses
+  namespace: test-instance-overriding-customResponses
+spec:
+  gatewayClassName: test-default
+  listeners:
+    - allowedRoutes:
+        namespaces:
+          from: default
+      name: default
+      port: 80
+      protocol: default
+    - allowedRoutes:
+        namespaces:
+          from: default
+      name: default
+      port: 80
+      protocol: default
+---
 apiVersion: microgateway.airlock.com/v1alpha1
 kind: GatewayParameters
 metadata:
@@ -41,6 +62,83 @@ metadata:
   namespace: test-instance-01
 spec:
   defaults:
+    customResponses:
+      local:
+        - customResponseRef:
+            name: '401'
+          statusCodeCondition:
+            matcher:
+              exact: 401
+        - customResponseRef:
+            name: '403'
+          statusCodeCondition:
+            matcher:
+              exact: 403
+        - customResponseRef:
+            name: '404'
+          statusCodeCondition:
+            matcher:
+              exact: 404
+        - customResponseRef:
+            name: 4xx
+          statusCodeCondition:
+            matcher:
+              range:
+                from: 400
+                to: 499
+        - customResponseRef:
+            name: '502'
+          statusCodeCondition:
+            matcher:
+              exact: 502
+        - customResponseRef:
+            name: 5xx
+          statusCodeCondition:
+            matcher:
+              range:
+                from: 500
+                to: 599
+      upstream:
+        - customResponseRef:
+            name: '401'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 401
+        - customResponseRef:
+            name: '403'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 403
+        - customResponseRef:
+            name: '404'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 404
+        - customResponseRef:
+            name: 4xx
+          responseConditions:
+            statusCode:
+              matcher:
+                range:
+                  end: 499
+                  start: 400
+        - customResponseRef:
+            name: '502'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 502
+        - customResponseRef:
+            name: 5xx
+          responseConditions:
+            statusCode:
+              matcher:
+                range:
+                  end: 599
+                  start: 500
     downstream:
       remoteIP:
         proxyProtocol: {}
@@ -83,6 +181,201 @@ metadata:
   namespace: test-instance-02
 spec:
   defaults:
+    customResponses:
+      local:
+        - customResponseRef:
+            name: '401'
+          statusCodeCondition:
+            matcher:
+              exact: 401
+        - customResponseRef:
+            name: '403'
+          statusCodeCondition:
+            matcher:
+              exact: 403
+        - customResponseRef:
+            name: '404'
+          statusCodeCondition:
+            matcher:
+              exact: 404
+        - customResponseRef:
+            name: 4xx
+          statusCodeCondition:
+            matcher:
+              range:
+                from: 400
+                to: 499
+        - customResponseRef:
+            name: '502'
+          statusCodeCondition:
+            matcher:
+              exact: 502
+        - customResponseRef:
+            name: 5xx
+          statusCodeCondition:
+            matcher:
+              range:
+                from: 500
+                to: 599
+      upstream:
+        - customResponseRef:
+            name: '401'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 401
+        - customResponseRef:
+            name: '403'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 403
+        - customResponseRef:
+            name: '404'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 404
+        - customResponseRef:
+            name: 4xx
+          responseConditions:
+            statusCode:
+              matcher:
+                range:
+                  end: 499
+                  start: 400
+        - customResponseRef:
+            name: '502'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 502
+        - customResponseRef:
+            name: 5xx
+          responseConditions:
+            statusCode:
+              matcher:
+                range:
+                  end: 599
+                  start: 500
+    downstream:
+      remoteIP:
+        proxyProtocol: {}
+    sessionHandlingRef:
+      name: redis-session
+  features:
+    envoyExtensionPolicyEnabled: true
+    insecureTLSAllowed: true
+  kubernetes:
+    deployment:
+      automountServiceAccountToken: false
+      engineContainer:
+        resources:
+          limits:
+            cpu: 1
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      placement:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: gateway.networking.k8s.io/gateway-name
+                      operator: In
+                      values:
+                        - vshn-instances-test-01
+                topologyKey: kubernetes.io/hostname
+        nodeSelector:
+          node-role.kubernetes.io/infra: ''
+      replicas: 2
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: test-instance-overriding-customResponses
+  namespace: test-instance-overriding-customResponses
+spec:
+  defaults:
+    customResponses:
+      local:
+        - customResponseRef:
+            name: '401'
+          statusCodeCondition:
+            matcher:
+              exact: 401
+        - customResponseRef:
+            name: '403'
+          statusCodeCondition:
+            matcher:
+              exact: 403
+        - customResponseRef:
+            name: '404'
+          statusCodeCondition:
+            matcher:
+              exact: 404
+        - customResponseRef:
+            name: 4xx
+          statusCodeCondition:
+            matcher:
+              range:
+                from: 400
+                to: 499
+        - customResponseRef:
+            name: '502'
+          statusCodeCondition:
+            matcher:
+              exact: 502
+        - customResponseRef:
+            name: 5xx
+          statusCodeCondition:
+            matcher:
+              range:
+                from: 500
+                to: 599
+      upstream:
+        - customResponseRef:
+            name: '401'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 401
+        - customResponseRef:
+            name: '403'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 403
+        - customResponseRef:
+            name: '404'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 404
+        - customResponseRef:
+            name: 4xx
+          responseConditions:
+            statusCode:
+              matcher:
+                range:
+                  end: 499
+                  start: 400
+        - customResponseRef:
+            name: '502'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 502
+        - customResponseRef:
+            name: 5xx
+          responseConditions:
+            statusCode:
+              matcher:
+                range:
+                  end: 599
+                  start: 500
     downstream:
       remoteIP:
         proxyProtocol: {}
@@ -147,6 +440,31 @@ kind: HTTPRoute
 metadata:
   name: http-filter-redirect
   namespace: test-instance-02
+spec:
+  hostnames:
+    - '*.test.com'
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: vshn-instances-test-01
+      sectionName: http-default
+  rules:
+    - filters:
+        - requestRedirect:
+            scheme: https
+            statusCode: 301
+          type: RequestRedirect
+      matches:
+        - method: GET
+          path:
+            type: PathPrefix
+            value: /
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-filter-redirect
+  namespace: test-instance-overriding-customResponses
 spec:
   hostnames:
     - '*.test.com'
@@ -195,6 +513,20 @@ spec:
       gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
   unhealthyPodEvictionPolicy: IfHealthyBudget
 ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    gateway.networking.k8s.io/gateway-name: test-instance-overriding-customResponses
+  name: vshn-instances-test-01
+  namespace: test-instance-overriding-customResponses
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -219,6 +551,26 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   namespace: test-instance-02
+spec:
+  egress:
+    - ports:
+        - port: 13377
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: syn-airlock-microgateway
+  podSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  policyTypes:
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  namespace: test-instance-overriding-customResponses
 spec:
   egress:
     - ports:
@@ -294,6 +646,35 @@ spec:
         name: redis-clientcert
 ---
 apiVersion: microgateway.airlock.com/v1alpha1
+kind: SessionHandling
+metadata:
+  name: test-instance-overriding-customResponses
+  namespace: test-instance-overriding-customResponses
+spec:
+  auth:
+    password:
+      secretRef:
+        name: redis-password
+    username: default
+  mode:
+    standalone:
+      host: redis-master
+      port: 6379
+  timeouts:
+    connect: 10s
+    maxDuration: 2s
+  tls:
+    certificateVerification:
+      custom:
+        trustedCA:
+          certificates:
+            - secretRef:
+                name: redis-ca
+    clientCertificate:
+      secretRef:
+        name: redis-clientcert
+---
+apiVersion: microgateway.airlock.com/v1alpha1
 kind: RedisProvider
 metadata:
   name: test-instance-01
@@ -327,6 +708,35 @@ kind: RedisProvider
 metadata:
   name: test-instance-02
   namespace: test-instance-02
+spec:
+  auth:
+    password:
+      secretRef:
+        name: redis-password
+    username: default
+  mode:
+    standalone:
+      host: redis-master
+      port: 6379
+  timeouts:
+    connect: 10s
+    maxDuration: 2s
+  tls:
+    certificateVerification:
+      custom:
+        trustedCA:
+          certificates:
+            - secretRef:
+                name: redis-ca
+    clientCertificate:
+      secretRef:
+        name: redis-clientcert
+---
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: RedisProvider
+metadata:
+  name: test-instance-overriding-customResponses
+  namespace: test-instance-overriding-customResponses
 spec:
   auth:
     password:
@@ -372,3 +782,14 @@ metadata:
     openshift.io/cluster-monitoring: 'true'
     vshn.microgateway/redis-sync-secret: 'true'
   name: test-instance-02
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations: {}
+  labels:
+    appuio.ch/waf: airlock
+    name: test-instance-overriding-customResponses
+    openshift.io/cluster-monitoring: 'true'
+    vshn.microgateway/redis-sync-secret: 'true'
+  name: test-instance-overriding-customResponses

@@ -10,10 +10,81 @@ default:: `syn-airlock-microgateway`
 
 The namespace in which to deploy this component.
 
-
 == Example
 
 [source,yaml]
 ----
 namespace: example-namespace
+----
+
+== `default.gatewayParameters.defaults.customResponses`
+
+Allows to set the local and upstream customResponses, see
+https://docs.airlock.com/microgateway/5.0/index/api/crds/gateway-parameters/v1alpha1/index.html#gatewayparametersspecdefaultscustomresponses[Airlock Microgateway docs].
+
+The first matching entry is used.
+It is not possible to override an existing range of the defaults in an instance because the additional customResponse configurations are appended because it is an array.
+
+For placeHolders see https://www.envoyproxy.io/docs/envoy/latest/configuration/advanced/substitution_formatter#config-advanced-substitution-operators[envoy substitution operators].
+
+== Example
+
+[source,yaml]
+----
+default:
+  gatewayParameters:
+    defaults:
+      customResponses:
+        local:
+          - statusCodeCondition:
+              matcher:
+                exact: 401
+            customResponseRef:
+              name: "401"
+          - statusCodeCondition:
+              matcher:
+                range:
+                  from: 400
+                  to: 499
+            customResponseRef:
+              name: "4xx"
+  customResponses:
+        "401":
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  <!DOCTYPE html>
+                  <html lang="de">
+                  <head>
+                      <meta charset="utf-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <title>Customer Error 401</title>
+                      <style>
+                          @media (max-height: 550px) {
+                              body { overflow-y: auto; height: auto; }
+                          }
+                      </style>
+                  </head>
+                  <body>
+                  <main>
+                      <h1><span class="textcode">Error </span>401</h1>
+                      <section>
+                        <h2 lang="de">Access Denied</h2>
+                        <p lang="de">You can't access this application.<br>
+                        Additional info: <a href="https://support.customer.com">Support</a>.</p>
+                      </section>
+                  </main>
+                  <footer>
+                      REQUEST ID: %STREAM_ID%
+                  </footer>
+                  </body>
+                  </html>
+              headers: {}
+        "4xx":
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  %RESPONSE_CODE%
 ----
