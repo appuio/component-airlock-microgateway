@@ -1,3 +1,4 @@
+
 applications:
   - airlock-microgateway
   - cilium
@@ -13,11 +14,167 @@ parameters:
     default:
       gateway:
       gatewayParameters:
+        defaults:
+          customResponses:
+            local:
+              - statusCodeCondition:
+                  matcher:
+                    exact: 401
+                customResponseRef:
+                  name: "401"
+              - statusCodeCondition:
+                  matcher:
+                    exact: 403
+                customResponseRef:
+                  name: "403"
+              - statusCodeCondition:
+                  matcher:
+                    exact: 404
+                customResponseRef:
+                  name: "404"
+              - statusCodeCondition:
+                  matcher:
+                    range:
+                      from: 400
+                      to: 499
+                customResponseRef:
+                  name: "4xx"
+              - statusCodeCondition:
+                  matcher:
+                    exact: 502
+                customResponseRef:
+                  name: "502"
+              - statusCodeCondition:
+                  matcher:
+                    range:
+                      from: 500
+                      to: 599
+                customResponseRef:
+                  name: "5xx"
+            upstream:
+              - responseConditions:
+                  statusCode:
+                    matcher:
+                      exact: 401
+                customResponseRef:
+                  name: "401"
+              - responseConditions:
+                  statusCode:
+                    matcher:
+                      exact: 403
+                customResponseRef:
+                  name: "403"
+              - responseConditions:
+                  statusCode:
+                    matcher:
+                      exact: 404
+                customResponseRef:
+                  name: "404"
+              - responseConditions:
+                  statusCode:
+                    matcher:
+                      range:
+                        start: 400
+                        end: 499
+                customResponseRef:
+                  name: "4xx"
+              - responseConditions:
+                  statusCode:
+                    matcher:
+                      exact: 502
+                customResponseRef:
+                  name: "502"
+              - responseConditions:
+                  statusCode:
+                    matcher:
+                      range:
+                        start: 500
+                        end: 599
+                customResponseRef:
+                  name: "5xx"
       pdb:
       redisProvider:
       sessionHandling:
       egressNetpol:
       httpRedirect:
+      customResponses:
+        "401":
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  <!DOCTYPE html>
+                  <html lang="de">
+                  <head>
+                      <meta charset="utf-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <title>Customer Error 401</title>
+                      <style>
+                          @media (max-height: 550px) {
+                              body { overflow-y: auto; height: auto; }
+                          }
+                      </style>
+                  </head>
+                  <body>
+
+                  <header>
+                  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 100" width="160" height="80">
+                    <defs>
+                      <style>
+                        .cls-1 {
+                          fill: #666;
+                        }
+                        .cls-2 {
+                          fill: #f39900;
+                        }
+                      </style>
+                    </defs>
+                    <g>
+                      <g id="Ebene_1">
+                        <path class="cls-2" d="M125.8,85.7c.8,0,1.6-.1,2.5-.5s1.8-.9,2.6-1.6c.9-.7,1.7-1.5,2.5-2.4s1.4-2,2-3c.5-1.1.9-2.1,1.1-3.1.2-.9.2-1.8,0-2.5s-.5-1.3-1-1.7c-.5-.4-1.1-.6-1.9-.7-.8,0-1.6.2-2.5.5-.9.4-1.7.9-2.6,1.6-.8.7-1.7,1.5-2.4,2.4-.7.9-1.4,1.9-1.9,3s-.9,2.1-1.1,3-.2,1.8-.1,2.5.4,1.3.9,1.8c.5.4,1.1.7,1.9.7"/>
+                        <path class="cls-2" d="M135.3,67.7c.7,0,1.5-.2,2.4-.5.8-.4,1.7-.9,2.5-1.5s1.6-1.4,2.3-2.3c.7-.9,1.3-1.8,1.8-2.8s.8-2,1-2.8c.2-.9.1-1.6,0-2.3-.2-.6-.5-1.2-.9-1.5-.5-.4-1.1-.6-1.8-.6s-1.5.2-2.3.5c-.8.4-1.6.9-2.4,1.5s-1.6,1.4-2.3,2.2c-.7.8-1.3,1.8-1.8,2.8s-.8,1.9-1,2.8-.2,1.6,0,2.3c.1.7.4,1.2.9,1.6.3.3.9.6,1.6.6"/>
+                        <path class="cls-2" d="M148,67.9c.8,0,1.6-.2,2.5-.5.9-.4,1.7-.9,2.6-1.6.8-.7,1.6-1.5,2.4-2.3.7-.9,1.3-1.9,1.8-2.9s.8-2,.9-2.9.1-1.7-.1-2.3c-.2-.7-.5-1.2-1-1.6s-1.1-.6-1.9-.6-1.6.2-2.4.6-1.7.9-2.5,1.5-1.6,1.4-2.3,2.3c-.7.9-1.3,1.8-1.8,2.8s-.8,2-1,2.8c-.2.9-.1,1.7,0,2.4.2.7.5,1.2,1,1.6.4.4,1.1.7,1.8.7"/>
+                        <path class="cls-2" d="M156.3,50.2c.7,0,1.5-.2,2.3-.5.8-.4,1.6-.9,2.4-1.5s1.5-1.4,2.2-2.2c.7-.8,1.3-1.7,1.7-2.7.5-.9.7-1.8.9-2.6.1-.8.1-1.5-.1-2.1s-.5-1.1-1-1.4-1.1-.5-1.8-.5-1.5.2-2.3.6-1.6.9-2.4,1.5-1.5,1.3-2.2,2.1c-.7.8-1.2,1.7-1.7,2.6s-.8,1.8-.9,2.6c-.1.8-.1,1.5.1,2.2.2.6.5,1.1.9,1.5.5.2,1.1.4,1.9.4"/>
+                        <path class="cls-2" d="M175.8,27.2c.7,0,1.5-.2,2.3-.6.8-.3,1.6-.8,2.4-1.5.8-.6,1.5-1.3,2.1-2.1.6-.8,1.2-1.6,1.6-2.5s.7-1.7.8-2.5c.1-.8,0-1.4-.2-2s-.6-1-1.1-1.3-1.1-.4-1.8-.4-1.5.2-2.3.6c-.8.3-1.6.8-2.3,1.4-.7.6-1.4,1.3-2.1,2.1-.6.8-1.2,1.6-1.6,2.5s-.7,1.7-.8,2.5c-.1.8-.1,1.4.1,2s.5,1,1,1.3c.6.3,1.2.5,1.9.5"/>
+                        <path class="cls-1" d="M43.6,15.4v17.8h-13.2V15.4h-15.5v1.1h1.3q4.6.6,4.6,4.5v37.4h9.5v-19.4h13.2v19.4h9.5V15.4h-9.4"/>
+                        <path class="cls-1" d="M61.5,15.4v1.1l1.3.2q4.7.6,4.7,4.4v37.3h9.5V15.4h-15.5"/>
+                        <path class="cls-1" d="M121.7,15.4h-5.2v28.5l-16.6-28.5h-14.9v1.1l2.2.4q3.8.7,3.8,4.6v36.9h6.7v-30l17.4,30h8V15.4h-1.4"/>
+                      </g>
+                    </g>
+                  </svg>
+                  </header>
+                  <main>
+                      <h1><span class="textcode">Error </span>401</h1>
+                      <section>
+                        <h2 lang="de">Access Denied</h2>
+                        <p lang="de">You can't access this application.<br>
+                        Additional info: <a href="https://support.customer.com">Support</a>.</p>
+                      </section>
+                  </main>
+                  <footer>
+                      REQUEST ID: %STREAM_ID%
+                  </footer>
+                  </body>
+                  </html>
+              headers:
+        "403":
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  %RESPONSE_CODE%
+        "404":
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  %RESPONSE_CODE%
+        "4xx":
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  %RESPONSE_CODE%
   live_example_dev:
     instances:
       vshn-airlock-dev-01:

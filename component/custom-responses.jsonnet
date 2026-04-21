@@ -1,0 +1,25 @@
+local kube = import 'kube-ssa-compat.libsonnet';
+local gw = import 'lib/airlock-microgateway-operator.libsonnet';
+local com = import 'lib/commodore.libjsonnet';
+local kap = import 'lib/kapitan.libjsonnet';
+local prometheus = import 'lib/prometheus.libsonnet';
+
+local hierarchicalConfig = import 'lib/hierarchical-config.libsonnet';
+local extractInstances = hierarchicalConfig.extractInstances;
+local patchObjects = hierarchicalConfig.patchObjects;
+
+local inv = kap.inventory();
+
+local params = inv.parameters.airlock_microgateway;
+
+local instance = inv.parameters._instance;
+
+local createCustomResponse(name, customResponseConfig) = kube._Object('microgateway.airlock.com/v1alpha1', 'CustomResponse', std.toString(name)) {
+  spec: customResponseConfig,
+};
+
+{
+  ['custom-responses/%s/%s' % [instance.key, customResponse.key]]: createCustomResponse(customResponse.key, customResponse.value)
+  for customResponse in std.objectKeysValues(std.mergePatch(params.default.customResponses, params.default.customResponses))
+  for instance in std.objectKeysValues(params.instances)
+}

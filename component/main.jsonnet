@@ -122,3 +122,4 @@ local gateway_cnps = [
   [if has_cilium then '01_gateway_networkpolicies']:
     gateway_cnps,
 }
+ + (import 'custom-responses.jsonnet')

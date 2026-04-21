@@ -16,4 +16,5 @@ parameters:
       sessionHandling: {}
       egressNetpol: {}
       httpRedirect: {}
+      customResponses: {}
     instances: {}
