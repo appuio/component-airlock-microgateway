@@ -1,0 +1,7 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: CustomResponse
+metadata:
+  labels:
+    name: blabla
+  name: blabla
+spec: {}

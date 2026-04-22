@@ -22,6 +22,8 @@ local createCustomResponse(name, customResponseConfig) =
 
 {
   ['custom-responses/%s/%s' % [instance.key, customResponse.key]]: createCustomResponse(customResponse.key, customResponse.value)
-  for customResponse in std.objectKeysValues(std.mergePatch(params.default.customResponses, instance.value))
+  for customResponse in std.objectKeysValues(std.mergePatch(params.default.customResponses, params.instances['test-instance-02']))
   for instance in std.objectKeysValues(params.instances)
 }
++ {[instance.key]: {}
+  for instance in std.objectKeysValues(params.instances)}

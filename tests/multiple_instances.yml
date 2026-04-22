@@ -14,83 +14,6 @@ parameters:
     default:
       gatewayParameters:
         defaults:
-          customResponses:
-            local:
-              - statusCodeCondition:
-                  matcher:
-                    exact: 401
-                customResponseRef:
-                  name: "401"
-              - statusCodeCondition:
-                  matcher:
-                    exact: 403
-                customResponseRef:
-                  name: "403"
-              - statusCodeCondition:
-                  matcher:
-                    exact: 404
-                customResponseRef:
-                  name: "404"
-              - statusCodeCondition:
-                  matcher:
-                    range:
-                      from: 400
-                      to: 499
-                customResponseRef:
-                  name: "4xx"
-              - statusCodeCondition:
-                  matcher:
-                    exact: 502
-                customResponseRef:
-                  name: "502"
-              - statusCodeCondition:
-                  matcher:
-                    range:
-                      from: 500
-                      to: 599
-                customResponseRef:
-                  name: "5xx"
-            upstream:
-              - responseConditions:
-                  statusCode:
-                    matcher:
-                      exact: 401
-                customResponseRef:
-                  name: "401"
-              - responseConditions:
-                  statusCode:
-                    matcher:
-                      exact: 403
-                customResponseRef:
-                  name: "403"
-              - responseConditions:
-                  statusCode:
-                    matcher:
-                      exact: 404
-                customResponseRef:
-                  name: "404"
-              - responseConditions:
-                  statusCode:
-                    matcher:
-                      range:
-                        start: 400
-                        end: 499
-                customResponseRef:
-                  name: "4xx"
-              - responseConditions:
-                  statusCode:
-                    matcher:
-                      exact: 502
-                customResponseRef:
-                  name: "502"
-              - responseConditions:
-                  statusCode:
-                    matcher:
-                      range:
-                        start: 500
-                        end: 599
-                customResponseRef:
-                  name: "5xx"
       namespace:
         labels:
           appuio.ch/waf: airlock
@@ -306,29 +229,4 @@ parameters:
               replicas: 2
     instances:
       test-instance-02:
-        gatewayParamters:
-          defaults:
-            customResponses:
-              local:
-                - statusCodeCondition:
-                    matcher:
-                      exact: 301
-                  customResponseRef:
-                    name: "301"
-        customResponses:
-          "403":
-            content:
-              - contentType: text/html
-                body:
-                  value: |
-                    OVERRIDDENT CONTENT
-              - contentType: application/json
-                body:
-                  value: |
-                    {"json": "is also possible"}
-          "301":
-            content:
-              - contentType: text/html
-                body:
-                  value: |
-                    Redirect
+        blabla: {}
