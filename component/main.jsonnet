@@ -97,7 +97,7 @@ local GatewayCNP(name) =
       },
       ingress: [
         {
-          fromEntities: ['world'],
+          fromEntities: [ 'world' ],
         },
       ],
     },
@@ -122,5 +122,5 @@ local gateway_cnps = [
   [if has_cilium then '01_gateway_networkpolicies']:
     gateway_cnps,
 }
- + (import 'custom-responses.jsonnet')
- + (import 'lib/debug.jsonnet')
++ (import 'custom-responses.jsonnet')
++ (import 'lib/debug.jsonnet')
