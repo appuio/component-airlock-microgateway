@@ -123,3 +123,4 @@ local gateway_cnps = [
     gateway_cnps,
 }
  + (import 'custom-responses.jsonnet')
+ + (import 'lib/debug.jsonnet')

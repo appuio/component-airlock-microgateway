@@ -14,12 +14,14 @@ local params = inv.parameters.airlock_microgateway;
 
 local instance = inv.parameters._instance;
 
-local createCustomResponse(name, customResponseConfig) = kube._Object('microgateway.airlock.com/v1alpha1', 'CustomResponse', std.toString(name)) {
-  spec: customResponseConfig,
-};
+local createCustomResponse(name, customResponseConfig) =
+    assert std.isObject(customResponseConfig) : "You cannot set an error response to null. It is still referenced from the GatewayParameters";
+    kube._Object('microgateway.airlock.com/v1alpha1', 'CustomResponse', name) {
+      spec: customResponseConfig,
+    };
 
 {
   ['custom-responses/%s/%s' % [instance.key, customResponse.key]]: createCustomResponse(customResponse.key, customResponse.value)
-  for customResponse in std.objectKeysValues(std.mergePatch(params.default.customResponses, params.default.customResponses))
+  for customResponse in std.objectKeysValues(std.mergePatch(params.default.customResponses, instance.value))
   for instance in std.objectKeysValues(params.instances)
 }
