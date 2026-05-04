@@ -2,6 +2,10 @@
 
 The parent key for all of the following parameters is `airlock_microgateway`.
 
+Api reference for Gateway API can be found here: https://gateway-api.sigs.k8s.io/reference/spec
+
+Api reference for Airlock Microgateway CRs can be found here: https://docs.airlock.com/
+
 == `namespace`
 
 [horizontal]
@@ -15,6 +19,37 @@ The namespace in which to deploy this component.
 [source,yaml]
 ----
 namespace: example-namespace
+----
+
+== `gatewayparameters.spec.features.externalNameServicesAllowed`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+Note that this is only available from v5.0.0 see https://github.com/airlock/microgateway/releases/tag/5.0.0 and configurable since v4.8.6.
+
+== Example
+
+To set it on a specific instance.
+[source,yaml]
+----
+instances:
+  vshn-default-test-01:
+    gatewayParameters:
+      spec:
+        features:
+		  externalNameServicesAllowed: true
+----
+
+To set it on all instanes of an environment.
+[source,yaml]
+----
+default:
+  gatewayParameters:
+    spec:
+      features:
+        externalNameServicesAllowed: true
 ----
 
 == `default.gatewayParameters.defaults.customResponses`
