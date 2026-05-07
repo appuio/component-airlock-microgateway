@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations: {}
+  labels:
+    appuio.ch/waf: airlock
+    name: vshn-default-test-01
+    openshift.io/cluster-monitoring: 'true'
+    vshn.microgateway/redis-sync-secret: 'true'
+  name: vshn-default-test-01
