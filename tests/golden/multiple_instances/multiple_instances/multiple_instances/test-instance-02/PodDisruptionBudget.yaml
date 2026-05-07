@@ -1,0 +1,13 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  labels:
+    gateway.networking.k8s.io/gateway-name: test-instance-02
+  name: vshn-instances-test-01
+  namespace: test-instance-02
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: vshn-instances-test-01
+  unhealthyPodEvictionPolicy: IfHealthyBudget

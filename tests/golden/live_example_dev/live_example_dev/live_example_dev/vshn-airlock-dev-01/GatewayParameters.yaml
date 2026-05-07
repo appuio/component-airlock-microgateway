@@ -1,0 +1,128 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: vshn-airlock-dev-01
+  namespace: vshn-airlock-dev-01
+spec:
+  defaults:
+    customResponses:
+      local:
+        - customResponseRef:
+            name: '401'
+          statusCodeCondition:
+            matcher:
+              exact: 401
+        - customResponseRef:
+            name: '403'
+          statusCodeCondition:
+            matcher:
+              exact: 403
+        - customResponseRef:
+            name: '404'
+          statusCodeCondition:
+            matcher:
+              exact: 404
+        - customResponseRef:
+            name: 4xx
+          statusCodeCondition:
+            matcher:
+              range:
+                from: 400
+                to: 499
+        - customResponseRef:
+            name: '502'
+          statusCodeCondition:
+            matcher:
+              exact: 502
+        - customResponseRef:
+            name: 5xx
+          statusCodeCondition:
+            matcher:
+              range:
+                from: 500
+                to: 599
+      upstream:
+        - customResponseRef:
+            name: '401'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 401
+        - customResponseRef:
+            name: '403'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 403
+        - customResponseRef:
+            name: '404'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 404
+        - customResponseRef:
+            name: 4xx
+          responseConditions:
+            statusCode:
+              matcher:
+                range:
+                  end: 499
+                  start: 400
+        - customResponseRef:
+            name: '502'
+          responseConditions:
+            statusCode:
+              matcher:
+                exact: 502
+        - customResponseRef:
+            name: 5xx
+          responseConditions:
+            statusCode:
+              matcher:
+                range:
+                  end: 599
+                  start: 500
+    downstream:
+      remoteIP:
+        proxyProtocol: {}
+    sessionHandlingRef:
+      name: redis-session
+  features:
+    envoyExtensionPolicyEnabled: true
+    insecureTLSAllowed: true
+  kubernetes:
+    deployment:
+      automountServiceAccountToken: false
+      engineContainer:
+        resources:
+          limits:
+            cpu: 1
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      placement:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: gateway.networking.k8s.io/gateway-name
+                      operator: In
+                      values:
+                        - vshn-airlock-dev-01
+                topologyKey: kubernetes.io/hostname
+        nodeSelector:
+          node-role.kubernetes.io/infra: ''
+      replicas: 2
+    service:
+      annotations:
+        k8s.cloudscale.ch/loadbalancer-floating-ips: '["46.246.132.110/32","9b2f:7a1c:fad1/128"]'
+        k8s.cloudscale.ch/loadbalancer-listener-allowed-cidrs: '["42.65.119.49/32",
+          "9b2f:48d7:fad1:7a1c::178/128"]'
+        k8s.cloudscale.ch/loadbalancer-name: ingress-dev-01
+        k8s.cloudscale.ch/loadbalancer-pool-protocol: proxyv2
+      externalTrafficPolicy: Local
+      type: LoadBalancer
+  logging:
+    level: info

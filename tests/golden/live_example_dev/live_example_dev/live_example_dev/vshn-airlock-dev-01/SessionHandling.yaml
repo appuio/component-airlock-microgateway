@@ -1,0 +1,15 @@
+apiVersion: microgateway.airlock.com/v1alpha1
+kind: SessionHandling
+metadata:
+  name: redis-session
+  namespace: vshn-airlock-dev-01
+spec:
+  cookie:
+    name: CUSTOMER_SESS
+  defaultTimeouts:
+    idle: 135m
+    lifetime: 735m
+  mode: Enforce
+  persistence:
+    redisProviderRef:
+      name: redis-provider

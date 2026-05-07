@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations: {}
+  labels:
+    name: vshn-airlock-dev-01
+    openshift.io/cluster-monitoring: 'true'
+  name: vshn-airlock-dev-01

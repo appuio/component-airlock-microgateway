@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vshn-default-test-01
+  namespace: vshn-default-test-01
+spec:
+  egress:
+    - ports:
+        - port: 13377
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: syn-airlock-microgateway
+    - ports:
+        - port: 5353
+          protocol: UDP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+  podSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+      gateway.networking.k8s.io/gateway-name: vshn-default-test-01
+  policyTypes:
+    - Egress
