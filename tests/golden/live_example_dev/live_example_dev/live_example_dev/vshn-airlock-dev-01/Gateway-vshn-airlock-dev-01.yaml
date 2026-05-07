@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  annotations:
+    airlock-microgateway.appuio.io/httproute-default-cluster-issuer: digicert-ev
+  name: vshn-airlock-dev-01
+  namespace: vshn-airlock-dev-01
+spec:
+  gatewayClassName: microgateway-cloudscale
+  infrastructure:
+    parametersRef:
+      group: microgateway.airlock.com
+      kind: GatewayParameters
+      name: parameters-dev-01
+  listeners:
+    - name: http-default
+      port: 80
+      protocol: HTTP
