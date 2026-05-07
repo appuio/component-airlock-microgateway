@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: vshn-test-default-02
+  namespace: vshn-test-default-02
+spec:
+  gatewayClassName: test-default
+  listeners:
+    - allowedRoutes:
+        namespaces:
+          from: default
+      name: default
+      port: 80
+      protocol: default

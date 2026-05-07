@@ -56,6 +56,7 @@ local egressNetpol(name='') = {
   kind: 'NetworkPolicy',
   metadata: {
     namespace: name,
+    name: name
   },
 };
 
@@ -105,22 +106,26 @@ local GatewayCNP(name) =
 
 local gateway_cnps = [
   GatewayCNP(instance.key)
-  for instance in std.objectKeysValues(params.instances)
+  for instance in std.objectKeysValues(params.instances) if has_cilium
 ];
 
+local toFiles(objects) = {
+    ['%s/%s-%s' % [object.metadata.namespace, object.kind, object.metadata.name]]: object
+    for object in objects
+};
+
 // Define outputs below
+toFiles(patchObjects('gateway', com.generateResources(extractInstances('gateway'), gw.Gateway))) +
+toFiles(patchObjects('gatewayParameters', com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters))) +
+toFiles(patchObjects('httpRedirect', com.generateResources(extractInstances('httpRedirect'), httpRoute))) +
+toFiles(patchObjects('pdb', com.generateResources(extractInstances('pdb'), pdb))) +
+toFiles(patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol))) +
+toFiles(patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling))) +
+toFiles(patchObjects('redisProvider', com.generateResources(extractInstances('redisProvider'), gw.RedisProvider))) +
+toFiles(gateway_cnps) +
 {
   '01_gateways':
-    patchObjects('gateway', com.generateResources(extractInstances('gateway'), gw.Gateway)) +
-    patchObjects('gatewayParameters', com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters)) +
-    patchObjects('httpRedirect', com.generateResources(extractInstances('httpRedirect'), httpRoute)) +
-    patchObjects('pdb', com.generateResources(extractInstances('pdb'), pdb)) +
-    patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol)) +
-    patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling)) +
-    patchObjects('redisProvider', com.generateResources(extractInstances('redisProvider'), gw.RedisProvider)) +
     namespace,
-  [if has_cilium then '01_gateway_networkpolicies']:
-    gateway_cnps,
 }
 + (import 'custom-responses.jsonnet')
 + (import 'lib/debug.jsonnet')
