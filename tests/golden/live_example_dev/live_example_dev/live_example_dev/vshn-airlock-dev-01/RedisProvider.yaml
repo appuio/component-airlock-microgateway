@@ -1,6 +1,8 @@
 apiVersion: microgateway.airlock.com/v1alpha1
 kind: RedisProvider
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   name: redis-provider
   namespace: vshn-airlock-dev-01
 spec:
