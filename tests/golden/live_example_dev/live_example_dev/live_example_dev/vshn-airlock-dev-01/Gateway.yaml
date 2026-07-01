@@ -3,6 +3,7 @@ kind: Gateway
 metadata:
   annotations:
     airlock-microgateway.appuio.io/httproute-default-cluster-issuer: digicert-ev
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   name: vshn-airlock-dev-01
   namespace: vshn-airlock-dev-01
 spec:

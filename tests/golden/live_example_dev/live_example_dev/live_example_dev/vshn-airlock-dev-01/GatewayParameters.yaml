@@ -1,6 +1,8 @@
 apiVersion: microgateway.airlock.com/v1alpha1
 kind: GatewayParameters
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   name: vshn-airlock-dev-01
   namespace: vshn-airlock-dev-01
 spec:

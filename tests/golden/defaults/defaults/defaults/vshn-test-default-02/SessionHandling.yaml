@@ -1,6 +1,8 @@
 apiVersion: microgateway.airlock.com/v1alpha1
 kind: SessionHandling
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   name: vshn-test-default-02
   namespace: vshn-test-default-02
 spec:
