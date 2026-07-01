@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/projectsyn/commodore-component-template.git",
-  "commit": "7e46facc758385bc32eeecab92b4639c66fd4e4f",
+  "commit": "09e48126cbaac4b52080c9827483a0a9d4d7040f",
   "checkout": "main",
   "context": {
     "cookiecutter": {
@@ -25,7 +25,7 @@
       "github_name": "component-airlock-microgateway",
       "github_url": "https://github.com/appuio/component-airlock-microgateway",
       "_template": "https://github.com/projectsyn/commodore-component-template.git",
-      "_commit": "7e46facc758385bc32eeecab92b4639c66fd4e4f"
+      "_commit": "09e48126cbaac4b52080c9827483a0a9d4d7040f"
     }
   },
   "directory": null
