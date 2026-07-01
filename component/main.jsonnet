@@ -100,6 +100,37 @@ local GatewayCNP(name) =
           fromEntities: [ 'world' ],
         },
       ],
+      egress: [
+        {
+          toEndpoints: [
+            {
+              matchLabels: {
+                'k8s:io.kubernetes.pod.namespace': 'openshift-dns',
+                'dns.operator.openshift.io/daemonset-dns': 'default',
+              },
+            },
+          ],
+        },
+        {
+          toPorts: [
+            {
+              ports: {
+                port: '5353',
+                protocol: 'UDP',
+              },
+            },
+            {
+              rules: {
+                dns: [
+                  {
+                    matchPattern: '*',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
     },
   };
 
