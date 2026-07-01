@@ -62,16 +62,15 @@ local egressNetpol(name='') = {
 
 local namespaces = {
   ['%s/Namespace' % instance.key]: kube.Namespace(instance.key) {
-                                     metadata+: {
-                                       labels+: { 'openshift.io/cluster-monitoring': 'true' },
-                                     },
-                                   }
-                                   + {
-                                     metadata+: {
-                                       labels+: com.makeMergeable(params.default.namespace.labels),
-                                       annotations: com.makeMergeable(params.default.namespace.annotations),
-                                     },
-                                   }
+    metadata+: {
+      labels+: { 'openshift.io/cluster-monitoring': 'true' },
+    },
+  } + {
+    metadata+: {
+      labels+: com.makeMergeable(params.default.namespace.labels),
+      annotations: com.makeMergeable(params.default.namespace.annotations),
+    },
+  }
   for instance in std.objectKeysValues(params.instances)
 };
 
