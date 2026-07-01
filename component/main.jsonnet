@@ -62,16 +62,15 @@ local egressNetpol(name='') = {
 
 local namespaces = {
   ['%s/Namespace' % instance.key]: kube.Namespace(instance.key) {
-                                     metadata+: {
-                                       labels+: { 'openshift.io/cluster-monitoring': 'true' },
-                                     },
-                                   }
-                                   + {
-                                     metadata+: {
-                                       labels+: com.makeMergeable(params.default.namespace.labels),
-                                       annotations: com.makeMergeable(params.default.namespace.annotations),
-                                     },
-                                   }
+    metadata+: {
+      labels+: { 'openshift.io/cluster-monitoring': 'true' },
+    },
+  } + {
+    metadata+: {
+      labels+: com.makeMergeable(params.default.namespace.labels),
+      annotations: com.makeMergeable(params.default.namespace.annotations),
+    },
+  }
   for instance in std.objectKeysValues(params.instances)
 };
 
@@ -99,6 +98,37 @@ local GatewayCNP(name) =
       ingress: [
         {
           fromEntities: [ 'world' ],
+        },
+      ],
+      egress: [
+        {
+          toEndpoints: [
+            {
+              matchLabels: {
+                'k8s:io.kubernetes.pod.namespace': 'openshift-dns',
+                'dns.operator.openshift.io/daemonset-dns': 'default',
+              },
+            },
+          ],
+        },
+        {
+          toPorts: [
+            {
+              ports: {
+                port: '5353',
+                protocol: 'UDP',
+              },
+            },
+            {
+              rules: {
+                dns: [
+                  {
+                    matchPattern: '*',
+                  },
+                ],
+              },
+            },
+          ],
         },
       ],
     },
