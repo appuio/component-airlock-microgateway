@@ -114,10 +114,12 @@ local GatewayCNP(name) =
         {
           toPorts: [
             {
-              ports: {
-                port: '5353',
-                protocol: 'UDP',
-              },
+              ports: [
+                {
+                  port: '5353',
+                  protocol: 'UDP',
+                },
+              ],
             },
             {
               rules: {
