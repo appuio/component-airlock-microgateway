@@ -1,8 +1,8 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: test-instance-01
-  namespace: test-instance-01
+  name: internal-dns-egress
+  namespace: test-instance-overriding-customResponses
 spec:
   egress:
     - toEndpoints:
@@ -18,8 +18,5 @@ spec:
               - matchPattern: '*'
   endpointSelector:
     matchLabels:
-      gateway.networking.k8s.io/gateway-name: test-instance-01
+      gateway.networking.k8s.io/gateway-name: test-instance-overriding-customResponses
       microgateway.airlock.com/managedBy: ''
-  ingress:
-    - fromEntities:
-        - world

@@ -82,10 +82,10 @@ local CiliumNetworkPolicy(name) = {
   },
 };
 
-local GatewayCNP(name) =
+local GatewayCNPEgress(name) =
   CiliumNetworkPolicy(name) {
     metadata: {
-      name: name,
+      name: 'internal-dns-egress',
       namespace: name,
     },
     spec: {
@@ -95,11 +95,6 @@ local GatewayCNP(name) =
           'microgateway.airlock.com/managedBy': params.operatorNamespace,
         },
       },
-      ingress: [
-        {
-          fromEntities: [ 'world' ],
-        },
-      ],
       egress: [
         {
           toEndpoints: [
@@ -136,10 +131,35 @@ local GatewayCNP(name) =
     },
   };
 
+local GatewayCNPIngress(name) =
+  CiliumNetworkPolicy(name) {
+    metadata: {
+      name: 'allow-ingress-world',
+      namespace: name,
+    },
+    spec: {
+      endpointSelector: {
+        matchLabels: {
+          'gateway.networking.k8s.io/gateway-name': name,
+          'microgateway.airlock.com/managedBy': params.operatorNamespace,
+        },
+      },
+      ingress: [
+        {
+          fromEntities: [ 'world' ],
+        },
+      ],
+    },
+  };
+
 local gateway_cnps = [
-  GatewayCNP(instance.key)
+  cnp
   for instance in std.objectKeysValues(params.instances)
   if has_cilium
+  for cnp in [
+    GatewayCNPIngress(instance.key),
+    GatewayCNPEgress(instance.key),
+  ]
 ];
 
 local toFiles(objects) = {
