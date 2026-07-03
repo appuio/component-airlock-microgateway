@@ -9,11 +9,11 @@ spec:
         - matchLabels:
             dns.operator.openshift.io/daemonset-dns: default
             k8s:io.kubernetes.pod.namespace: openshift-dns
-    - toPorts:
+      toPorts:
         - ports:
             - port: '5353'
               protocol: UDP
-        - rules:
+          rules:
             dns:
               - matchPattern: '*'
   endpointSelector:

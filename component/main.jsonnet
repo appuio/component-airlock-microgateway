@@ -100,13 +100,11 @@ local GatewayCNPEgress(name) =
           toEndpoints: [
             {
               matchLabels: {
-                'k8s:io.kubernetes.pod.namespace': 'openshift-dns',
                 'dns.operator.openshift.io/daemonset-dns': 'default',
+                'k8s:io.kubernetes.pod.namespace': 'openshift-dns',
               },
             },
           ],
-        },
-        {
           toPorts: [
             {
               ports: [
@@ -115,8 +113,6 @@ local GatewayCNPEgress(name) =
                   protocol: 'UDP',
                 },
               ],
-            },
-            {
               rules: {
                 dns: [
                   {
