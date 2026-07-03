@@ -143,7 +143,7 @@ local gateway_cnps = [
 ];
 
 local toFiles(objects) = {
-  ['%s/%s' % [ object.metadata.namespace, object.kind ]]: object
+  ['%s/%s-%s' % [ object.metadata.namespace, object.kind, object.metadata.name ]]: object
   for object in objects
 };
 
