@@ -214,7 +214,7 @@ parameters:
                           topologyKey: kubernetes.io/hostname
                   nodeSelector:
                     node-role.kubernetes.io/infra: ''
-                replicas: 2
+                replicas: 3
               service:
                 # 1.1.1.1: Jumphost 1
                 # 1.1.1.2: Jumphost 2

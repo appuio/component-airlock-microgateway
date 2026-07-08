@@ -276,7 +276,7 @@ data:
                     topologyKey: "kubernetes.io/hostname"
               nodeSelector:
                 node-role.kubernetes.io/infra: ""
-            replicas: 2
+            replicas: 3
           service:
             annotations:
               k8s.cloudscale.ch/loadbalancer-floating-ips: "[\"46.246.132.110/32\",\"9b2f:7a1c:fad1/128\"]"
