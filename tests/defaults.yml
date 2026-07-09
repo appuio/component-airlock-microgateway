@@ -105,7 +105,6 @@ parameters:
                         topologyKey: kubernetes.io/hostname
                 nodeSelector:
                   node-role.kubernetes.io/infra: ""
-              replicas: 2
       redisProvider:
         spec:
           auth:

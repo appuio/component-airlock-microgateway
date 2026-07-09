@@ -13,7 +13,11 @@ parameters:
         labels: {}
         annotations: {}
       gateway: {}
-      gatewayParameters: {}
+      gatewayParameters:
+        spec:
+          kubernetes:
+            deployment:
+              replicas: 2
       pdb: {}
       redisProvider: {}
       sessionHandling: {}
