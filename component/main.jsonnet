@@ -174,7 +174,7 @@ local prometheusRule(name) = {
 };
 
 local sessionStoreRules = {
-  ['%s/SessionMonitoring' % instance.key]: prometheusRule(instance.key)
+  ['%s/SessionMonitoring' % instance.key]: prometheusRule(instance.key),
   for instance in std.objectKeysValues(params.instances)
 };
 
@@ -188,7 +188,7 @@ toFiles(patchObjects('pdb', com.generateResources(extractInstances('pdb'), pdb))
 toFiles(patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol))) +
 toFiles(patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling))) +
 toFiles(patchObjects('redisProvider', com.generateResources(extractInstances('redisProvider'), gw.RedisProvider))) +
-(if params.sessionMonitoring.enabled then sessionStoreRules else []) +
+(if params.sessionMonitoring.enabled then sessionStoreRules else {}) +
 toFiles(gateway_cnps) +
 namespaces
 + (import 'custom-responses.jsonnet')
