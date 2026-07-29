@@ -1,13 +1,13 @@
 {
   "template": "https://github.com/projectsyn/commodore-component-template.git",
-  "commit": "09e48126cbaac4b52080c9827483a0a9d4d7040f",
+  "commit": "0beeff331c57a671ca982cd2e9bb84d429031d32",
   "checkout": "main",
   "context": {
     "cookiecutter": {
       "name": "airlock-microgateway",
       "slug": "airlock-microgateway",
       "parameter_key": "airlock_microgateway",
-      "test_cases": "defaults multiple_instances live_example_dev",
+      "test_cases": "defaults multiple_instances live_example_dev sessionStoreMonitoring",
       "add_lib": "n",
       "add_pp": "n",
       "add_golden": "y",
@@ -25,7 +25,7 @@
       "github_name": "component-airlock-microgateway",
       "github_url": "https://github.com/appuio/component-airlock-microgateway",
       "_template": "https://github.com/projectsyn/commodore-component-template.git",
-      "_commit": "09e48126cbaac4b52080c9827483a0a9d4d7040f"
+      "_commit": "0beeff331c57a671ca982cd2e9bb84d429031d32"
     }
   },
   "directory": null

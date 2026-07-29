@@ -17,17 +17,21 @@ local metadataNamespace(name) = {
   },
 };
 
+local has(obj, field) = std.objectHas(obj, field) && obj[field] != null;
+
 // main template for airlock-microgateway
 local extractInstances(field) = {
   [name]:
-    if std.objectHas(params.instances[name], field)
-    then std.mergePatch(params.instances[name][field], metadataNamespace(name))
+    if has(params.default, field)
+    then std.mergePatch(params.default[field], metadataNamespace(name))
     else metadataNamespace(name)
   for name in std.objectFields(params.instances)
 };
 
 local patchObjects(key, objs) = [
-  std.mergePatch(params.default[key], obj)
+  if has(params.instances[obj.metadata.namespace], key)
+  then std.mergePatch(obj, params.instances[obj.metadata.namespace][key])
+  else obj
   for obj in objs
 ];
 
@@ -36,6 +40,7 @@ local httpRoute(name='') = {
   kind: 'HTTPRoute',
   metadata: {
     namespace: name,
+    name: name,
   },
   spec: {},
 };
@@ -45,6 +50,7 @@ local pdb(name='') = {
   kind: 'PodDisruptionBudget',
   metadata: {
     namespace: name,
+    name: name,
     labels: {
       'gateway.networking.k8s.io/gateway-name': name,
     },
@@ -163,6 +169,22 @@ local toFiles(objects) = {
   for object in objects
 };
 
+local prometheusRule(name) = {
+  apiVersion: 'monitoring.coreos.com/v1',
+  kind: 'PrometheusRule',
+  metadata: {
+    name: 'sessionStorage-rules',
+    namespace: name,
+  },
+  spec: params.sessionMonitoring.prometheusRuleSpec,
+};
+
+local sessionStoreRules = {
+  ['%s/SessionMonitoring' % instance.key]: prometheusRule(instance.key)
+  for instance in std.objectKeysValues(params.instances)
+};
+
+
 // Define outputs below
 toFiles(patchObjects('gateway', com.generateResources(extractInstances('gateway'), gw.Gateway))) +
 toFiles(patchObjects('gatewayParameters', com.generateResources(extractInstances('gatewayParameters'), gw.GatewayParameters))) +
@@ -171,6 +193,7 @@ toFiles(patchObjects('pdb', com.generateResources(extractInstances('pdb'), pdb))
 toFiles(patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol))) +
 toFiles(patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling))) +
 toFiles(patchObjects('redisProvider', com.generateResources(extractInstances('redisProvider'), gw.RedisProvider))) +
+(if params.sessionMonitoring.enabled then sessionStoreRules else {}) +
 toFiles(gateway_cnps) +
 namespaces
 + (import 'custom-responses.jsonnet')

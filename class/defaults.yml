@@ -6,6 +6,8 @@ parameters:
       multi_version: true
 
     debug: false
+    sessionMonitoring:
+      enabled: false
 
     operatorNamespace: ""
     default:
