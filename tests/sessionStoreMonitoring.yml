@@ -1,3 +1,38 @@
-# Overwrite parameters here
+applications:
+  - airlock-microgateway
+  - cilium
 
-# parameters: {...}
+parameters:
+  # Dependency for testing with upstream lib
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
+        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
+
+  airlock_microgateway:
+    sessionMonitoring:
+      enabled: true
+      prometheusRuleSpec:
+        groups:
+          - name: monitoring
+            rules:
+              - alert: AirlockMicrogatewaySessionConnectionMonitoring
+                annotations:
+                  runbook_url: "alert.rubook.com"
+                  summary: "Microgateway has lost its connection to the sessionStore (instance {{ $labels.instance }})"
+                  description: >-
+                    "Microgateway in {{ $labels.namespace }} has lost its connection to the SessionStore "
+                expr: microgateway_session_store_connection_state{namespace="vshn-test"} != 1
+                for: 2m
+                keep_firing_for: 10m
+                labels:
+                  severity: warning
+
+  sessionStoreMonitoring:
+    sessionMonitoring:
+      enabled: true
+
+    instances:
+      test-instance-01: {}
+      test-instance-02: {}
