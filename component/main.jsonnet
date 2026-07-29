@@ -180,10 +180,9 @@ local prometheusRule(name) = {
 };
 
 local sessionStoreRules = {
-  ['%s/SessionMonitoring' % instance.key]: prometheusRule(instance.key),
+  ['%s/SessionMonitoring' % instance.key]: prometheusRule(instance.key)
   for instance in std.objectKeysValues(params.instances)
 };
-
 
 
 // Define outputs below
