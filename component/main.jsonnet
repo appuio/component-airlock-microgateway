@@ -173,7 +173,7 @@ local prometheusRule(name) = {
   apiVersion: 'monitoring.coreos.com/v1',
   kind: 'PrometheusRule',
   metadata: {
-    name: 'sessionStorage-rules',
+    name: 'session-storage-rules',
     namespace: name,
   },
   spec: params.sessionMonitoring.prometheusRuleSpec,
