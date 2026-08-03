@@ -6,8 +6,16 @@ parameters:
       multi_version: true
 
     debug: false
-    sessionMonitoring:
+
+    monitoring:
       enabled: false
+      namespace: {}
+      sessionMonitoring:
+        enabled: false
+      blackboxExporter:
+        enabled: false
+      dummyBackend:
+        enabled: false
 
     operatorNamespace: ""
     default:

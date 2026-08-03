@@ -9,25 +9,37 @@ parameters:
       - type: https
         source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
         output_path: vendor/lib/airlock-microgateway-operator.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/appuio/component-openshift4-monitoring/master/lib/openshift4-monitoring-prom.libsonnet
+        output_path: vendor/lib/prom.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/appuio/component-openshift4-monitoring/master/lib/openshift4-monitoring-alert-patching.libsonnet
+        output_path: vendor/lib/openshift4-monitoring-alert-patching.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/jsonnet-libs/main/alerts.libsonnet
+        output_path: vendor/lib/syn/alerts.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/jsonnet-libs/main/syn-teams.libsonnet
+        output_path: vendor/lib/syn/syn-teams.libsonnet
 
   airlock_microgateway:
-    sessionMonitoring:
+    monitoring:
       enabled: true
-      prometheusRuleSpec:
-        groups:
-          - name: monitoring
-            rules:
-              - alert: AirlockMicrogatewaySessionConnectionMonitoring
-                annotations:
-                  runbook_url: "alert.rubook.com"
-                  summary: "Microgateway has lost its connection to the sessionStore (instance {{ $labels.instance }})"
-                  description: >-
-                    "Microgateway in {{ $labels.namespace }} has lost its connection to the SessionStore "
-                expr: microgateway_session_store_connection_state{namespace="vshn-test"} != 1
-                for: 2m
-                keep_firing_for: 10m
-                labels:
-                  severity: warning
+      sessionMonitoring:
+        enabled: true
+        rules:
+          sessionMonitoring:
+            alert:AirlockMicrogatewaySessionConnectionMonitoring:
+              annotations:
+                runbook_url: "alert.rubook.com"
+                summary: "Microgateway has lost its connection to the sessionStore (instance {{ $labels.instance }})"
+                description: >-
+                  "Microgateway in {{ $labels.namespace }} has lost its connection to the SessionStore "
+              expr: microgateway_session_store_connection_state{namespace="vshn-test"} != 1
+              for: 2m
+              keep_firing_for: 10m
+              labels:
+                severity: warning
 
   sessionStoreMonitoring:
     sessionMonitoring:

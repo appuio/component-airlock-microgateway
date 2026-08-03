@@ -193,8 +193,8 @@ toFiles(patchObjects('pdb', com.generateResources(extractInstances('pdb'), pdb))
 toFiles(patchObjects('egressNetpol', com.generateResources(extractInstances('egressNetpol'), egressNetpol))) +
 toFiles(patchObjects('sessionHandling', com.generateResources(extractInstances('sessionHandling'), gw.SessionHandling))) +
 toFiles(patchObjects('redisProvider', com.generateResources(extractInstances('redisProvider'), gw.RedisProvider))) +
-(if params.sessionMonitoring.enabled then sessionStoreRules else {}) +
 toFiles(gateway_cnps) +
 namespaces
++ (import 'monitoring.jsonnet')
 + (import 'custom-responses.jsonnet')
 + (import 'lib/debug.jsonnet')
