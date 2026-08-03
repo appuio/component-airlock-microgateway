@@ -1,0 +1,136 @@
+applications:
+  - airlock-microgateway
+  - cilium
+
+parameters:
+  # Dependency for testing with upstream lib
+  kapitan:
+    dependencies:
+      - type: https
+        source: https://raw.githubusercontent.com/appuio/component-airlock-microgateway-operator/master/lib/airlock-microgateway-operator.libsonnet
+        output_path: vendor/lib/airlock-microgateway-operator.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/appuio/component-openshift4-monitoring/master/lib/openshift4-monitoring-prom.libsonnet
+        output_path: vendor/lib/prom.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/appuio/component-openshift4-monitoring/master/lib/openshift4-monitoring-alert-patching.libsonnet
+        output_path: vendor/lib/openshift4-monitoring-alert-patching.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/jsonnet-libs/main/alerts.libsonnet
+        output_path: vendor/lib/syn/alerts.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/jsonnet-libs/main/syn-teams.libsonnet
+        output_path: vendor/lib/syn/syn-teams.libsonnet
+
+  airlock_microgateway: {}
+  monitoring:
+    monitoring:
+      enabled: true
+      sessionMonitoring:
+        enabled: true
+        rules:
+          sessionMonitoring:
+            alert:AirlockMicrogatewaySessionConnectionMonitoring:
+              annotations:
+                runbook_url: "alert.rubook.com"
+                summary: "Microgateway has lost its connection to the sessionStore (instance {{ $labels.instance }})"
+                description: >-
+                  "Microgateway in {{ $labels.namespace }} has lost its connection to the SessionStore "
+              expr: microgateway_session_store_connection_state{namespace="vshn-test"} != 1
+              for: 2m
+              keep_firing_for: 10m
+              labels:
+                severity: warning
+      blackboxExporter:
+        enabled: true
+        rules:
+          blackboxExporter:
+            alert:IngressUnavailable:
+              annotations:
+                runbook_url: "runbook.url"
+                summary: "Http check failed"
+                description: "Http check failed on {{ $labels.gateway }}"
+              expr: probe_success{gateway=~"vshn-test-.*"} != 1
+              for: 5m
+              keep_firing_for: 10m
+              labels:
+                severity: critical
+      dummyBackend:
+        enabled: true
+        images:
+          image: 'ghcr.io/nginx/nginx-unprivileged'
+          tag: '1.30.0-alpine3.23'
+        resources:
+          requests:
+            memory: 10Mi
+            cpu: 10m
+          limits:
+            memory: 50Mi
+        configMap:
+          default.conf: |
+            server {
+              listen 8080;
+              location / {
+                return 200;
+              }
+            }
+      httpRoutes:
+        vshn-default-test-01:
+          metadata:
+            name: http-filter-redirect-2
+            namespace: vshn-default-test-02
+          spec:
+            hostnames:
+              - '*.test.com'
+            parentRefs:
+              - group: gateway.networking.k8s.io
+                kind: Gateway
+                name: vshn-default-test-01
+                sectionName: http-default
+            rules:
+              - filters:
+                  - requestRedirect:
+                      scheme: https
+                      statusCode: 301
+                    type: RequestRedirect
+                matches:
+                  - method: GET
+                    path:
+                      type: PathPrefix
+                      value: /
+        vshn-test-default-02:
+          metadata:
+            name: http-filter-redirect
+            namespace: vshn-test-default-02
+          spec:
+            hostnames:
+              - '*.test.com'
+            parentRefs:
+              - group: gateway.networking.k8s.io
+                kind: Gateway
+                name: vshn-default-test-01
+                sectionName: http-default
+            rules:
+              - filters:
+                  - requestRedirect:
+                      scheme: https
+                      statusCode: 301
+                    type: RequestRedirect
+                matches:
+                  - method: GET
+                    path:
+                      type: PathPrefix
+                      value: /
+      contentSecurityPolicySpec:
+        spec:
+          targetRefs:
+            - group: gateway.networking.k8s.io
+              kind: HTTPRoute
+              name: monitoring-test-01
+            - group: gateway.networking.k8s.io
+              kind: HTTPRoute
+              name: monitoring-test-02
+
+    instances:
+      test-instance-01: {}
+      test-instance-02: {}
