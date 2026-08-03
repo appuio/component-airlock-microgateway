@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    name: allow-gateways
+  name: allow-gateways
+  namespace: vshn-airlock-monitoring
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              appuio.ch/waf: airlock
+  podSelector:
+    matchLabels:
+      app: microgateway-monitoring
+  policyTypes:
+    - Ingress

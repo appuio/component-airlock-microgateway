@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: airlock-microgateway-rules
+  name: airlock-microgateway-rules
+  namespace: vshn-airlock-monitoring
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: microgateway-monitoring
+  type: ClusterIP
