@@ -125,7 +125,7 @@ local contentSecurityPolicy(name='') = {
     namespace: nsName,
   },
   spec: params.contentSecurityPolicySpec,
-} ;
+};
 
 local httpRoutes = {
   ['monitoring/HttpRoutes/%s' % instance.metadata.name]: instance
@@ -133,8 +133,8 @@ local httpRoutes = {
 };
 
 local promRules = {}
-+ (if params.sessionMonitoring.enabled then params.sessionMonitoring.rules else {})
-+ (if params.blackboxExporter.enabled then params.blackboxExporter.rules else {});
+                  + (if params.sessionMonitoring.enabled then params.sessionMonitoring.rules else {})
+                  + (if params.blackboxExporter.enabled then params.blackboxExporter.rules else {});
 
 local prometheusRule = prom.generateRules('airlock-microgateway-rules', promRules) {
   metadata+: {
@@ -144,16 +144,30 @@ local prometheusRule = prom.generateRules('airlock-microgateway-rules', promRule
 };
 local hasGroup = std.length(prometheusRule.spec.groups) > 0;
 
-if params.enabled then {
-  'monitoring/Namespace': namespace(params.namespace.metadata),
-  [if hasGroup then 'monitoring/Prometheusrule']: prometheusRule,
-}
-+ (if has(params, 'httpRoutes') then httpRoutes + {['monitoring/HttpRoutes/contentSecurityPolicy']: contentSecurityPolicy('monitoring')} else {})
-+ (
+local backendResources =
   if params.dummyBackend.enabled then {
     'monitoring/Backend/configMap': backendConfigMap,
-    'monitoring/Backend/networkPolicy': backendNetworkPolicy('allow-gateways'),
+    'monitoring/Backend/networkPolicy':
+      backendNetworkPolicy('allow-gateways'),
     'monitoring/Backend/Deployment': backendDeployment,
     'monitoring/Backend/Service': backendService,
-  } else {}
+  } else {};
+
+local httpRouteResources =
+  if has(params, 'httpRoutes') then
+    httpRoutes {
+      'monitoring/HttpRoutes/contentSecurityPolicy':
+        contentSecurityPolicy('monitoring'),
+    }
+  else
+    {};
+
+if params.enabled then (
+  {
+    'monitoring/Namespace': namespace(params.namespace.metadata),
+    [if hasGroup then 'monitoring/Prometheusrule']:
+      prometheusRule,
+  }
+  + backendResources
+  + httpRouteResources
 ) else {}
