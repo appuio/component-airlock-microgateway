@@ -56,7 +56,7 @@ local backendConfigMap = kube.ConfigMap('nginx-conf') {
   },
   data: params.dummyBackend.configMap.data,
 };
-local backendDeployment = kube.Deployment('monitoring-dummy-backend') {
+local backendDeployment = kube.Deployment('microgateway-canary-backend') {
   metadata+: {
     namespace: params.namespace.name,
     labels: {
@@ -100,7 +100,7 @@ local backendDeployment = kube.Deployment('monitoring-dummy-backend') {
     },
   },
 };
-local backendService = kube.Service('monitoring-dummy-backend') {
+local backendService = kube.Service('microgateway-canary-backend-svc') {
   target_pod:: backendDeployment.spec.template,
   target_container_name:: 'nginx',
   metadata+: {
