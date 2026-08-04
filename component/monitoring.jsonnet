@@ -54,7 +54,7 @@ local backendConfigMap = kube.ConfigMap('nginx-conf') {
   metadata+: {
     namespace: params.namespace.name,
   },
-  data+: params.dummyBackend.configMap,
+  data: params.dummyBackend.configMap.data,
 };
 local backendDeployment = kube.Deployment('monitoring-dummy-backend') {
   metadata+: {
