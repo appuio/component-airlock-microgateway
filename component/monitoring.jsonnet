@@ -52,13 +52,13 @@ local backendNetworkPolicy(name) = kube.NetworkPolicy(name) {
 };
 local backendConfigMap = kube.ConfigMap('nginx-conf') {
   metadata+: {
-    namespace: if has(params.namespace, 'name') then params.namespace.name else 'vshn-airlock-monitoring',
+    namespace: params.namespace.name,
   },
   data+: params.dummyBackend.configMap,
 };
 local backendDeployment = kube.Deployment('monitoring-dummy-backend') {
   metadata+: {
-    namespace: if has(params.namespace, 'name') then params.namespace.name else 'vshn-airlock-monitoring',
+    namespace: params.namespace.name,
     labels: {
       app: 'microgateway-monitoring',
     },
@@ -105,7 +105,7 @@ local backendService = kube.Service('monitoring-dummy-backend') {
   target_container_name:: 'nginx',
   metadata+: {
     name: 'airlock-microgateway-rules',
-    namespace: if has(params.namespace, 'name') then params.namespace.name else 'vshn-airlock-monitoring',
+    namespace: params.namespace.name,
   },
 };
 local httpRoute(name='') = {
@@ -122,7 +122,7 @@ local contentSecurityPolicy(name='') = {
   kind: 'ContentSecurityPolicy',
   metadata+: {
     name: 'monitoring-routes-content-security-policy',
-    namespace: if has(params.namespace, 'name') then params.namespace.name else 'vshn-airlock-monitoring',
+    namespace: params.namespace.name,
   },
   spec: params.contentSecurityPolicySpec,
 } ;
@@ -139,7 +139,7 @@ local promRules = {}
 local prometheusRule = prom.generateRules('airlock-microgateway-rules', promRules) {
   metadata+: {
     name: 'airlock-microgateway-rules',
-    namespace: if has(params.namespace, 'name') then params.namespace.name else 'vshn-airlock-monitoring',
+    namespace: params.namespace.name,
   },
 };
 local hasGroup = std.length(prometheusRule.spec.groups) > 0;

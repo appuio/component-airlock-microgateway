@@ -15,8 +15,9 @@ parameters:
 
 
     monitoring:
+      namespace:
+        name: "airlock-microgateway-monitoring"
       enabled: false
-      namespace: {}
       sessionMonitoring:
         enabled: false
       blackboxExporter:
