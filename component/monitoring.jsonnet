@@ -7,10 +7,10 @@ local main = import 'main.jsonnet';
 local inv = kap.inventory();
 local params = inv.parameters.airlock_microgateway.monitoring;
 local backendImage = inv.parameters.airlock_microgateway.images.nginx;
-
+local nsName = params.namespace.metadata.name;
 local has(obj, field) = std.objectHas(obj, field) && obj[field] != null;
 
-local namespace(name, override={}) = kube.Namespace(name) {
+local namespace(override={}) = kube.Namespace(nsName) {
   metadata+: {
     labels+: { 'openshift.io/cluster-monitoring': 'true' },
   },
@@ -52,13 +52,13 @@ local backendNetworkPolicy(name) = kube.NetworkPolicy(name) {
 };
 local backendConfigMap = kube.ConfigMap('nginx-conf') {
   metadata+: {
-    namespace: params.namespace.name,
+    namespace: nsName,
   },
   data: params.dummyBackend.configMap.data,
 };
 local backendDeployment = kube.Deployment('microgateway-canary-backend') {
   metadata+: {
-    namespace: params.namespace.name,
+    namespace: nsName,
     labels: {
       app: 'microgateway-monitoring',
     },
@@ -105,7 +105,7 @@ local backendService = kube.Service('microgateway-canary-backend-svc') {
   target_container_name:: 'nginx',
   metadata+: {
     name: 'airlock-microgateway-rules',
-    namespace: params.namespace.name,
+    namespace: nsName,
   },
 };
 local httpRoute(name='') = {
@@ -122,7 +122,7 @@ local contentSecurityPolicy(name='') = {
   kind: 'ContentSecurityPolicy',
   metadata+: {
     name: 'monitoring-routes-content-security-policy',
-    namespace: params.namespace.name,
+    namespace: nsName,
   },
   spec: params.contentSecurityPolicySpec,
 } ;
@@ -139,13 +139,13 @@ local promRules = {}
 local prometheusRule = prom.generateRules('airlock-microgateway-rules', promRules) {
   metadata+: {
     name: 'airlock-microgateway-rules',
-    namespace: params.namespace.name,
+    namespace: nsName,
   },
 };
 local hasGroup = std.length(prometheusRule.spec.groups) > 0;
 
 if params.enabled then {
-  'monitoring/Namespace': namespace('vshn-airlock-monitoring', params.namespace),
+  'monitoring/Namespace': namespace(params.namespace.metadata),
   [if hasGroup then 'monitoring/Prometheusrule']: prometheusRule,
 }
 + (if has(params, 'httpRoutes') then httpRoutes + {['monitoring/HttpRoutes/contentSecurityPolicy']: contentSecurityPolicy('monitoring')} else {})

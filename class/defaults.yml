@@ -16,7 +16,9 @@ parameters:
 
     monitoring:
       namespace:
-        name: "airlock-microgateway-monitoring"
+        metadata:
+          name: "airlock-microgateway-monitoring"
+
       enabled: false
       sessionMonitoring:
         enabled: false
