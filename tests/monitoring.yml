@@ -24,6 +24,11 @@ parameters:
 
   airlock_microgateway: {}
   monitoring:
+    images:
+      nginx:
+        registry: 'test.io'
+        repository: 'test/test-unprivileged'
+        tag: '10'
     monitoring:
       enabled: true
       sessionMonitoring:
@@ -57,23 +62,13 @@ parameters:
                 severity: critical
       dummyBackend:
         enabled: true
-        images:
-          image: 'ghcr.io/nginx/nginx-unprivileged'
-          tag: '1.30.0-alpine3.23'
         resources:
           requests:
             memory: 10Mi
             cpu: 10m
           limits:
             memory: 50Mi
-        configMap:
-          default.conf: |
-            server {
-              listen 8080;
-              location / {
-                return 200;
-              }
-            }
+
       httpRoutes:
         vshn-default-test-01:
           metadata:

@@ -3,8 +3,8 @@ kind: Deployment
 metadata:
   labels:
     app: microgateway-monitoring
-  name: monitoring-dummy-backend
-  namespace: vshn-airlock-monitoring
+  name: microgateway-canary-backend
+  namespace: airlock-microgateway-monitoring
 spec:
   minReadySeconds: 30
   replicas: 1
@@ -24,7 +24,7 @@ spec:
         app: microgateway-monitoring
     spec:
       containers:
-        - image: ghcr.io/nginx/nginx-unprivileged:1.30.0-alpine3.23
+        - image: test.io/test/test-unprivileged:10
           livenessProbe:
             httpGet:
               path: /health
