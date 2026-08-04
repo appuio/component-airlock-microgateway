@@ -19,8 +19,8 @@ local namespace(name, override={}) = kube.Namespace(name) {
   then
     {
       metadata+: {
-        labels+: com.makeMergeable(override.labels),
-        annotations: com.makeMergeable(override.annotations),
+        labels+: override.labels,
+        annotations+: override.annotations,
       },
     }
   else {}
