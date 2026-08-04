@@ -6,6 +6,7 @@ local main = import 'main.jsonnet';
 
 local inv = kap.inventory();
 local params = inv.parameters.airlock_microgateway.monitoring;
+local backendImage = inv.parameters.airlock_microgateway.images.nginx;
 
 local has(obj, field) = std.objectHas(obj, field) && obj[field] != null;
 
@@ -68,7 +69,7 @@ local backendDeployment = kube.Deployment('monitoring-dummy-backend') {
         containers: [
           {
             name: 'nginx',
-            image: params.dummyBackend.images.image + ':' + params.dummyBackend.images.tag,
+            image: backendImage.registry + '/' + backendImage.repository + ':' + backendImage.tag,
             resources: params.dummyBackend.resources,
             ports: [
               {
