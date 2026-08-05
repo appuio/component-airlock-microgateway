@@ -12,4 +12,4 @@ metadata:
   labels:
     name: nginx-conf
   name: nginx-conf
-  namespace: airlock-microgateway-monitoring
+  namespace: vshn-airlock-monitoring

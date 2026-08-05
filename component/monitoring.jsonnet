@@ -10,18 +10,11 @@ local backendImage = inv.parameters.airlock_microgateway.images.nginx;
 local nsName = params.namespace.metadata.name;
 local has(obj, field) = std.objectHas(obj, field) && obj[field] != null;
 
-local namespace(override={}) = kube.Namespace(nsName) {
-  metadata+: {
-    labels+: { 'openshift.io/cluster-monitoring': 'true' },
-  },
-} + (
+local namespace(override={}) = kube.Namespace(nsName) {} + (
   if has(override, 'labels') || has(override, 'annotations')
   then
     {
-      metadata+: {
-        labels+: override.labels,
-        annotations+: override.annotations,
-      },
+      metadata+: com.makeMergeable(params.namespace.metadata),
     }
   else {}
 );

@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    name: airlock-microgateway-monitoring
+    name: vshn-airlock-monitoring
     openshift.io/cluster-monitoring: 'true'
-  name: airlock-microgateway-monitoring
+    test.label: test-value
+  name: vshn-airlock-monitoring

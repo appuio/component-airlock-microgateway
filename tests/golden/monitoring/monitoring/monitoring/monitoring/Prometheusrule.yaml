@@ -4,7 +4,7 @@ metadata:
   labels:
     name: airlock-microgateway-rules
   name: airlock-microgateway-rules
-  namespace: airlock-microgateway-monitoring
+  namespace: vshn-airlock-monitoring
 spec:
   groups:
     - name: blackboxExporter

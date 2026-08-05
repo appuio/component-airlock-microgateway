@@ -2,7 +2,7 @@ apiVersion: microgateway.airlock.com/v1alpha1
 kind: ContentSecurityPolicy
 metadata:
   name: monitoring-routes-content-security-policy
-  namespace: airlock-microgateway-monitoring
+  namespace: vshn-airlock-monitoring
 spec:
   spec:
     targetRefs:

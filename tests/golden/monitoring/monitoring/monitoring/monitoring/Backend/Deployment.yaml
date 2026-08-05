@@ -4,7 +4,7 @@ metadata:
   labels:
     app: microgateway-monitoring
   name: microgateway-canary-backend
-  namespace: airlock-microgateway-monitoring
+  namespace: vshn-airlock-monitoring
 spec:
   minReadySeconds: 30
   replicas: 1

@@ -18,6 +18,8 @@ parameters:
       namespace:
         metadata:
           name: "airlock-microgateway-monitoring"
+          labels:
+            openshift.io/cluster-monitoring: 'true'
 
       enabled: false
       sessionMonitoring:
