@@ -74,6 +74,7 @@ local backendDeployment = kube.Deployment('microgateway-canary-backend') {
               httpGet: {
                 port: 'http',
                 path: '/health',
+                protocol: 'TCP'
               },
             },
             volumeMounts: [ {
