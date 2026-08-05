@@ -122,14 +122,13 @@ parameters:
                       type: PathPrefix
                       value: /
       contentSecurityPolicySpec:
-        spec:
-          targetRefs:
-            - group: gateway.networking.k8s.io
-              kind: HTTPRoute
-              name: monitoring-test-01
-            - group: gateway.networking.k8s.io
-              kind: HTTPRoute
-              name: monitoring-test-02
+        targetRefs:
+          - group: gateway.networking.k8s.io
+            kind: HTTPRoute
+            name: monitoring-test-01
+          - group: gateway.networking.k8s.io
+            kind: HTTPRoute
+            name: monitoring-test-02
 
     instances:
       test-instance-01: {}
