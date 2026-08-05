@@ -5,3 +5,6 @@ metadata:
     name: airlock-microgateway-monitoring
     openshift.io/cluster-monitoring: 'true'
   name: airlock-microgateway-monitoring
+spec:
+  finalizers:
+    - kubernetes

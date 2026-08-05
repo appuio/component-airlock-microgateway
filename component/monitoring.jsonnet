@@ -10,7 +10,13 @@ local backendImage = inv.parameters.airlock_microgateway.images.nginx;
 local nsName = params.namespace.metadata.name;
 local has(obj, field) = std.objectHas(obj, field) && obj[field] != null;
 
-local namespace(override={}) = kube.Namespace(nsName) {} + (
+local namespace(override={}) = kube.Namespace(nsName) {
+  spec:{
+    finalizers:[
+      "kubernetes",
+    ]
+  }
+} + (
   if has(override, 'labels') || has(override, 'annotations')
   then
     {
