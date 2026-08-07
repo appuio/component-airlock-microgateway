@@ -103,7 +103,6 @@ local backendService = kube.Service('microgateway-canary-backend-svc') {
   target_pod:: backendDeployment.spec.template,
   target_container_name:: 'nginx',
   metadata+: {
-    name: 'airlock-microgateway-rules',
     namespace: nsName,
   },
 };
