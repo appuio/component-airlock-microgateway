@@ -6,9 +6,37 @@ parameters:
       multi_version: true
 
     debug: false
-    sessionMonitoring:
-      enabled: false
 
+    images:
+      nginx:
+        registry: 'ghcr.io'
+        repository: 'nginx/nginx-unprivileged'
+        tag: '1.30.0-alpine3.23'
+
+
+    monitoring:
+      namespace:
+        metadata:
+          name: "airlock-microgateway-monitoring"
+          labels:
+            openshift.io/cluster-monitoring: 'true'
+
+      enabled: false
+      sessionMonitoring:
+        enabled: false
+      blackboxExporter:
+        enabled: false
+      dummyBackend:
+        enabled: false
+        configMap:
+          data:
+            default.conf: |
+              server {
+                listen 8080;
+                location / {
+                  return 200;
+                }
+              }
     operatorNamespace: ""
     default:
       namespace:

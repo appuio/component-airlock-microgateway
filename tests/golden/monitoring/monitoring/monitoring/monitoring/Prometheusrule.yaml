@@ -1,11 +1,27 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: session-storage-rules
-  namespace: test-instance-01
+  labels:
+    name: airlock-microgateway-rules
+  name: airlock-microgateway-rules
+  namespace: vshn-airlock-monitoring
 spec:
   groups:
-    - name: monitoring
+    - name: blackboxExporter
+      rules:
+        - alert: IngressUnavailable
+          annotations:
+            description: Http check failed on {{ $labels.gateway }}
+            runbook_url: runbook.url
+            summary: Http check failed
+          expr: probe_success{gateway=~"vshn-test-.*"} != 1
+          for: 5m
+          keep_firing_for: 10m
+          labels:
+            severity: critical
+            syn: 'true'
+            syn_component: monitoring
+    - name: sessionMonitoring
       rules:
         - alert: AirlockMicrogatewaySessionConnectionMonitoring
           annotations:
@@ -20,3 +36,5 @@ spec:
           keep_firing_for: 10m
           labels:
             severity: warning
+            syn: 'true'
+            syn_component: monitoring

@@ -1,11 +1,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: session-storage-rules
-  namespace: test-instance-02
+  labels:
+    name: airlock-microgateway-rules
+  name: airlock-microgateway-rules
+  namespace: airlock-microgateway-monitoring
 spec:
   groups:
-    - name: monitoring
+    - name: sessionMonitoring
       rules:
         - alert: AirlockMicrogatewaySessionConnectionMonitoring
           annotations:
@@ -20,3 +22,5 @@ spec:
           keep_firing_for: 10m
           labels:
             severity: warning
+            syn: 'true'
+            syn_component: sessionStoreMonitoring

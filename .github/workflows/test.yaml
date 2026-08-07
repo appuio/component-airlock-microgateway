@@ -37,6 +37,7 @@ jobs:
           - live_example_dev
           - multiple_instances
           - sessionStoreMonitoring
+          - monitoring
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -55,6 +56,7 @@ jobs:
           - live_example_dev
           - multiple_instances
           - sessionStoreMonitoring
+          - monitoring
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
