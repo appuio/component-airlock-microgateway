@@ -29,7 +29,6 @@ spec:
             httpGet:
               path: /health
               port: http
-              protocol: TCP
           name: nginx
           ports:
             - containerPort: 8080
