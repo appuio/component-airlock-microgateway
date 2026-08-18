@@ -28,6 +28,8 @@ parameters:
         enabled: false
       dummyBackend:
         enabled: false
+        tls:
+          enabled: false
         configMap:
           data:
             default.conf: |

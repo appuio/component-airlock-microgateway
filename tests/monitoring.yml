@@ -71,6 +71,9 @@ parameters:
                 severity: critical
       dummyBackend:
         enabled: true
+        tls:
+          enabled: true
+          secret: nginx-tls
         resources:
           requests:
             memory: 10Mi
