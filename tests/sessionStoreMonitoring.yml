@@ -1,6 +1,7 @@
 applications:
   - airlock-microgateway
   - cilium
+  - gateway-api
 
 parameters:
   # Dependency for testing with upstream lib
@@ -21,6 +22,9 @@ parameters:
       - type: https
         source: https://raw.githubusercontent.com/projectsyn/jsonnet-libs/main/syn-teams.libsonnet
         output_path: vendor/lib/syn/syn-teams.libsonnet
+      - type: https
+        source: https://raw.githubusercontent.com/projectsyn/component-gateway-api/master/lib/gateway-api.libsonnet
+        output_path: vendor/lib/gateway-api.libsonnet
 
   airlock_microgateway:
     monitoring:

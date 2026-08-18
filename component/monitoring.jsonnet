@@ -44,11 +44,58 @@ local backendNetworkPolicy(name) = kube.NetworkPolicy(name) {
     ],
   },
 };
+
+local httpConfig = {
+  'default.conf': |||
+    server {
+      listen 8080;
+
+      location / {
+        return 200;
+      }
+    }
+  |||,
+};
+
+local mtlsConfig = {
+  'default.conf': |||
+    server {
+      listen 8080;
+
+      location / {
+        return 200;
+      }
+    }
+
+    server {
+      listen 8443 ssl;
+
+      ssl_certificate     /etc/nginx/tls/tls.crt;
+      ssl_certificate_key /etc/nginx/tls/tls.key;
+
+      ssl_client_certificate /etc/nginx/tls/ca.crt;
+      ssl_verify_client on;
+
+      location / {
+        return 200;
+      }
+    }
+  |||,
+};
+
+
 local backendConfigMap = kube.ConfigMap('nginx-conf') {
   metadata+: {
     namespace: nsName,
   },
-  data: params.dummyBackend.configMap.data,
+  data:
+    if std.objectHas(params.dummyBackend, 'configMap') && std.objectHas(params.dummyBackend.configMap, 'data') then
+      params.dummyBackend.configMap.data
+    else
+      if params.dummyBackend.tls.enabled then
+        mtlsConfig
+      else
+        httpConfig,
 };
 local backendDeployment = kube.Deployment('microgateway-canary-backend') {
   metadata+: {
@@ -70,7 +117,12 @@ local backendDeployment = kube.Deployment('microgateway-canary-backend') {
                 name: 'http',
                 containerPort: 8080,
               },
-            ],
+            ] + if params.dummyBackend.tls.enabled then [
+              {
+                name: 'https',
+                containerPort: 8443,
+              },
+            ] else [],
             livenessProbe: {
               httpGet: {
                 port: 'http',
@@ -81,7 +133,13 @@ local backendDeployment = kube.Deployment('microgateway-canary-backend') {
               mountPath: '/etc/nginx/conf.d/default.conf',
               name: 'nginx-conf',
               subPath: 'default.conf',
-            } ],
+            } ] + if params.dummyBackend.tls.enabled then [
+              {
+                mountPath: '/etc/nginx/tls',
+                name: 'nginx-tls',
+                readOnly: true,
+              },
+            ] else [],
           },
         ],
         volumes+: [ {
@@ -89,7 +147,14 @@ local backendDeployment = kube.Deployment('microgateway-canary-backend') {
           configMap: {
             name: 'nginx-conf',
           },
-        } ],
+        } ] + if params.dummyBackend.tls.enabled then [
+          {
+            name: 'nginx-tls',
+            secret: {
+              name: params.dummyBackend.tls.secret,
+            },
+          },
+        ] else [],
       },
     },
   },
@@ -99,6 +164,17 @@ local backendService = kube.Service('microgateway-canary-backend-svc') {
   target_container_name:: 'nginx',
   metadata+: {
     namespace: nsName,
+  },
+  spec+: {
+    ports+: (
+      if params.dummyBackend.tls.enabled then [
+        {
+          name: 'https',
+          port: 8443,
+          targetPort: 8443,
+        },
+      ] else []
+    ),
   },
 };
 local httpRoute(name='') = {

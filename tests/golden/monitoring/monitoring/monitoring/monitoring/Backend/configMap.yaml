@@ -3,6 +3,21 @@ data:
   default.conf: |
     server {
       listen 8080;
+
+      location / {
+        return 200;
+      }
+    }
+
+    server {
+      listen 8443 ssl;
+
+      ssl_certificate     /etc/nginx/tls/tls.crt;
+      ssl_certificate_key /etc/nginx/tls/tls.key;
+
+      ssl_client_certificate /etc/nginx/tls/ca.crt;
+      ssl_verify_client on;
+
       location / {
         return 200;
       }
