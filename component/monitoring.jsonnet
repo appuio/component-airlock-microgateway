@@ -151,7 +151,7 @@ local backendDeployment = kube.Deployment('microgateway-canary-backend') {
           {
             name: 'nginx-tls',
             secret: {
-              name: params.dummyBackend.tls.secret,
+              secretName: params.dummyBackend.tls.secret,
             },
           },
         ] else [],
