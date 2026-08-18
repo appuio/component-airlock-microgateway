@@ -44,6 +44,19 @@ local backendNetworkPolicy(name) = kube.NetworkPolicy(name) {
     ],
   },
 };
+
+local httpConfig = {
+  'default.conf': |||
+    server {
+      listen 8080;
+
+      location / {
+        return 200;
+      }
+    }
+  |||,
+};
+
 local mtlsConfig = {
   'default.conf': |||
     server {
@@ -76,10 +89,13 @@ local backendConfigMap = kube.ConfigMap('nginx-conf') {
     namespace: nsName,
   },
   data:
-    if params.dummyBackend.tls.enabled then
-      mtlsConfig
+    if std.objectHas(params.dummyBackend, 'configMap') && std.objectHas(params.dummyBackend.configMap, 'data') then
+      params.dummyBackend.configMap.data
     else
-      params.dummyBackend.configMap.data,
+      if params.dummyBackend.tls.enabled then
+        mtlsConfig
+      else
+        httpConfig,
 };
 local backendDeployment = kube.Deployment('microgateway-canary-backend') {
   metadata+: {

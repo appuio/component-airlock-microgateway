@@ -30,15 +30,6 @@ parameters:
         enabled: false
         tls:
           enabled: false
-        configMap:
-          data:
-            default.conf: |
-              server {
-                listen 8080;
-                location / {
-                  return 200;
-                }
-              }
     operatorNamespace: ""
     default:
       namespace:
