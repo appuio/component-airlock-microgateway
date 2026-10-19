@@ -40,8 +40,8 @@ parameters:
                 - statusCodeCondition:
                     matcher:
                       range:
-                        from: 400
-                        to: 499
+                        start: 400
+                        end: 499
                   customResponseRef:
                     name: "4xx"
                 - statusCodeCondition:
@@ -52,8 +52,8 @@ parameters:
                 - statusCodeCondition:
                     matcher:
                       range:
-                        from: 500
-                        to: 599
+                        start: 500
+                        end: 599
                   customResponseRef:
                     name: "5xx"
               upstream:
