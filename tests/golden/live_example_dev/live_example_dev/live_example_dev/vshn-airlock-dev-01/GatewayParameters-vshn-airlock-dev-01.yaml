@@ -29,8 +29,8 @@ spec:
           statusCodeCondition:
             matcher:
               range:
-                from: 400
-                to: 499
+                end: 499
+                start: 400
         - customResponseRef:
             name: '502'
           statusCodeCondition:
@@ -41,8 +41,8 @@ spec:
           statusCodeCondition:
             matcher:
               range:
-                from: 500
-                to: 599
+                end: 599
+                start: 500
       upstream:
         - customResponseRef:
             name: '401'
@@ -87,8 +87,6 @@ spec:
     downstream:
       remoteIP:
         proxyProtocol: {}
-    sessionHandlingRef:
-      name: redis-session
   features:
     envoyExtensionPolicyEnabled: true
     insecureTLSAllowed: true
@@ -128,3 +126,5 @@ spec:
       type: LoadBalancer
   logging:
     level: info
+  sessionHandlingRef:
+    name: redis-session

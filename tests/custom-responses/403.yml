@@ -1,0 +1,32 @@
+classes:
+  - common
+
+parameters:
+  airlock_microgateway:
+    default:
+      gatewayParameters:
+        spec:
+          defaults:
+            customResponses:
+              local:
+                - statusCodeCondition:
+                    matcher: &matcher
+                      exact: 403
+                  customResponseRef: &customResponseRef
+                    name: '403'
+              upstream:
+                - customResponseRef: *customResponseRef
+                  responseConditions:
+                    statusCode:
+                      matcher: *matcher
+      customResponses:
+        '403':
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  %RESPONSE_CODE%
+              headers: ${airlock_microgateway:test:customResponsesCommon:custom_response_headers}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:text_json}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:application_json}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:text_plain}

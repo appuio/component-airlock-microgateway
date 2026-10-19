@@ -1,0 +1,34 @@
+classes:
+  - common
+
+parameters:
+  airlock_microgateway:
+    default:
+      gatewayParameters:
+        spec:
+          defaults:
+            customResponses:
+              local:
+                - statusCodeCondition:
+                    matcher: &matcher
+                      range:
+                        start: 400
+                        end: 499
+                  customResponseRef: &customResponseRef
+                    name: '4xx'
+              upstream:
+                - customResponseRef: *customResponseRef
+                  responseConditions:
+                    statusCode:
+                      matcher: *matcher
+      customResponses:
+        '4xx':
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  %RESPONSE_CODE%
+              headers: ${airlock_microgateway:test:customResponsesCommon:custom_response_headers}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:text_json}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:application_json}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:text_plain}

@@ -64,6 +64,8 @@ For placeHolders see https://www.envoyproxy.io/docs/envoy/latest/configuration/a
 
 == Example
 
+See the xref:how-tos/custom-responses.adoc[custom responses how-to] for a complete consumer setup based on classes.
+
 [source,yaml]
 ----
 default:
@@ -79,8 +81,8 @@ default:
           - statusCodeCondition:
               matcher:
                 range:
-                  from: 400
-                  to: 499
+                  start: 400
+                  end: 499
             customResponseRef:
               name: "4xx"
   customResponses:

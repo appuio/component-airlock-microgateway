@@ -1,0 +1,57 @@
+classes:
+  - common
+
+parameters:
+  airlock_microgateway:
+    default:
+      gatewayParameters:
+        spec:
+          defaults:
+            customResponses:
+              local:
+                - statusCodeCondition:
+                    matcher: &matcher
+                      exact: 401
+                  customResponseRef: &customResponseRef
+                    name: '401'
+              upstream:
+                - customResponseRef: *customResponseRef
+                  responseConditions:
+                    statusCode:
+                      matcher: *matcher
+      customResponses:
+        '401':
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  <!DOCTYPE html>
+                  <html lang="de">
+                  <head>
+                      <meta charset="utf-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <title>Customer Error 401</title>
+                      <style>
+                          @media (max-height: 550px) {
+                              body { overflow-y: auto; height: auto; }
+                          }
+                      </style>
+                  </head>
+                  <body>
+                  <main>
+                      <h1><span class="textcode">Error </span>401</h1>
+                      <section>
+                        <h2 lang="de">Access Denied</h2>
+                        <p lang="de">You can't access this application.<br>
+                        Additional info: <a href="https://support.customer.com">Support</a>.</p>
+                      </section>
+                  </main>
+                  <footer>
+                      REQUEST ID: %STREAM_ID%
+                  </footer>
+                  </body>
+                  </html>
+              headers: ${airlock_microgateway:test:customResponsesCommon:custom_response_headers}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:text_json}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:application_json}
+            - ${airlock_microgateway:test:customResponsesCommon:common_custom_response_contents:text_plain}

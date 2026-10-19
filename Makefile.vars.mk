@@ -50,4 +50,10 @@ KUBENT_IMAGE    ?= ghcr.io/doitintl/kube-no-trouble:latest
 KUBENT_DOCKER   ?= $(DOCKER_CMD) $(DOCKER_ARGS) $(root_volume) --entrypoint=/app/kubent $(KUBENT_IMAGE)
 
 instance ?= defaults
+value_files ?= $(value_files_$(instance))
+value_files_defaults ?=
+value_files_multiple_instances ?=
+value_files_sessionStoreMonitoring ?=
+value_files_monitoring ?=
+value_files_live_example_dev ?= $(wildcard tests/custom-responses/*.yml)
 test_instances = tests/defaults.yml tests/multiple_instances.yml tests/live_example_dev.yml tests/sessionStoreMonitoring.yml tests/monitoring.yml

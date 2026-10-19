@@ -11,3 +11,23 @@ spec:
         value: |
           %RESPONSE_CODE%
       contentType: text/html
+      headers:
+        - name: RESPONSE_CODE_DETAILS
+          value: '%RESPONSE_CODE_DETAILS%'
+    - body:
+        value: |
+          {"message":"Error %RESPONSE_CODE%", "request_id":"%STREAM_ID%", "request_time":"%START_TIME(%Y-%m-%dT%H:%M:%SZ)%"}
+      contentType: text/json
+    - body:
+        value: |
+          {"message":"Error %RESPONSE_CODE%", "request_id":"%STREAM_ID%", "request_time":"%START_TIME(%Y-%m-%dT%H:%M:%SZ)%"}
+      contentType: application/json
+    - body:
+        value: |
+          Error %RESPONSE_CODE%
+          Request ID: %STREAM_ID%
+          Request Time: %START_TIME(%Y-%m-%dT%H:%M:%SZ)%
+      contentType: text/plain
+      headers:
+        - name: RESPONSE_CODE_DETAILS
+          value: '%RESPONSE_CODE_DETAILS%'

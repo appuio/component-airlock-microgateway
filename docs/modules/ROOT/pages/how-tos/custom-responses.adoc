@@ -1,0 +1,119 @@
+= Configure custom responses
+
+Custom error responses are defined as link:https://docs.airlock.com/microgateway/5.0/index/api/crds/custom-response/v1alpha1[CustomResponse] objects referenced from the GatewayParameters defaults.
+This how-to shows a setup that keeps headers and shared content defined once and splits per status code in its own class.
+
+IMPORTANT: The first matching `customResponseRef` wins, so order the classes from exact status codes to the catch-alls (`4xx` before `5xx`, and both last).
+
+== Shared definitions
+
+Create a class holding the headers and content shared between all custom responses, e.g. `catalog/tenant/microgateway/custom-responses/common.yml`:
+
+[source,yaml]
+----
+parameters:
+  airlock_microgateway:
+    customResponsesCommon:
+      custom_response_headers:
+        - name: RESPONSE_CODE_DETAILS
+          value: '%RESPONSE_CODE_DETAILS%'
+      common_custom_response_contents:
+        text_json: &json_content
+          contentType: text/json
+          body:
+            value: |
+              {"message":"Error %RESPONSE_CODE%", "request_id":"%STREAM_ID%", "request_time":"%START_TIME(%Y-%m-%dT%H:%M:%SZ)%"}
+        headers: ${airlock_microgateway:customResponsesCommon:custom_response_headers}
+        application_json:
+          <<: *json_content
+          contentType: application/json
+        text_plain:
+          contentType: text/plain
+          body:
+            value: |
+              Error %RESPONSE_CODE%
+              Request ID: %STREAM_ID%
+              Request Time: %START_TIME(%Y-%m-%dT%H:%M:%SZ)%
+          headers: ${airlock_microgateway:customResponsesCommon:custom_response_headers}
+----
+
+== Per status code classes
+
+Create one class per status code, e.g. `catalog/tenant/microgateway/custom-responses/401.yml` (similar classes for `403`, `404`, `4xx`, `502`, `5xx`):
+
+[source,yaml]
+----
+classes:
+  - tenant.microgateway.custom-responses.common
+
+parameters:
+  airlock_microgateway:
+    default:
+      gatewayParameters:
+        spec:
+          defaults:
+            customResponses:
+              local:
+                - statusCodeCondition:
+                    matcher: &matcher
+                      exact: 401
+                  customResponseRef: &customResponseRef
+                    name: '401'
+              upstream:
+                - customResponseRef: *customResponseRef
+                  responseConditions:
+                    statusCode:
+                      matcher: *matcher
+      customResponses:
+        '401':
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  <!DOCTYPE html>
+                  <html lang="de">
+                  <body>
+                  <main>
+                      <h1><span class="textcode">Error </span>401</h1>
+                  </main>
+                  <footer>
+                      REQUEST ID: %STREAM_ID%
+                  </footer>
+                  </body>
+                  </html>
+              headers: ${airlock_microgateway:customResponsesCommon:custom_response_headers}
+            - ${airlock_microgateway:customResponsesCommon:common_custom_response_contents:text_json}
+            - ${airlock_microgateway:customResponsesCommon:common_custom_response_contents:application_json}
+            - ${airlock_microgateway:customResponsesCommon:common_custom_response_contents:text_plain}
+----
+
+The catch-all classes use a range matcher instead of an exact status code, e.g. `4xx.yml`:
+
+[source,yaml]
+----
+      gatewayParameters:
+        spec:
+          defaults:
+            customResponses:
+              local:
+                - statusCodeCondition:
+                    matcher:
+                      range:
+                        start: 400
+                        end: 499
+----
+
+== Activate the classes
+
+Include the classes with the catch-alls at the end of their status code group:
+
+[source,yaml]
+----
+classes:
+  - tenant.microgateway.custom-responses.401
+  - tenant.microgateway.custom-responses.403
+  - tenant.microgateway.custom-responses.404
+  - tenant.microgateway.custom-responses.4xx
+  - tenant.microgateway.custom-responses.502
+  - tenant.microgateway.custom-responses.5xx
+----
