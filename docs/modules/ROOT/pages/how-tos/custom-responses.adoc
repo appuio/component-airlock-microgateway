@@ -7,7 +7,9 @@ IMPORTANT: The first matching `customResponseRef` wins, so order the classes fro
 
 == Shared definitions
 
-Create a class holding the headers and content shared between all custom responses, e.g. `catalog/tenant/microgateway/custom-responses/common.yml`:
+Create a class holding the headers and content shared between all custom responses, e.g. `catalog/tenant/microgateway/custom-responses/common.yml`.
+
+NOTE: In this component's own test files (`tests/custom-responses/`) the shared parameters live under `airlock_microgateway.test.*` to avoid colliding with real component parameters.
 
 [source,yaml]
 ----
@@ -87,20 +89,44 @@ parameters:
             - ${airlock_microgateway:customResponsesCommon:common_custom_response_contents:text_plain}
 ----
 
-The catch-all classes use a range matcher instead of an exact status code, e.g. `4xx.yml`:
+The catch-all classes are equal to the exact status code classes above, except that the matcher uses a range instead of an exact status code, e.g. `4xx.yml`:
 
 [source,yaml]
 ----
+classes:
+  - tenant.microgateway.custom-responses.common
+
+parameters:
+  airlock_microgateway:
+    default:
       gatewayParameters:
         spec:
           defaults:
             customResponses:
               local:
                 - statusCodeCondition:
-                    matcher:
+                    matcher: &matcher
                       range:
                         start: 400
                         end: 499
+                  customResponseRef: &customResponseRef
+                    name: '4xx'
+              upstream:
+                - customResponseRef: *customResponseRef
+                  responseConditions:
+                    statusCode:
+                      matcher: *matcher
+      customResponses:
+        '4xx':
+          content:
+            - contentType: text/html
+              body:
+                value: |
+                  %RESPONSE_CODE%
+              headers: ${airlock_microgateway:customResponsesCommon:custom_response_headers}
+            - ${airlock_microgateway:customResponsesCommon:common_custom_response_contents:text_json}
+            - ${airlock_microgateway:customResponsesCommon:common_custom_response_contents:application_json}
+            - ${airlock_microgateway:customResponsesCommon:common_custom_response_contents:text_plain}
 ----
 
 == Activate the classes
