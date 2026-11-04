@@ -50,6 +50,8 @@ spec:
               readOnly: true
       imagePullSecrets: []
       initContainers: []
+      nodeSelector:
+        node-role.kubernetes.io/infra: ''
       terminationGracePeriodSeconds: 30
       volumes:
         - configMap:
