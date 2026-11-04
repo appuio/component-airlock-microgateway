@@ -71,6 +71,8 @@ parameters:
                 severity: critical
       dummyBackend:
         enabled: true
+        nodeSelector:
+          node-role.kubernetes.io/infra: ""
         tls:
           enabled: true
           secret: nginx-tls

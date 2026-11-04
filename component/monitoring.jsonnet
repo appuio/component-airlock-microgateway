@@ -107,6 +107,7 @@ local backendDeployment = kube.Deployment('microgateway-canary-backend') {
   spec+: {
     template+: {
       spec+: {
+        nodeSelector: params.dummyBackend.nodeSelector,
         containers: [
           {
             name: 'nginx',

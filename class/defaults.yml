@@ -28,6 +28,7 @@ parameters:
         enabled: false
       dummyBackend:
         enabled: false
+        nodeSelector: {}
         tls:
           enabled: false
     operatorNamespace: ""
