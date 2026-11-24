@@ -147,6 +147,49 @@ The `ManagedResource` aborts reconciliation if a referenced source secret does n
 The defaults create `redis-password`, `redis-ca` and `redis-clientcert`.
 Add more entries with the same data mapping to create additional secret names, for example to switch an instance to new redis secret names without downtime.
 
+== `backendTLSPolicyCNP`
+
+[horizontal]
+type:: object
+default:: `enabled: false`, `sourceNamespace: ""`, `apiVersion: "x-openshift.microgateway.airlock.com/v1alpha3"`
+
+Configures the Espejote `ManagedResource` that turns BackendTLSPolicies and
+ExternalName Services from the `sourceNamespace` into CiliumNetworkPolicies
+in the gateway instance namespace, so gateway pods can reach external backends
+through Cilium's DNS/SNI egress enforcement.
+
+When enabled for an instance, the component renders the ManagedResource, a
+ServiceAccount, and the required Roles/RoleBindings into the gateway instance
+namespace (and read access into the source namespace).
+
+=== `backendTLSPolicyCNP.enabled`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+Enables the BackendTLSPolicy to CiliumNetworkPolicy rendering for an instance.
+
+=== `backendTLSPolicyCNP.sourceNamespace`
+
+[horizontal]
+type:: string
+default:: `""`
+
+The namespace where the ExternalName Services and BackendTLSPolicies live that
+gateway pods need to egress to.
+Must be set when `enabled` is `true`.
+
+=== `backendTLSPolicyCNP.apiVersion`
+
+[horizontal]
+type:: string
+default:: `x-openshift.microgateway.airlock.com/v1alpha3`
+
+The group/version of the BackendTLSPolicy CRD to watch in the source namespace.
+The RBAC Role for reading BackendTLSPolicies automatically uses the group part of
+this value.
+
 == Example
 
 [source,yaml]
@@ -174,4 +217,8 @@ instances:
           tls.key:
             secretName: redis-creds-connection
             key: tls.key
+  my-gateway:
+    backendTLSPolicyCNP:
+      enabled: true
+      sourceNamespace: my-app-namespace
 ----

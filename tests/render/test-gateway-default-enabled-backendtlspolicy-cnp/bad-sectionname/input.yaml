@@ -1,0 +1,58 @@
+# Scenario bad-sectionname — sectionName nope matches no port, so the ref
+# contributes nothing and the render is null; the pre-existing labeled CNP in
+# the context is deleted
+triggers:
+  - {}
+context:
+  - name: services
+    resources:
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: external-backend
+          namespace: source
+        spec:
+          type: ExternalName
+          externalName: eu.api.example.org
+          ports:
+            - name: https
+              port: 443
+              protocol: TCP
+  - name: backendtlspolicies
+    resources:
+      - apiVersion: x-openshift.microgateway.airlock.com/v1alpha3
+        kind: BackendTLSPolicy
+        metadata:
+          name: external-backend-tls
+          namespace: source
+        spec:
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: external-backend
+              sectionName: nope
+          validation:
+            hostname: api.example.org
+  - name: ciliumnetworkpolicies
+    resources:
+      - apiVersion: cilium.io/v2
+        kind: CiliumNetworkPolicy
+        metadata:
+          name: c29b21042dea9eac0e6a-external-backend
+          namespace: test-gateway-default-enabled
+          labels:
+            espejote.io/managed-resource: backendtlspolicy-cnp
+        spec:
+          endpointSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+          egress:
+            - toFQDNs:
+                - matchName: eu.api.example.org
+              toPorts:
+                - ports:
+                    - port: "443"
+                      protocol: TCP
+                  serverNames:
+                    - api.example.org
+libraries: {}

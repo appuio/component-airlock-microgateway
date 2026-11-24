@@ -1,0 +1,77 @@
+# Scenario happy-path — one policy referencing both ExternalName services plus
+# the negative ClusterIP pair. Renders exactly 2 service-named SNI CNPs
+# (external-backend 443, external-backend-2 8443, both serverNames
+# api.example.org); the ClusterIP service renders nothing.
+triggers:
+  - {}
+context:
+  - name: services
+    resources:
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: external-backend
+          namespace: source
+        spec:
+          type: ExternalName
+          externalName: eu.api.example.org
+          ports:
+            - port: 443
+              protocol: TCP
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: external-backend-2
+          namespace: source
+        spec:
+          type: ExternalName
+          externalName: us.api.example.org
+          ports:
+            - port: 8443
+              protocol: TCP
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: internal-backend
+          namespace: source
+          labels:
+            app: internal
+        spec:
+          type: ClusterIP
+          selector:
+            app: internal
+          ports:
+            - port: 443
+              protocol: TCP
+  - name: backendtlspolicies
+    resources:
+      - apiVersion: x-openshift.microgateway.airlock.com/v1alpha3
+        kind: BackendTLSPolicy
+        metadata:
+          name: external-backend-tls
+          namespace: source
+        spec:
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: external-backend
+            - group: ""
+              kind: Service
+              name: external-backend-2
+          validation:
+            hostname: api.example.org
+      - apiVersion: x-openshift.microgateway.airlock.com/v1alpha3
+        kind: BackendTLSPolicy
+        metadata:
+          name: internal-backend-tls
+          namespace: source
+        spec:
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: internal-backend
+          validation:
+            hostname: internal.example.org
+  - name: ciliumnetworkpolicies
+    resources: []
+libraries: {}

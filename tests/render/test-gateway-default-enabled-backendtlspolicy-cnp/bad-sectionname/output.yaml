@@ -1,0 +1,24 @@
+---
+- null
+- __internal_use_espejote_lib_deletion:
+    delete: true
+  apiVersion: cilium.io/v2
+  kind: CiliumNetworkPolicy
+  metadata:
+    labels:
+      espejote.io/managed-resource: backendtlspolicy-cnp
+    name: c29b21042dea9eac0e6a-external-backend
+    namespace: test-gateway-default-enabled
+  spec:
+    egress:
+    - toFQDNs:
+      - matchName: eu.api.example.org
+      toPorts:
+      - ports:
+        - port: "443"
+          protocol: TCP
+        serverNames:
+        - api.example.org
+    endpointSelector:
+      matchLabels:
+        gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale

@@ -5,6 +5,10 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../../.." && pwd)"
 DIR="${HERE#"$ROOT"/}"
 INSTANCE="${ESPEJOTE_INSTANCE:-redisSecretSync}"
+if [ "$INSTANCE" != "redisSecretSync" ]; then
+  echo "SKIP: $DIR belongs to instance redisSecretSync (compiling $INSTANCE instead)"
+  exit 0
+fi
 ESPEJOTE_CMD="${ESPEJOTE_CMD:-espejote}"
 NAMESPACE="test-instance-02"
 RESOURCE="redis-secret-sync"

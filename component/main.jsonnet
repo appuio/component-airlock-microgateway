@@ -1,6 +1,7 @@
 // main template for airlock-microgateway
 local kube = import 'kube-ssa-compat.libsonnet';
 local gw = import 'lib/airlock-microgateway-operator.libsonnet';
+local btlspolicycnp = import 'lib/backendtlspolicy-cnp.libsonnet';
 local com = import 'lib/commodore.libjsonnet';
 local kap = import 'lib/kapitan.libjsonnet';
 local redisSecretSync = import 'lib/redis-secret-sync.libsonnet';
@@ -169,6 +170,7 @@ local instanceResources = std.flatMap(
            GatewayCNPIngress(instance.key),
            GatewayCNPEgress(instance.key),
          ] else [])
+    + btlspolicycnp.forInstance(instance.key)
     + redisSecretSync.resources(instance.key),
   std.objectKeysValues(params.instances)
 );
