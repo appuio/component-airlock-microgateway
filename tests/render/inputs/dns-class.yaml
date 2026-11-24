@@ -1,0 +1,60 @@
+# Scenario dns-class — referenced service renders the SNI CNP; the unreferenced
+# ExternalName loose-end renders a DNS CNP over ALL its ports (443 + 8443, no
+# serverNames); the portless ExternalName portless renders the unrestricted
+# toFQDNs-only fallback.
+triggers:
+  - {}
+context:
+  - name: services
+    resources:
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: external-backend
+          namespace: source
+        spec:
+          type: ExternalName
+          externalName: eu.api.example.org
+          ports:
+            - port: 443
+              protocol: TCP
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: loose-end
+          namespace: source
+        spec:
+          type: ExternalName
+          externalName: stray.example.org
+          ports:
+            - port: 443
+              name: https
+              protocol: TCP
+            - port: 8443
+              name: alt
+              protocol: TCP
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: portless
+          namespace: source
+        spec:
+          type: ExternalName
+          externalName: portless.example.org
+  - name: backendtlspolicies
+    resources:
+      - apiVersion: x-openshift.microgateway.airlock.com/v1alpha3
+        kind: BackendTLSPolicy
+        metadata:
+          name: external-backend-tls
+          namespace: source
+        spec:
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: external-backend
+          validation:
+            hostname: api.example.org
+  - name: ciliumnetworkpolicies
+    resources: []
+libraries: {}

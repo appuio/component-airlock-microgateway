@@ -38,6 +38,7 @@ jobs:
           - multiple_instances
           - sessionStoreMonitoring
           - monitoring
+          - backendtlspolicy-cnp
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -57,6 +58,7 @@ jobs:
           - multiple_instances
           - sessionStoreMonitoring
           - monitoring
+          - backendtlspolicy-cnp
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -66,3 +68,20 @@ jobs:
           path: ${{ env.COMPONENT_NAME }}
       - name: Golden diff
         run: make golden-diff -e instance=${{ matrix.instance }}
+  espejote-render:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    defaults:
+      run:
+        working-directory: ${{ env.COMPONENT_NAME }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: ${{ env.COMPONENT_NAME }}
+      - name: Install espejote CLI
+        run: |
+          ver="$(gh api repos/vshn/espejote/releases/latest --jq .tag_name)"
+          curl -sSL "https://github.com/vshn/espejote/releases/download/${ver}/espejote_${ver#v}_linux_amd64.tar.gz" | tar xz -C /usr/local/bin espejote
+      - name: Render Espejote MR and check for drift
+        run: make test-espejote

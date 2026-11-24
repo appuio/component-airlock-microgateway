@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: espejote-btlspolicy-cnp
+  namespace: other-source
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - x-openshift.microgateway.airlock.com
+    resources:
+      - backendtlspolicies
+    verbs:
+      - get
+      - list
+      - watch

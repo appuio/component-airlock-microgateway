@@ -1,0 +1,21 @@
+---
+- apiVersion: cilium.io/v2
+  kind: CiliumNetworkPolicy
+  metadata:
+    annotations:
+      espejote.io/source-service: external-backend
+    labels:
+      espejote.io/managed-resource: backendtlspolicy-cnp
+    name: a580b80c8f893491e202
+    namespace: test-gateway-default-enabled
+  spec:
+    egress:
+    - toFQDNs:
+      - matchName: eu.api.example.org
+      toPorts:
+      - ports:
+        - port: "443"
+          protocol: TCP
+    endpointSelector:
+      matchLabels:
+        gateway.networking.k8s.io/gateway-name: test-gateway-default-enabled

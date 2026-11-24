@@ -1,0 +1,44 @@
+# Scenario sni-disabled — a referenced Service labeled
+# microgateway.airlock.com/enable-sni-check: "false" renders the DNS shape but
+# keeps the targetRef's port selection (sectionName: https -> only 443, not the
+# unselected 8443), no serverNames, under the same deterministic hash name.
+triggers:
+  - {}
+context:
+  - name: services
+    resources:
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: external-backend
+          namespace: source
+          labels:
+            microgateway.airlock.com/enable-sni-check: "false"
+        spec:
+          type: ExternalName
+          externalName: eu.api.example.org
+          ports:
+            - port: 443
+              name: https
+              protocol: TCP
+            - port: 8443
+              name: alt
+              protocol: TCP
+  - name: backendtlspolicies
+    resources:
+      - apiVersion: x-openshift.microgateway.airlock.com/v1alpha3
+        kind: BackendTLSPolicy
+        metadata:
+          name: external-backend-tls
+          namespace: source
+        spec:
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: external-backend
+              sectionName: https
+          validation:
+            hostname: api.example.org
+  - name: ciliumnetworkpolicies
+    resources: []
+libraries: {}

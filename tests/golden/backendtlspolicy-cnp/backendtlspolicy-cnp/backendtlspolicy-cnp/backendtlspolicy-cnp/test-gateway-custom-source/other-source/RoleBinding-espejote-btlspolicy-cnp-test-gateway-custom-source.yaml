@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: espejote-btlspolicy-cnp-test-gateway-custom-source
+  namespace: other-source
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: espejote-btlspolicy-cnp
+subjects:
+  - kind: ServiceAccount
+    name: espejote-btlspolicy-cnp
+    namespace: test-gateway-custom-source
