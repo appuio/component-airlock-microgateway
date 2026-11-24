@@ -287,6 +287,24 @@ data:
             type: "LoadBalancer"
         logging:
           level: "info"
+    hpa:
+      enabled: false
+      spec:
+        maxReplicas: 10
+        metrics:
+        - resource:
+            name: "cpu"
+            target:
+              averageUtilization: 80
+              type: "Utilization"
+          type: "Resource"
+        - resource:
+            name: "memory"
+            target:
+              averageUtilization: 80
+              type: "Utilization"
+          type: "Resource"
+        minReplicas: 2
     httpRedirect:
       metadata:
         name: "http-filter-redirect"

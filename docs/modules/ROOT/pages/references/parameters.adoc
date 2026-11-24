@@ -175,3 +175,49 @@ instances:
             secretName: redis-creds-connection
             key: tls.key
 ----
+
+== `default.hpa`
+
+[horizontal]
+type:: object (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/[HorizontalPodAutoscaler])
+default:: `enabled: false`, with a CPU/memory scaling policy (autoscaling disabled)
+
+Opt-in per instance: a Kubernetes `HorizontalPodAutoscaler` managing the gateway Deployment of the instance. The HPA renders only when `enabled` is `true` in the instance's effective config — the `default.hpa` config deep-merged with the instance's own `hpa` config, instance values winning — so a spec template can be defined once globally and switched on where needed. The component ships a ready-made policy (2-10 replicas on 80% average CPU or memory utilization), so an instance usually only needs `enabled: true`. `enabled` is evaluated by the component and never rendered into the manifest.
+
+A partial spec is accepted and deep-merged onto a generated skeleton whose `scaleTargetRef` already points at the gateway Deployment, so `scaleTargetRef` doesn't need to be repeated.
+
+== Example
+
+Enable the shipped policy for an instance:
+
+[source,yaml]
+----
+instances:
+  example-8:
+    hpa:
+      enabled: true
+    gatewayParameters:
+      spec:
+        kubernetes:
+          deployment:
+            replicas: null
+----
+
+Tune the policy where the shipped default doesn't fit:
+
+[source,yaml]
+----
+instances:
+  example-9:
+    hpa:
+      enabled: true
+      spec:
+        maxReplicas: 20
+    gatewayParameters:
+      spec:
+        kubernetes:
+          deployment:
+            replicas: null
+----
+
+An instance can also disable autoscaling explicitly with `hpa: {enabled: false}` while keeping the shipped policy.
