@@ -176,4 +176,5 @@ toFiles(instanceResources) +
 namespaces
 + (import 'monitoring.jsonnet')
 + (import 'custom-responses.jsonnet')
++ (import 'backendtlspolicy-cnp.jsonnet')
 + (import 'lib/debug.jsonnet')

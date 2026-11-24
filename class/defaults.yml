@@ -53,4 +53,7 @@ parameters:
       egressNetpol: {}
       httpRedirect: {}
       customResponses: {}
+      backendTLSPolicyCNP:
+        enabled: false
+        sourceNamespace: ""
     instances: {}

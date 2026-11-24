@@ -123,3 +123,49 @@ default:
                 value: |
                   %RESPONSE_CODE%
 ----
+
+== `backendTLSPolicyCNP`
+
+[horizontal]
+type:: object
+default:: `enabled: false`, `sourceNamespace: ""`
+
+Configures the Espejote `ManagedResource` that turns Airlock Microgateway
+BackendTLSPolicies and ExternalName Services from the `sourceNamespace` into
+CiliumNetworkPolicies in the gateway instance namespace, so gateway pods can reach
+external backends through Cilium's DNS/SNI egress enforcement.
+
+When enabled for an instance, the component renders the ManagedResource, a
+ServiceAccount, and the required Roles/RoleBindings into the gateway instance
+namespace (and read access into the source namespace).
+Requires an operating https://espejote.io[Espejote] installation and the
+BackendTLSPolicy CRD (`x-openshift.microgateway.airlock.com/v1alpha3`).
+
+=== `backendTLSPolicyCNP.enabled`
+
+[horizontal]
+type:: boolean
+default:: `false`
+
+Enables the BackendTLSPolicy to CiliumNetworkPolicy rendering for an instance.
+
+=== `backendTLSPolicyCNP.sourceNamespace`
+
+[horizontal]
+type:: string
+default:: `""`
+
+The namespace where the ExternalName Services and BackendTLSPolicies live that
+gateway pods need to egress to.
+Must be set when `enabled` is `true`.
+
+== Example
+
+[source,yaml]
+----
+instances:
+  my-gateway:
+    backendTLSPolicyCNP:
+      enabled: true
+      sourceNamespace: my-app-namespace
+----
