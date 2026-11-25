@@ -4,8 +4,17 @@
     ":gitSignOff",
     ":disableDependencyDashboard"
   ],
-  "ignorePaths": [
-    ".github/**"
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.github/workflows/test\\.yaml$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)(?: versioning=(?<versioning>.*?))?\\s*\\n\\s*.*?: (?<currentValue>\\S+)"
+      ],
+      "versioningTemplate": "semver-coerced"
+    }
   ],
   "labels": [
     "dependency"
@@ -37,6 +46,12 @@
         "automerge",
         "bump:patch"
       ]
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "enabled": false
     }
   ]
 }

@@ -13,7 +13,7 @@ rules:
       - list
       - watch
   - apiGroups:
-      - x-openshift.microgateway.airlock.com
+      - gateway.networking.k8s.io
     resources:
       - backendtlspolicies
     verbs:

@@ -12,7 +12,7 @@
 #
 # NOTE: this renders the *compiled* ManagedResource, so it also guards against
 # parameter-substitution regressions (target namespace, gateway label, MR name)
-# in component/backendtlspolicy-cnp.jsonnet, not just the template logic.
+# in component/lib/backendtlspolicy-cnp.libsonnet, not just the template logic.
 #
 # CAVEAT (offline pre-filtering): espejote does NOT re-apply the context
 # labelSelector/namespace offline, so every CNP placed in a scenario's
@@ -24,7 +24,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 INSTANCE="backendtlspolicy-cnp"
 GATEWAY="test-gateway-default-enabled"
-MANIFEST="$ROOT/compiled/$INSTANCE/$INSTANCE/$INSTANCE/$GATEWAY/$GATEWAY/ManagedResource-backendtlspolicy-cnp.yaml"
+MANIFEST="$ROOT/compiled/$INSTANCE/$INSTANCE/$GATEWAY/ManagedResource-backendtlspolicy-cnp.yaml"
 INPUTS="$ROOT/tests/render/inputs"
 EXPECTED="$ROOT/tests/render/expected"
 

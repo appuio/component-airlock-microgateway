@@ -1,5 +1,5 @@
 # Scenario sni-disabled — a referenced Service labeled
-# microgateway.airlock.com/enable-sni-check: "false" renders the DNS shape but
+# microgateway.vshn.io/enable-sni-check: "false" renders the DNS shape but
 # keeps the targetRef's port selection (sectionName: https -> only 443, not the
 # unselected 8443), no serverNames, under the same deterministic hash name.
 triggers:
@@ -13,7 +13,7 @@ context:
           name: external-backend
           namespace: source
           labels:
-            microgateway.airlock.com/enable-sni-check: "false"
+            microgateway.vshn.io/enable-sni-check: "false"
         spec:
           type: ExternalName
           externalName: eu.api.example.org

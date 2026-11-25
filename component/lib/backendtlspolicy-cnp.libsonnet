@@ -1,6 +1,3 @@
-// Renders one Espejote ManagedResource per gateway instance (when enabled) that turns
-// BackendTLSPolicies + ExternalName Services in a configurable source namespace into
-// CiliumNetworkPolicies in the gateway instance namespace.
 local kap = import 'lib/kapitan.libjsonnet';
 
 local inv = kap.inventory();
@@ -9,21 +6,19 @@ local params = inv.parameters.airlock_microgateway;
 local mrName = 'backendtlspolicy-cnp';
 local saName = 'espejote-btlspolicy-cnp';
 
-// Rendered CNPs are named md5(service-name)[:20], so several instances watching the
-// same source namespace produce the same names in different (their own) target
-// namespaces; GC is label+namespace scoped, so they never interfere.
+// Rendered CNPs are named sha256(service-name)[:20] + '-' + service-name, so several
+// instances watching the same source namespace produce the same names in different
+// (their own) target namespaces; GC is label+namespace scoped, so they never interfere.
 local template = |||
   local esp = import 'espejote.libsonnet';
 
-  local sniDisabled(svc) =
-    std.get(std.get(svc.metadata, 'labels', {}), 'microgateway.airlock.com/enable-sni-check', '') == 'false';
+  local sniEnabled(svc) =
+    std.get(std.get(svc.metadata, 'labels', {}), 'microgateway.vshn.io/enable-sni-check', 'true') != 'false';
   local portsFor(ref, svc) =
     if std.objectHasAll(ref, 'sectionName') && ref.sectionName != null && ref.sectionName != '' then
       [ p for p in svc.spec.ports if std.objectHasAll(p, 'name') && p.name == ref.sectionName ]
     else svc.spec.ports;
 
-  // One pass over every policy's usable core-Service refs: maps Service name
-  // -> [{hostname, ref}] bindings in policy-then-ref order. No per-service rescan.
   local bindingsByService(policies) =
     std.foldl(
       function(acc, b)
@@ -37,29 +32,25 @@ local template = |||
       {}
     );
 
-  // CNP shell shared by both classes: hash-named metadata (first 20 hex of
-  // md5 of the Service name; source Service kept in an annotation) with the
-  // distinctive label, the gateway instance's endpointSelector, and the
-  // egress list.
-  local cnpBody(svc, egress) = {
-    apiVersion: 'cilium.io/v2',
-    kind: 'CiliumNetworkPolicy',
-    metadata: {
-      name: std.substr(std.md5(svc.metadata.name), 0, 20),
-      namespace: '%(target)s',
-      labels: { 'espejote.io/managed-resource': '%(label)s' },
-      annotations: { 'espejote.io/source-service': svc.metadata.name },
-    },
-    spec: {
-      endpointSelector: {
-        matchLabels: { 'gateway.networking.k8s.io/gateway-name': '%(gateway)s' },
+  local cnpBody(svc, egress) =
+    local hash = std.substr(std.sha256(svc.metadata.name), 0, 20);
+    local hashed = hash + '-' + std.substr(svc.metadata.name, 0, 63 - std.length(hash) - 1);
+    {
+      apiVersion: 'cilium.io/v2',
+      kind: 'CiliumNetworkPolicy',
+      metadata: {
+        name: if std.endsWith(hashed, '-') then std.substr(hashed, 0, std.length(hashed) - 1) else hashed,
+        namespace: '%(target)s',
+        labels: { 'espejote.io/managed-resource': '%(label)s' },
+        annotations: { 'espejote.io/source-service': svc.metadata.name },
       },
-      egress: egress,
-    },
-  };
-  // Egress entry shape shared by both classes: toFQDNs for the externalName,
-  // toPorts narrowing when there are ports, serverNames only for the SNI class.
-  // Portless Service -> unrestricted toFQDNs-only entry.
+      spec: {
+        endpointSelector: {
+          matchLabels: { 'gateway.networking.k8s.io/gateway-name': '%(gateway)s' },
+        },
+        egress: egress,
+      },
+    };
   local egressEntry(svc, ports, serverNames) =
     { toFQDNs: [ { matchName: svc.spec.externalName } ] }
     + (if std.length(ports) == 0 then {} else {
@@ -71,24 +62,17 @@ local template = |||
          } + (if std.length(serverNames) == 0 then {} else { serverNames: serverNames }) ],
        });
 
-  // DNS class -- a Service referenced by NO BackendTLSPolicy: an unrestricted
-  // egress entry to the externalName over ALL its declared ports, no SNI.
   local dnsCnp(svc) =
     cnpBody(svc, [ egressEntry(svc, std.get(svc.spec, 'ports', []), []) ]);
 
-  // Referenced class -- a policy's targetRef points at this Service: ports come
-  // from the targetRef (sectionName subset, or all Service ports when the ref
-  // omits sectionName). SNI is enforced via serverNames UNLESS the Service opts
-  // out (microgateway.airlock.com/enable-sni-check: "false") -- then it is still
-  // the policy's ports, just DNS-checked instead of SNI-checked. Zero surviving
-  // ports -> null (the prune path).
   local policyCnp(svc, binds) =
     local entries = [
-      egressEntry(svc, portsFor(b.ref, svc), if sniDisabled(svc) then [] else [ b.hostname ])
+      egressEntry(svc, portsFor(b.ref, svc), if sniEnabled(svc) then [ b.hostname ] else [])
       for b in binds
       if std.objectHasAll(svc.spec, 'ports') && std.length(portsFor(b.ref, svc)) > 0
     ];
-    if std.length(entries) == 0 then null else cnpBody(svc, entries);
+    local pruneThisCNP = null;
+    if std.length(entries) == 0 then pruneThisCNP else cnpBody(svc, entries);
 
   local cnpFor(svc, binds) =
     if std.length(binds) == 0 then dnsCnp(svc) else policyCnp(svc, binds);
@@ -137,11 +121,14 @@ local roleBinding(name, namespace, roleName, saNamespace) = {
   } ],
 };
 
-local objects(instanceName) =
+local instanceObjects(instanceName) =
   local cfg = config(instanceName);
   assert std.isString(cfg.sourceNamespace) && cfg.sourceNamespace != '' : 'backendTLSPolicyCNP.sourceNamespace must be set for enabled instance ' + instanceName;
   local gateway = instanceName;
   local source = cfg.sourceNamespace;
+  assert std.isString(cfg.apiVersion) && std.findSubstr('/', cfg.apiVersion) != [] : 'backendTLSPolicyCNP.apiVersion must be a group/version string for enabled instance ' + instanceName;
+  local policyAPIVersion = cfg.apiVersion;
+  local policyGroup = std.split(policyAPIVersion, '/')[0];
   [
     {
       apiVersion: 'espejote.io/v1alpha1',
@@ -156,7 +143,7 @@ local objects(instanceName) =
           {
             name: 'backendtlspolicies',
             resource: {
-              apiVersion: 'x-openshift.microgateway.airlock.com/v1alpha3',
+              apiVersion: policyAPIVersion,
               kind: 'BackendTLSPolicy',
               namespace: source,
             },
@@ -199,19 +186,17 @@ local objects(instanceName) =
         verbs: [ 'get', 'list', 'watch' ],
       },
       {
-        apiGroups: [ 'x-openshift.microgateway.airlock.com' ],
+        apiGroups: [ policyGroup ],
         resources: [ 'backendtlspolicies' ],
         verbs: [ 'get', 'list', 'watch' ],
       },
     ]),
-    // The binding lives in the source namespace and is per-instance because its
+    // This binding lives in the source namespace and is per-instance because its
     // subject (the SA) lives in the instance's gateway namespace.
     roleBinding('%s-%s' % [ saName, gateway ], source, saName, gateway),
   ];
 
 {
-  ['backendtlspolicy-cnp/%s/%s/%s-%s' % [ i.key, object.metadata.namespace, object.kind, object.metadata.name ]]: object
-  for i in std.objectKeysValues(params.instances)
-  if config(i.key).enabled
-  for object in objects(i.key)
+  // Every object a single gateway instance needs, or [] when the feature is off.
+  forInstance(instanceName):: if config(instanceName).enabled then instanceObjects(instanceName) else [],
 }

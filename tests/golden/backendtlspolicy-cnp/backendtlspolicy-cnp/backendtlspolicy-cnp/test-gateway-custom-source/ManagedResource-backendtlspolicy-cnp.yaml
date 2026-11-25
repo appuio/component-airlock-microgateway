@@ -2,19 +2,19 @@ apiVersion: espejote.io/v1alpha1
 kind: ManagedResource
 metadata:
   name: backendtlspolicy-cnp
-  namespace: test-gateway-default-enabled
+  namespace: test-gateway-custom-source
 spec:
   context:
     - name: services
       resource:
         apiVersion: v1
         kind: Service
-        namespace: shared-source
+        namespace: other-source
     - name: backendtlspolicies
       resource:
-        apiVersion: x-openshift.microgateway.airlock.com/v1alpha3
+        apiVersion: gateway.networking.k8s.io/v1alpha1
         kind: BackendTLSPolicy
-        namespace: shared-source
+        namespace: other-source
     - name: ciliumnetworkpolicies
       resource:
         apiVersion: cilium.io/v2
@@ -22,21 +22,19 @@ spec:
         labelSelector:
           matchLabels:
             espejote.io/managed-resource: backendtlspolicy-cnp
-        namespace: test-gateway-default-enabled
+        namespace: test-gateway-custom-source
   serviceAccountRef:
     name: espejote-btlspolicy-cnp
   template: |
     local esp = import 'espejote.libsonnet';
 
-    local sniDisabled(svc) =
-      std.get(std.get(svc.metadata, 'labels', {}), 'microgateway.airlock.com/enable-sni-check', '') == 'false';
+    local sniEnabled(svc) =
+      std.get(std.get(svc.metadata, 'labels', {}), 'microgateway.vshn.io/enable-sni-check', 'true') != 'false';
     local portsFor(ref, svc) =
       if std.objectHasAll(ref, 'sectionName') && ref.sectionName != null && ref.sectionName != '' then
         [ p for p in svc.spec.ports if std.objectHasAll(p, 'name') && p.name == ref.sectionName ]
       else svc.spec.ports;
 
-    // One pass over every policy's usable core-Service refs: maps Service name
-    // -> [{hostname, ref}] bindings in policy-then-ref order. No per-service rescan.
     local bindingsByService(policies) =
       std.foldl(
         function(acc, b)
@@ -50,29 +48,25 @@ spec:
         {}
       );
 
-    // CNP shell shared by both classes: hash-named metadata (first 20 hex of
-    // md5 of the Service name; source Service kept in an annotation) with the
-    // distinctive label, the gateway instance's endpointSelector, and the
-    // egress list.
-    local cnpBody(svc, egress) = {
-      apiVersion: 'cilium.io/v2',
-      kind: 'CiliumNetworkPolicy',
-      metadata: {
-        name: std.substr(std.md5(svc.metadata.name), 0, 20),
-        namespace: 'test-gateway-default-enabled',
-        labels: { 'espejote.io/managed-resource': 'backendtlspolicy-cnp' },
-        annotations: { 'espejote.io/source-service': svc.metadata.name },
-      },
-      spec: {
-        endpointSelector: {
-          matchLabels: { 'gateway.networking.k8s.io/gateway-name': 'test-gateway-default-enabled' },
+    local cnpBody(svc, egress) =
+      local hash = std.substr(std.sha256(svc.metadata.name), 0, 20);
+      local hashed = hash + '-' + std.substr(svc.metadata.name, 0, 63 - std.length(hash) - 1);
+      {
+        apiVersion: 'cilium.io/v2',
+        kind: 'CiliumNetworkPolicy',
+        metadata: {
+          name: if std.endsWith(hashed, '-') then std.substr(hashed, 0, std.length(hashed) - 1) else hashed,
+          namespace: 'test-gateway-custom-source',
+          labels: { 'espejote.io/managed-resource': 'backendtlspolicy-cnp' },
+          annotations: { 'espejote.io/source-service': svc.metadata.name },
         },
-        egress: egress,
-      },
-    };
-    // Egress entry shape shared by both classes: toFQDNs for the externalName,
-    // toPorts narrowing when there are ports, serverNames only for the SNI class.
-    // Portless Service -> unrestricted toFQDNs-only entry.
+        spec: {
+          endpointSelector: {
+            matchLabels: { 'gateway.networking.k8s.io/gateway-name': 'test-gateway-custom-source' },
+          },
+          egress: egress,
+        },
+      };
     local egressEntry(svc, ports, serverNames) =
       { toFQDNs: [ { matchName: svc.spec.externalName } ] }
       + (if std.length(ports) == 0 then {} else {
@@ -84,24 +78,17 @@ spec:
            } + (if std.length(serverNames) == 0 then {} else { serverNames: serverNames }) ],
          });
 
-    // DNS class -- a Service referenced by NO BackendTLSPolicy: an unrestricted
-    // egress entry to the externalName over ALL its declared ports, no SNI.
     local dnsCnp(svc) =
       cnpBody(svc, [ egressEntry(svc, std.get(svc.spec, 'ports', []), []) ]);
 
-    // Referenced class -- a policy's targetRef points at this Service: ports come
-    // from the targetRef (sectionName subset, or all Service ports when the ref
-    // omits sectionName). SNI is enforced via serverNames UNLESS the Service opts
-    // out (microgateway.airlock.com/enable-sni-check: "false") -- then it is still
-    // the policy's ports, just DNS-checked instead of SNI-checked. Zero surviving
-    // ports -> null (the prune path).
     local policyCnp(svc, binds) =
       local entries = [
-        egressEntry(svc, portsFor(b.ref, svc), if sniDisabled(svc) then [] else [ b.hostname ])
+        egressEntry(svc, portsFor(b.ref, svc), if sniEnabled(svc) then [ b.hostname ] else [])
         for b in binds
         if std.objectHasAll(svc.spec, 'ports') && std.length(portsFor(b.ref, svc)) > 0
       ];
-      if std.length(entries) == 0 then null else cnpBody(svc, entries);
+      local pruneThisCNP = null;
+      if std.length(entries) == 0 then pruneThisCNP else cnpBody(svc, entries);
 
     local cnpFor(svc, binds) =
       if std.length(binds) == 0 then dnsCnp(svc) else policyCnp(svc, binds);

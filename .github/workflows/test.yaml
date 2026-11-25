@@ -70,8 +70,6 @@ jobs:
         run: make golden-diff -e instance=${{ matrix.instance }}
   espejote-render:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -80,8 +78,10 @@ jobs:
         with:
           path: ${{ env.COMPONENT_NAME }}
       - name: Install espejote CLI
+        env:
+          # renovate: datasource=github-releases depName=vshn/espejote
+          ESPEJOTE_VERSION: v0.22.0
         run: |
-          ver="$(gh api repos/vshn/espejote/releases/latest --jq .tag_name)"
-          curl -sSL "https://github.com/vshn/espejote/releases/download/${ver}/espejote_${ver#v}_linux_amd64.tar.gz" | tar xz -C /usr/local/bin espejote
+          curl -sSL "https://github.com/vshn/espejote/releases/download/${ESPEJOTE_VERSION}/espejote_${ESPEJOTE_VERSION#v}_linux_amd64.tar.gz" | tar xz -C /usr/local/bin espejote
       - name: Render Espejote MR and check for drift
         run: make test-espejote

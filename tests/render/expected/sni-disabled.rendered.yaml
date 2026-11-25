@@ -6,7 +6,7 @@
       espejote.io/source-service: external-backend
     labels:
       espejote.io/managed-resource: backendtlspolicy-cnp
-    name: a580b80c8f893491e202
+    name: c29b21042dea9eac0e6a-external-backend
     namespace: test-gateway-default-enabled
   spec:
     egress:

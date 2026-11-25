@@ -1,6 +1,6 @@
 # Scenario orphan-prune — two labeled CNPs whose names match the rendered
 # hashes survive (deletion keys off names only, so the stale-spec
-# external-backend-2 copy — hash 074535ecee4d901070be — is updated, not
+# external-backend-2 copy — named cd26f55d9469332f8427-external-backend-2 — is updated, not
 # pruned); the legacy policy-named external-backend-tls leftover is the only
 # prune.
 triggers:
@@ -52,7 +52,7 @@ context:
       - apiVersion: cilium.io/v2
         kind: CiliumNetworkPolicy
         metadata:
-          name: a580b80c8f893491e202
+          name: c29b21042dea9eac0e6a-external-backend
           namespace: test-gateway-default-enabled
           labels:
             espejote.io/managed-resource: backendtlspolicy-cnp
@@ -72,7 +72,7 @@ context:
       - apiVersion: cilium.io/v2
         kind: CiliumNetworkPolicy
         metadata:
-          name: 074535ecee4d901070be
+          name: cd26f55d9469332f8427-external-backend-2
           namespace: test-gateway-default-enabled
           labels:
             espejote.io/managed-resource: backendtlspolicy-cnp

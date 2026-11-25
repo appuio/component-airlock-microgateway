@@ -128,7 +128,7 @@ default:
 
 [horizontal]
 type:: object
-default:: `enabled: false`, `sourceNamespace: ""`
+default:: `enabled: false`, `sourceNamespace: ""`, `apiVersion: "x-openshift.microgateway.airlock.com/v1alpha3"`
 
 Configures the Espejote `ManagedResource` that turns Airlock Microgateway
 BackendTLSPolicies and ExternalName Services from the `sourceNamespace` into
@@ -139,7 +139,8 @@ When enabled for an instance, the component renders the ManagedResource, a
 ServiceAccount, and the required Roles/RoleBindings into the gateway instance
 namespace (and read access into the source namespace).
 Requires an operating https://espejote.io[Espejote] installation and the
-BackendTLSPolicy CRD (`x-openshift.microgateway.airlock.com/v1alpha3`).
+BackendTLSPolicy CRD served under the configured `apiVersion` (default
+`x-openshift.microgateway.airlock.com/v1alpha3`).
 
 === `backendTLSPolicyCNP.enabled`
 
@@ -158,6 +159,16 @@ default:: `""`
 The namespace where the ExternalName Services and BackendTLSPolicies live that
 gateway pods need to egress to.
 Must be set when `enabled` is `true`.
+
+=== `backendTLSPolicyCNP.apiVersion`
+
+[horizontal]
+type:: string
+default:: `x-openshift.microgateway.airlock.com/v1alpha3`
+
+The group/version of the BackendTLSPolicy CRD to watch in the source namespace.
+The RBAC Role for reading BackendTLSPolicies automatically uses the group part of
+this value.
 
 == Example
 

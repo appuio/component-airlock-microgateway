@@ -56,4 +56,5 @@ parameters:
       backendTLSPolicyCNP:
         enabled: false
         sourceNamespace: ""
+        apiVersion: "x-openshift.microgateway.airlock.com/v1alpha3"
     instances: {}

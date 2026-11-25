@@ -6,7 +6,7 @@
       espejote.io/source-service: external-backend
     labels:
       espejote.io/managed-resource: backendtlspolicy-cnp
-    name: a580b80c8f893491e202
+    name: c29b21042dea9eac0e6a-external-backend
     namespace: test-gateway-default-enabled
   spec:
     egress:
@@ -28,7 +28,7 @@
       espejote.io/source-service: loose-end
     labels:
       espejote.io/managed-resource: backendtlspolicy-cnp
-    name: 247110cd075e67fa8cb3
+    name: 46c0ef1fda413a403b89-loose-end
     namespace: test-gateway-default-enabled
   spec:
     egress:
@@ -50,7 +50,7 @@
       espejote.io/source-service: portless
     labels:
       espejote.io/managed-resource: backendtlspolicy-cnp
-    name: 39433b7dc1d5eebab879
+    name: 4455138c4b5ea68d9a4e-portless
     namespace: test-gateway-default-enabled
   spec:
     egress:

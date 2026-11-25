@@ -35,6 +35,7 @@ parameters:
       test-gateway-custom-source:
         backendTLSPolicyCNP:
           sourceNamespace: other-source
+          apiVersion: gateway.networking.k8s.io/v1alpha1
       test-gateway-disabled:
         backendTLSPolicyCNP:
           enabled: false
