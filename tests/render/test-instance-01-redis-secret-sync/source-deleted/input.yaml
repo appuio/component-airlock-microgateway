@@ -12,8 +12,12 @@ context:
           deletionTimestamp: "2026-11-26T00:00:00Z"
         data:
           REDIS_PASSWORD: cGFzc3dvcmQ=
+          REDIS_HOST: cmVkaXMtbWFzdGVyLmV4YW1wbGU=
+          REDIS_USERNAME: ZGVmYXVsdA==
           ca.crt: Y2E=
           tls.crt: Y3J0
           tls.key: a2V5
         type: Opaque
+  - name: redis_provider
+    resources: []
 libraries: {}

@@ -30,3 +30,14 @@
     name: redis-password
     namespace: test-instance-01
   type: Opaque
+- apiVersion: microgateway.airlock.com/v1alpha1
+  kind: RedisProvider
+  metadata:
+    name: test-instance-01
+    namespace: test-instance-01
+  spec:
+    auth:
+      username: default
+    mode:
+      standalone:
+        host: redis-master.example

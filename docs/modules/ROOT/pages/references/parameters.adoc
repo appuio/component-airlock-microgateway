@@ -138,6 +138,22 @@ default:: `enabled: false`
 
 `sourceNamespace`:: The namespace that contains the source secrets.
 
+`updateRedisProvider`:: Controls updates to the instance's `RedisProvider`.
+The secret name is taken from the RedisProvider field `spec.auth.password.secretRef.name` and must match one of the secrets managed through `secrets`.
+The host and username are read from the source secret that provides the `redis.password` value of that secret.
+The host is read from key `REDIS_HOST` and the username from key `REDIS_USERNAME`.
+The host is written to `spec.mode.standalone.host` and the username to `spec.auth.username`.
+It assumes that the secret mapping a value to redis.password also has the REDIS_HOST and REDIS_USERNAME keys.
+type:: object
+default:: `host: true, username: true`
+
+`updateRedisProvider.host`:: Whether to update `spec.mode.standalone.host`.
+
+`updateRedisProvider.username`:: Whether to update `spec.auth.username`.
+
+When either update is enabled, the generated `RedisProvider` gets the `argocd.argoproj.io/ignore-differences` annotation for the managed fields.
+This prevents Argo CD from reverting the values written by espejote.
+
 `secrets`:: A map of the secrets to create in the instance namespace.
 The map key is the name of the secret in the instance namespace.
 Each entry has an optional `type` (default `Opaque`) and one entry per data key in the created secret.
@@ -147,15 +163,34 @@ The `ManagedResource` aborts reconciliation if a referenced source secret does n
 The defaults create `redis-password`, `redis-ca` and `redis-clientcert`.
 Add more entries with the same data mapping to create additional secret names, for example to switch an instance to new redis secret names without downtime.
 
+The `ManagedResource` reconciles when a source secret or the RedisProvider changes.
+To force a reconcile, annotate the `ManagedResource`:
+
+[source,bash]
+----
+kubectl -n <instance> annotate managedresource redis-secret-sync touch="$(date +%s)" --overwrite
+----
+
+Any annotation works for that.
+
 == Example
 
 [source,yaml]
 ----
 instances:
   vshn-default-test-01:
+    redisProvider:
+      spec:
+        auth:
+          password:
+            secretRef:
+              name: redis-password
     redisSecretSync:
       enabled: true
       sourceNamespace: vshn-airlock-redis
+      updateRedisProvider:
+        host: true
+        username: false
       secrets:
         redis-password:
           redis.password:
