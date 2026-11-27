@@ -51,6 +51,22 @@ local egressNetpol(name='') = {
   },
 };
 
+local hpa(name='') = {
+  apiVersion: 'autoscaling/v2',
+  kind: 'HorizontalPodAutoscaler',
+  metadata: {
+    namespace: name,
+    name: name,
+  },
+  spec: {
+    scaleTargetRef: {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      name: name,
+    },
+  },
+};
+
 local namespaces = {
   ['%s/Namespace' % instance.key]: kube.Namespace(instance.key) {
     metadata+: {
@@ -157,19 +173,25 @@ local resource(field, generator, name) =
 // All per-instance resources, generated in an instance-outer loop
 local instanceResources = std.flatMap(
   function(instance)
+    local hpaObj = resource('hpa', hpa, instance.key);
+    local has_hpa = hpaObj.enabled;
+    local gwParams = resource('gatewayParameters', gw.GatewayParameters, instance.key);
+    // https://docs.airlock.com/microgateway/5.2/configuration-guides/setup/high-availability-and-autoscaling/
+    assert !(has_hpa && has(
+               std.get(std.get(std.get(gwParams, 'spec', {}), 'kubernetes', {}), 'deployment', {}),
+               'replicas'
+             )) : "Instance %s: when an HPA is configured, gatewayParameters.spec.kubernetes.deployment.replicas must be unset — set it to null to override the inherited default and use the HPA's minReplicas instead" % instance.key;
     [
       resource('gateway', gw.Gateway, instance.key),
-      resource('gatewayParameters', gw.GatewayParameters, instance.key),
+      gwParams,
       resource('httpRedirect', httpRoute, instance.key),
       resource('pdb', pdb, instance.key),
       resource('egressNetpol', egressNetpol, instance.key),
       resource('sessionHandling', gw.SessionHandling, instance.key),
       resource('redisProvider', gw.RedisProvider, instance.key),
-    ] + (if has_cilium then [
-           GatewayCNPIngress(instance.key),
-           GatewayCNPEgress(instance.key),
-         ] else [])
-    + redisSecretSync.resources(instance.key),
+    ] + redisSecretSync.resources(instance.key)
+    + (if has_hpa then [ std.mergePatch(hpaObj, { enabled: null }) ] else [])
+    + (if has_cilium then [ GatewayCNPIngress(instance.key), GatewayCNPEgress(instance.key) ] else []),
   std.objectKeysValues(params.instances)
 );
 

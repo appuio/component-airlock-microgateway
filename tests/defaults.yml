@@ -45,7 +45,16 @@ parameters:
                           topologyKey: kubernetes.io/hostname
                   nodeSelector:
                     node-role.kubernetes.io/test: ""
-      vshn-test-default-02: {}
+      vshn-test-default-02:
+        hpa:
+          enabled: true
+          spec:
+            minReplicas: 3
+        gatewayParameters:
+          spec:
+            kubernetes:
+              deployment:
+                replicas: null
 
     default:
       namespace:
