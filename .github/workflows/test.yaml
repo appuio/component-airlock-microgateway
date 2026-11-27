@@ -39,7 +39,6 @@ jobs:
           - sessionStoreMonitoring
           - monitoring
           - redisSecretSync
-          - backendtlspolicy-cnp
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}
@@ -60,7 +59,6 @@ jobs:
           - sessionStoreMonitoring
           - monitoring
           - redisSecretSync
-          - backendtlspolicy-cnp
     defaults:
       run:
         working-directory: ${{ env.COMPONENT_NAME }}

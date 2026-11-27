@@ -18,11 +18,11 @@ context:
 libraries: {}
 ```
 
-The suite is run by `make test-espejote -e espejote_instance=backendtlspolicy-cnp` (or
-`make test-espejote-one -e espejote_instance=backendtlspolicy-cnp -e MR=test-gateway-default-enabled-backendtlspolicy-cnp`),
+The suite is run by `make test-espejote` (or
+`make test-espejote-one -e MR=test-gateway-default-enabled-backendtlspolicy-cnp`),
 which invokes this suite's `run.sh` with the dockerized `ESPEJOTE_CMD`; drift
 from the committed goldens fails the script directly. Regenerate goldens with
-`make gen-espejote -e espejote_instance=backendtlspolicy-cnp` or
+`make gen-espejote` or
 `bash tests/render/test-gateway-default-enabled-backendtlspolicy-cnp/run.sh --update`.
 
 ## Offline caveat (label pre-filtering)

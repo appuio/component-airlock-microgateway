@@ -4,11 +4,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../../.." && pwd)"
 DIR="${HERE#"$ROOT"/}"
-INSTANCE="${ESPEJOTE_INSTANCE:-backendtlspolicy-cnp}"
-if [ "$INSTANCE" != "backendtlspolicy-cnp" ]; then
-  echo "SKIP: $DIR belongs to instance backendtlspolicy-cnp (compiling $INSTANCE instead)"
-  exit 0
-fi
+INSTANCE="${ESPEJOTE_INSTANCE:-redisSecretSync}"
 ESPEJOTE_CMD="${ESPEJOTE_CMD:-espejote}"
 NAMESPACE="test-gateway-default-enabled"
 RESOURCE="backendtlspolicy-cnp"
