@@ -12,8 +12,22 @@ context:
           namespace: vshn-airlock-redis
         data:
           REDIS_PASSWORD: cm90YXRlZC1wYXNz
+          REDIS_HOST: cm90YXRlZC5leGFtcGxl
+          REDIS_USERNAME: cm90YXRlZA==
           ca.crt: cm90YXRlZC1jYQ==
           tls.crt: cm90YXRlZC1jcnQ=
           tls.key: cm90YXRlZC1rZXk=
         type: Opaque
+  - name: redis_provider
+    resources:
+      - apiVersion: microgateway.airlock.com/v1alpha1
+        kind: RedisProvider
+        metadata:
+          name: test-instance-01
+          namespace: test-instance-01
+        spec:
+          auth:
+            password:
+              secretRef:
+                name: redis-password
 libraries: {}

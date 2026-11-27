@@ -4,4 +4,6 @@ triggers:
 context:
   - name: source_secret_0
     resources: []
+  - name: redis_provider
+    resources: []
 libraries: {}

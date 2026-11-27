@@ -15,4 +15,6 @@ context:
         type: Opaque
   - name: source_secret_1
     resources: []
+  - name: redis_provider
+    resources: []
 libraries: {}

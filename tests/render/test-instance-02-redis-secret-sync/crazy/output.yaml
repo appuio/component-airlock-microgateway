@@ -43,3 +43,12 @@
     name: redis-password
     namespace: test-instance-02
   type: Opaque
+- apiVersion: microgateway.airlock.com/v1alpha1
+  kind: RedisProvider
+  metadata:
+    name: test-instance-02
+    namespace: test-instance-02
+  spec:
+    mode:
+      standalone:
+        host: crazy.example

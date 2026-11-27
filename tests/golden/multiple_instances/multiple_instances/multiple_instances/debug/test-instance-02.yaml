@@ -293,6 +293,9 @@ data:
             key: "REDIS_PASSWORD"
             secretName: "redis-creds-connection"
       sourceNamespace: "vshn-airlock-redis"
+      updateRedisProvider:
+        host: true
+        username: true
     sessionHandling:
       spec:
         auth:
