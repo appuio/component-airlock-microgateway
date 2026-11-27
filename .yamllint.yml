@@ -22,3 +22,5 @@ ignore: |
   manifests/
   vendor/
   compiled/
+  # espejote dumps indentless sequences; goldens live in case dirs below
+  tests/render/test-gateway-default-enabled-backendtlspolicy-cnp/

@@ -1,0 +1,38 @@
+# Scenario empty — ClusterIP services + policies only, no ExternalName:
+# nothing renders; the golden is the empty-list shape.
+triggers:
+  - {}
+context:
+  - name: services
+    resources:
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: internal-backend
+          namespace: source
+          labels:
+            app: internal
+        spec:
+          type: ClusterIP
+          selector:
+            app: internal
+          ports:
+            - port: 443
+              protocol: TCP
+  - name: backendtlspolicies
+    resources:
+      - apiVersion: x-openshift.microgateway.airlock.com/v1alpha3
+        kind: BackendTLSPolicy
+        metadata:
+          name: internal-backend-tls
+          namespace: source
+        spec:
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: internal-backend
+          validation:
+            hostname: internal.example.org
+  - name: ciliumnetworkpolicies
+    resources: []
+libraries: {}

@@ -1,6 +1,10 @@
 apiVersion: v1
 data:
   debug: |
+    backendTLSPolicyCNP:
+      apiVersion: "x-openshift.microgateway.airlock.com/v1alpha3"
+      enabled: false
+      sourceNamespace: ""
     customResponses:
       "301":
         content:

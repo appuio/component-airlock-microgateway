@@ -1,0 +1,119 @@
+apiVersion: espejote.io/v1alpha1
+kind: ManagedResource
+metadata:
+  name: backendtlspolicy-cnp
+  namespace: test-gateway-custom-source
+spec:
+  context:
+    - name: services
+      resource:
+        apiVersion: v1
+        kind: Service
+        namespace: other-source
+    - name: backendtlspolicies
+      resource:
+        apiVersion: gateway.networking.k8s.io/v1alpha1
+        kind: BackendTLSPolicy
+        namespace: other-source
+    - name: ciliumnetworkpolicies
+      resource:
+        apiVersion: cilium.io/v2
+        kind: CiliumNetworkPolicy
+        labelSelector:
+          matchLabels:
+            espejote.io/managed-resource: backendtlspolicy-cnp
+        namespace: test-gateway-custom-source
+  serviceAccountRef:
+    name: espejote-btlspolicy-cnp
+  template: |
+    local esp = import 'espejote.libsonnet';
+
+    local sniEnabled(svc) =
+      std.get(std.get(svc.metadata, 'labels', {}), 'microgateway.vshn.io/enable-sni-check', 'true') != 'false';
+    local portsFor(ref, svc) =
+      if std.objectHasAll(ref, 'sectionName') && ref.sectionName != null && ref.sectionName != '' then
+        [ p for p in svc.spec.ports if std.objectHasAll(p, 'name') && p.name == ref.sectionName ]
+      else svc.spec.ports;
+
+    local bindingsByService(policies) =
+      std.foldl(
+        function(acc, b)
+          acc { [b.svc]: std.get(acc, b.svc, []) + [ { hostname: b.hostname, ref: b.ref } ] },
+        [
+          { svc: ref.name, hostname: policy.spec.validation.hostname, ref: ref }
+          for policy in policies
+          for ref in policy.spec.targetRefs
+          if ref.kind == 'Service' && ref.group == ''
+        ],
+        {}
+      );
+
+    local cnpBody(svc, egress) =
+      local hash = std.substr(std.sha256(svc.metadata.name), 0, 20);
+      local hashed = hash + '-' + std.substr(svc.metadata.name, 0, 63 - std.length(hash) - 1);
+      {
+        apiVersion: 'cilium.io/v2',
+        kind: 'CiliumNetworkPolicy',
+        metadata: {
+          name: if std.endsWith(hashed, '-') then std.substr(hashed, 0, std.length(hashed) - 1) else hashed,
+          namespace: 'test-gateway-custom-source',
+          labels: { 'espejote.io/managed-resource': 'backendtlspolicy-cnp' },
+          annotations: { 'espejote.io/source-service': svc.metadata.name },
+        },
+        spec: {
+          endpointSelector: {
+            matchLabels: { 'gateway.networking.k8s.io/gateway-name': 'test-gateway-custom-source' },
+          },
+          egress: egress,
+        },
+      };
+
+    local egressEntry(svc, ports, serverNames) =
+      { toFQDNs: [ { matchName: svc.spec.externalName } ] }
+      + (if std.length(ports) == 0 then {} else {
+           toPorts: [ {
+             ports: [
+               { port: '' + p.port, protocol: p.protocol }
+               for p in ports
+             ],
+           } + (if std.length(serverNames) == 0 then {} else { serverNames: serverNames }) ],
+         });
+
+    local dnsCnp(svc) =
+      local ports = std.get(svc.spec, 'ports', []);
+      local emptyServerNames = [];
+      cnpBody(svc, [ egressEntry(svc, ports, emptyServerNames) ]);
+
+    local policyCnp(svc, binds) =
+      local entries = [
+        egressEntry(svc, portsFor(b.ref, svc), if sniEnabled(svc) then [ b.hostname ] else [])
+        for b in binds
+        if std.objectHasAll(svc.spec, 'ports') && std.length(portsFor(b.ref, svc)) > 0
+      ];
+      local pruneThisCNP = null;
+      if std.length(entries) == 0 then pruneThisCNP else cnpBody(svc, entries);
+
+    local cnpFor(svc, binds) =
+      if std.length(binds) == 0 then dnsCnp(svc) else policyCnp(svc, binds);
+    local ctx = esp.context();
+    local byService = bindingsByService(ctx.backendtlspolicies);
+    local rendered = [
+      cnpFor(svc, std.get(byService, svc.metadata.name, []))
+      for svc in ctx.services
+      if std.objectHasAll(svc.spec, 'externalName')
+    ];
+
+    local desiredNames = [ r.metadata.name for r in rendered if r != null ];
+    local stale = [
+      c
+      for c in ctx.ciliumnetworkpolicies
+      if !std.member(desiredNames, c.metadata.name)
+    ];
+    rendered + [ esp.markForDelete(c) for c in stale ]
+  triggers:
+    - name: backendtlspolicy
+      watchContextResource:
+        name: backendtlspolicies
+    - name: service
+      watchContextResource:
+        name: services

@@ -1,0 +1,106 @@
+# Scenario orphan-prune — two labeled CNPs whose names match the rendered
+# hashes survive (deletion keys off names only, so the stale-spec
+# external-backend-2 copy — named cd26f55d9469332f8427-external-backend-2 — is updated, not
+# pruned); the legacy policy-named external-backend-tls leftover is the only
+# prune.
+triggers:
+  - {}
+context:
+  - name: services
+    resources:
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: external-backend
+          namespace: source
+        spec:
+          type: ExternalName
+          externalName: eu.api.example.org
+          ports:
+            - port: 443
+              protocol: TCP
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: external-backend-2
+          namespace: source
+        spec:
+          type: ExternalName
+          externalName: us.api.example.org
+          ports:
+            - port: 8443
+              protocol: TCP
+  - name: backendtlspolicies
+    resources:
+      - apiVersion: x-openshift.microgateway.airlock.com/v1alpha3
+        kind: BackendTLSPolicy
+        metadata:
+          name: external-backend-tls
+          namespace: source
+        spec:
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: external-backend
+            - group: ""
+              kind: Service
+              name: external-backend-2
+          validation:
+            hostname: api.example.org
+  - name: ciliumnetworkpolicies
+    resources:
+      - apiVersion: cilium.io/v2
+        kind: CiliumNetworkPolicy
+        metadata:
+          name: c29b21042dea9eac0e6a-external-backend
+          namespace: test-gateway-default-enabled
+          labels:
+            espejote.io/managed-resource: backendtlspolicy-cnp
+        spec:
+          endpointSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+          egress:
+            - toFQDNs:
+                - matchName: eu.api.example.org
+              toPorts:
+                - ports:
+                    - port: "443"
+                      protocol: TCP
+                  serverNames:
+                    - api.example.org
+      - apiVersion: cilium.io/v2
+        kind: CiliumNetworkPolicy
+        metadata:
+          name: cd26f55d9469332f8427-external-backend-2
+          namespace: test-gateway-default-enabled
+          labels:
+            espejote.io/managed-resource: backendtlspolicy-cnp
+        spec:
+          endpointSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+          egress:
+            - toFQDNs:
+                - matchName: us.api.example.org
+              toPorts:
+                - ports:
+                    - port: "8444"
+                      protocol: TCP
+                  serverNames:
+                    - stale.example.org
+      - apiVersion: cilium.io/v2
+        kind: CiliumNetworkPolicy
+        metadata:
+          name: external-backend-tls
+          namespace: test-gateway-default-enabled
+          labels:
+            espejote.io/managed-resource: backendtlspolicy-cnp
+        spec:
+          endpointSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-class-name: microgateway-cloudscale
+          egress:
+            - toFQDNs:
+                - matchName: eu.api.example.org
+libraries: {}
