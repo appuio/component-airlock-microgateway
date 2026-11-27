@@ -26,6 +26,15 @@ parameters:
         enabled: false
       blackboxExporter:
         enabled: false
+      espejoteReconcileErrors:
+        enabled: true
+        annotations:
+          summary: 'espejote failed to reconcile ManagedResource {{ $labels.managedresource }} in namespace {{ $labels.namespace }}'
+          description: 'The ManagedResource {{ $labels.managedresource }} in namespace {{ $labels.namespace }} has not been Ready for %(minutesThreshold)s minutes. Last reported status: {{ $labels.status }}. The full error message is in the ManagedResource events: kubectl -n {{ $labels.namespace }} describe managedresource {{ $labels.managedresource }}'
+        for: 5m
+        minutesThreshold: 31
+        labels:
+          severity: 'warning'
       dummyBackend:
         enabled: false
         nodeSelector: {}
